@@ -27,7 +27,7 @@ body {
   @apply min-h-screen;
   @apply bg-white;
   @apply text-black;
-  @apply bg-[url('/public/background.svg')];
+  @apply bg-[url('/background.svg')];
 }
 
 h1,
