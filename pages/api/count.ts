@@ -8,7 +8,6 @@ const handler = async (
 ): Promise<void> => {
   if (req.method === "GET") {
     //TODO: interface needs to be implemented for req.body.address
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
     const collections = await getCollectionsWithCountOfNfts();
     res.status(200).json(collections);
   } else res.end(404);
