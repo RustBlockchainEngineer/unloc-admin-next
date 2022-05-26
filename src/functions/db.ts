@@ -28,9 +28,7 @@ export const fetchCollections = async (): Promise<string[] | number | Error> => 
   }
 }
 
-export const fetchNftsFromCollection = async (
-  collection: string
-): Promise<string[] | number | Error> => {
+export const fetchNftsFromCollection = async (collection: string): Promise<string[] | number | Error> => {
   try {
     const response = await axios.get(`/api/collections/${collection}`)
 

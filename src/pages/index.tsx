@@ -12,7 +12,7 @@ const Airdrop = (): React.ReactNode => {
   const [mint, setMint] = useState<string>('ExW7Yek3vsRJcapsdRKcxF9XRRS8zigLZ8nqqdqnWgQi')
   const [amount, setAmount] = useState<number>(1)
   const router = useRouter()
-  const { address } = router.query;
+  const { address } = router.query
 
   useEffect(() => {
     setMint(typeof address === 'string' ? address : mint)

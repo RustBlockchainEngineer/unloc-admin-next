@@ -2,11 +2,10 @@ import { Connection, MemcmpFilter, PublicKey } from '@solana/web3.js'
 import * as anchor from '@project-serum/anchor'
 import { bs58 } from '@project-serum/anchor/dist/cjs/utils/bytes'
 import { IDL as idl } from '../idl/unloc_idl'
-import { config } from '../config'
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { AnchorWallet } from '@solana/wallet-adapter-react'
 
-const { DEVNET } = config
+const DEVNET = true
 
 // eslint-disable-next-line no-shadow
 export enum SubOfferState {

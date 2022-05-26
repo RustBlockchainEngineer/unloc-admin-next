@@ -1,10 +1,6 @@
-import { useWallet } from '@solana/wallet-adapter-react'
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { AppProps } from 'next/app'
-import React, { useCallback, useContext, useEffect, useMemo, useState, Dispatch } from 'react'
+import React, { useCallback, useMemo, useState, Dispatch } from 'react'
 import { ReactNode } from 'react'
-import Link from 'next/link'
-import '../styles.css'
 import { clusterApiUrl } from '@solana/web3.js'
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react'
@@ -19,6 +15,7 @@ import {
 import toast, { Toaster } from 'react-hot-toast'
 import { Navbar } from '../components/navbar'
 
+import '../styles/globals.css'
 import '@solana/wallet-adapter-react-ui/styles.css'
 
 interface IAdminContext {
