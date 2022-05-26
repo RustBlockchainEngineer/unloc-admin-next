@@ -1,0 +1,37 @@
+.topbar {
+  @apply inline-flex justify-between items-center;
+  @apply p-4;
+  @apply text-4xl;
+  @apply w-full;
+}
+
+.topbar__nav {
+  @apply inline-flex gap-x-8;
+  @apply list-none;
+}
+
+.topbar a {
+  @apply border-solid border-2 border-gray-200;
+  @apply text-2xl;
+  @apply p-2;
+}
+
+.topbar .current {
+  @apply border-solid border-2 border-black;
+}
+
+.network-indicator {
+  @apply rounded-md;
+}
+
+@screen tablet {
+  .topbar {
+    @apply flex flex-col gap-y-8;
+  }
+}
+
+@screen phone {
+  .topbar__nav {
+    @apply flex flex-col items-center gap-y-4;
+  }
+}

@@ -1,0 +1,33 @@
+.lightbox {
+  @apply fixed top-0 left-0;
+  @apply flex flex-col justify-center items-center;
+  @apply w-full h-full;
+  @apply bg-gray-600/75;
+}
+
+.lightbox__container {
+  @apply relative;
+  @apply flex flex-col gap-y-4;
+  @apply bg-white;
+  @apply rounded-lg;
+  @apply p-10 pb-4;
+}
+
+.lightbox__close {
+  @apply absolute top-2 right-2;
+}
+
+.lightbox__input {
+  @apply border-2 border-solid border-black rounded-md;
+}
+
+.lightbox__title {
+  @apply text-2xl;
+  @apply font-bold;
+  font-family: 'Red Hat Display';
+}
+
+.lightbox__buttons {
+  @apply inline-flex justify-between items-center;
+  @apply mt-4;
+}

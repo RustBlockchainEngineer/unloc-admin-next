@@ -1,0 +1,30 @@
+.nfts__th.select,
+.nfts__td.select {
+  @apply w-1/12;
+}
+
+.nfts__th.nft-mint,
+.nfts__td.nft-mint {
+  @apply w-1/2;
+  @apply justify-evenly;
+}
+
+.nfts__th.proposed-count,
+.nfts__td.proposed-count {
+  @apply w-1/12;
+}
+
+.nfts__th.accepted-count,
+.nfts__td.accepted-count {
+  @apply w-1/12;
+}
+
+.nfts__th.actions,
+.nfts__td.actions {
+  @apply w-1/4;
+  @apply justify-evenly;
+}
+
+.nfts__td.nft-mint span {
+  @apply truncate;
+}

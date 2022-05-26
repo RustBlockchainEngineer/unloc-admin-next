@@ -1,0 +1,11 @@
+.connection {
+	@apply inline-flex gap-x-4;
+}
+
+.network-indicator {
+	@apply bg-red-500;
+	@apply font-semibold text-base text-white capitalize;
+	@apply py-3 px-6;
+	@apply text-center;
+	@apply border-none;
+}

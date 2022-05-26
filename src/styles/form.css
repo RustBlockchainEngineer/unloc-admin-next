@@ -1,0 +1,41 @@
+form {
+  @apply flex flex-col gap-y-4;
+}
+
+.label,
+.input,
+.form__buttons .btn {
+  @apply text-xl;
+}
+
+.label {
+  @apply inline-flex justify-between;
+}
+
+.input {
+  @apply px-1 border-solid border-2 border-gray-200 rounded;
+}
+
+.form-input {
+  @apply ml-4;
+}
+
+.form__buttons {
+  @apply inline-flex justify-center gap-x-8;
+  @apply mt-8;
+}
+
+.form__buttons .btn {
+  @apply grow;
+  @apply max-w-prose;
+}
+
+@screen phone {
+  .form__buttons {
+    @apply flex flex-col items-center gap-y-4;
+  }
+
+  .form__buttons .btn {
+    @apply w-full;
+  }
+}

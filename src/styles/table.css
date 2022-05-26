@@ -1,0 +1,53 @@
+.table {
+  @apply w-full;
+  @apply flex flex-col;
+}
+
+.tbody {
+  @apply flex flex-col;
+}
+
+.thead {
+  @apply flex flex-col;
+}
+
+.thead .tr {
+  @apply py-4;
+  @apply bg-gray-800;
+  @apply font-bold text-white;
+}
+
+.tr {
+  @apply inline-flex;
+}
+
+.tbody .tr:nth-child(odd) {
+  @apply bg-white;
+}
+
+.tbody .tr:nth-child(even) {
+  @apply bg-gray-100;
+}
+
+.th,
+.td {
+  @apply flex-wrap;
+  @apply text-center;
+}
+
+.td {
+  @apply inline-flex items-center justify-center;
+  @apply border-2 border-solid border-gray-200;
+  @apply p-2;
+}
+
+.td input {
+  @apply w-full;
+  @apply border-2 border-solid border-gray-100;
+  @apply text-sm;
+  @apply p-1;
+}
+
+.th {
+  @apply inline-flex justify-center items-center;
+}
