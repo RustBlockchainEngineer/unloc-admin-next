@@ -18,7 +18,7 @@ const AirdropToMultiple: NextPage = () => {
 
   useEffect(() => {
     setMint(typeof address === 'string' ? address : mint)
-  }, [])
+  }, [address, mint])
 
   const handleMintChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMint(event.target.value)
