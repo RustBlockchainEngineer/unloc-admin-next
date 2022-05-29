@@ -22,7 +22,10 @@ import idl from '../idl/token_faucet.json'
 import { TokenFaucet, IDL } from '../idl/token_faucet'
 
 export const initAnchorProgram = (wallet: AnchorWallet, connection: Connection) => {
-  const provider = new AnchorProvider(connection, wallet, { commitment: 'confirmed', maxRetries: 5 })
+  const provider = new AnchorProvider(connection, wallet, {
+    commitment: 'confirmed',
+    maxRetries: 5
+  })
 
   const program = new Program<TokenFaucet>(IDL, idl.metadata.address, provider)
 
@@ -41,7 +44,10 @@ export const getMintDecimals = async (connection: Connection, mint: PublicKey) =
 }
 
 export const getManagerPDA = async (mint: PublicKey, programId: PublicKey) => {
-  const [managerPDA] = await PublicKey.findProgramAddress([Buffer.from('manager'), mint.toBuffer()], programId)
+  const [managerPDA] = await PublicKey.findProgramAddress(
+    [Buffer.from('manager'), mint.toBuffer()],
+    programId
+  )
   return managerPDA
 }
 
@@ -50,7 +56,11 @@ export const isManagerInitialized = async (connection: Connection, pda: PublicKe
   return !!info
 }
 
-export const giveAuthority = async (wallet: AnchorWallet, connection: Connection, mint: PublicKey) => {
+export const giveAuthority = async (
+  wallet: AnchorWallet,
+  connection: Connection,
+  mint: PublicKey
+) => {
   const [, program] = initAnchorProgram(wallet, connection)
   const initialize: TransactionInstruction[] = []
 
@@ -87,7 +97,11 @@ export const giveAuthority = async (wallet: AnchorWallet, connection: Connection
   await connection.confirmTransaction(signature, 'single')
 }
 
-export const reclaimAuthority = async (wallet: AnchorWallet, connection: Connection, mint: PublicKey) => {
+export const reclaimAuthority = async (
+  wallet: AnchorWallet,
+  connection: Connection,
+  mint: PublicKey
+) => {
   const [, program] = initAnchorProgram(wallet, connection)
 
   const managerPDA = await getManagerPDA(mint, program.programId)
@@ -106,7 +120,12 @@ export const reclaimAuthority = async (wallet: AnchorWallet, connection: Connect
   await connection.confirmTransaction(signature, 'single')
 }
 
-export const airdrop = async (wallet: AnchorWallet, connection: Connection, mint: PublicKey, amount: BN) => {
+export const airdrop = async (
+  wallet: AnchorWallet,
+  connection: Connection,
+  mint: PublicKey,
+  amount: BN
+) => {
   const [, program] = initAnchorProgram(wallet, connection)
 
   const managerPDA = await getManagerPDA(mint, program.programId)
@@ -143,6 +162,8 @@ export const airdropToMultiple = async (
   const [, program] = initAnchorProgram(wallet, connection)
 
   const manager = await getManagerPDA(mint, program.programId)
+  const latestBlockhash = await connection.getLatestBlockhash()
+
   const txs = await Promise.all(
     recipients.map(async (recipient) => {
       const ata = await getAssociatedTokenAddress(mint, recipient, false)
@@ -154,26 +175,22 @@ export const airdropToMultiple = async (
           manager,
           mint,
           ata,
-          recipient,
-          systemProgram: SystemProgram.programId,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          rent: SYSVAR_RENT_PUBKEY
+          recipient
         })
         .transaction()
 
-      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+      tx.recentBlockhash = latestBlockhash.blockhash
       tx.feePayer = wallet.publicKey
 
       return tx
     })
   )
 
-  const signedTxs = await wallet.signAllTransactions(txs.filter((tx) => tx !== null))
+  const signedTxs = await wallet.signAllTransactions(txs.filter((tx) => tx))
 
   for (const signed of signedTxs) {
     const serialized = signed.serialize()
-    await connection.sendRawTransaction(serialized)
+    const signature = await connection.sendRawTransaction(serialized)
   }
 }
 
@@ -215,11 +232,18 @@ export const distributeNFTsToWallets = async (
 
         if (ataInfo === null) {
           instructions.push(
-            createAssociatedTokenAccountInstruction(wallet.publicKey, ata, recipPubkey, mintsForRecipient[j])
+            createAssociatedTokenAccountInstruction(
+              wallet.publicKey,
+              ata,
+              recipPubkey,
+              mintsForRecipient[j]
+            )
           )
         }
 
-        instructions.push(createTransferCheckedInstruction(src, mintsForRecipient[j], ata, wallet.publicKey, 1, 0))
+        instructions.push(
+          createTransferCheckedInstruction(src, mintsForRecipient[j], ata, wallet.publicKey, 1, 0)
+        )
 
         tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
         tx.feePayer = wallet.publicKey
