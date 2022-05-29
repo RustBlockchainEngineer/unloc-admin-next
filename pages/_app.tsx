@@ -43,7 +43,7 @@ const App = ({ Component, pageProps }: AppProps): ReactNode => {
   )
 
   const onError = useCallback(
-    (error) => toast.custom(error.message ? `${error.name}: ${error.message}` : `${error.name}`),
+    (error) => toast.error(error.message ? `${error.name}: ${error.message}` : `${error.name}`),
     []
   )
 

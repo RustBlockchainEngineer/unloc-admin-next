@@ -20,6 +20,8 @@ import { Program, BN, AnchorProvider } from '@project-serum/anchor'
 
 import idl from '../idl/token_faucet.json'
 import { TokenFaucet, IDL } from '../idl/token_faucet'
+import { chunks } from '../utils'
+import toast from 'react-hot-toast'
 
 export const initAnchorProgram = (wallet: AnchorWallet, connection: Connection) => {
   const provider = new AnchorProvider(connection, wallet, {
@@ -162,35 +164,61 @@ export const airdropToMultiple = async (
   const [, program] = initAnchorProgram(wallet, connection)
 
   const manager = await getManagerPDA(mint, program.programId)
-  const latestBlockhash = await connection.getLatestBlockhash()
 
-  const txs = await Promise.all(
-    recipients.map(async (recipient) => {
-      const ata = await getAssociatedTokenAddress(mint, recipient, false)
+  const airdropToInstruction = async (recipient: PublicKey) => {
+    const ata = await getAssociatedTokenAddress(mint, recipient, false)
 
-      const tx = await program.methods
-        .airdropTo(new BN(amount))
-        .accounts({
-          user: wallet.publicKey,
-          manager,
-          mint,
-          ata,
-          recipient
-        })
-        .transaction()
+    return await program.methods
+      .airdropTo(new BN(amount))
+      .accounts({
+        user: wallet.publicKey,
+        manager,
+        mint,
+        ata,
+        recipient
+      })
+      .instruction()
+  }
 
-      tx.recentBlockhash = latestBlockhash.blockhash
-      tx.feePayer = wallet.publicKey
+  // We will sign and confirm the transactions in chunks of 6
+  const chunkSize = 6
+  const rec = chunks(recipients, chunkSize)
+  const toastId = 'tx-confirmations'
+  let unconfirmed: string[] = []
+  let i = 0
 
-      return tx
+  for (const chunk of rec) {
+    const start = chunkSize * i + 1
+    const end = start + chunk.length - 1
+    toast.loading(`Confirming ${start} - ${end}/${recipients.length}`, {
+      id: toastId
     })
-  )
 
-  const signedTxs = await wallet.signAllTransactions(txs.filter((tx) => tx))
+    const latestBlockhash = await connection.getLatestBlockhash()
+    const ixs = await Promise.all(chunk.map(airdropToInstruction))
+    const tx = new Transaction({
+      feePayer: wallet.publicKey,
+      ...latestBlockhash
+    }).add(...ixs)
 
-  for (const signed of signedTxs) {
-    const serialized = signed.serialize()
-    const signature = await connection.sendRawTransaction(serialized)
+    try {
+      const signed = await wallet.signTransaction(tx)
+      const signature = await connection.sendRawTransaction(signed.serialize())
+      await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
+      i++
+    } catch (e) {
+      unconfirmed.push(...chunk.map((p) => p.toString()))
+      console.log(e)
+    }
+  }
+
+  if (unconfirmed.length === 0) {
+    toast.success('Confirmed all transactions!', { id: toastId })
+  } else {
+    toast.error('Failed to confirm some transactions, check the console.', {
+      id: toastId
+    })
+    console.log('Unconfirmed:', unconfirmed)
   }
 }
 

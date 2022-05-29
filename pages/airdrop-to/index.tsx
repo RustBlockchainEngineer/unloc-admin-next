@@ -55,7 +55,6 @@ const AirdropToMultiple: NextPage = () => {
       const mintPubkey = new PublicKey(mint)
       const decimals = await getMintDecimals(connection, mintPubkey)
       await airdropToMultiple(wallet, connection, mintPubkey, recips, new BN(amount * 10 ** decimals))
-      toast.success('Minted tokens for specified addresses!')
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
