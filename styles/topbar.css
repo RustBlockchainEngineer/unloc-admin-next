@@ -6,8 +6,9 @@
 }
 
 .topbar__nav {
-  @apply inline-flex gap-x-8;
+  @apply inline-flex gap-8;
   @apply list-none;
+  @apply flex-wrap;
 }
 
 .topbar a {
