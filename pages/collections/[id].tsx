@@ -12,10 +12,10 @@ import { useRouter } from 'next/router'
 
 const ManageNFTs: React.FC = observer(() => {
   const router = useRouter()
-  const { id } = router.query
   const wallet = useContext(WalletContext)
   const store = useContext(NftsContext)
   const lightboxes = useContext(LightboxContext)
+  const { id } = router.query
   const { nfts, nftsData, selected } = store
   const { showAddNft, showRemoveNfts } = lightboxes
 

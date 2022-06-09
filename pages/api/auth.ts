@@ -7,7 +7,6 @@ const handler = async (
   res: NextApiResponse<{ isWhitelisted: boolean }>
 ): Promise<void> => {
   if (req.method === 'POST') {
-    //TODO: interface needs to be implemented for req.body.address
     const isWhitelisted = await isWalletInWhitelist('admins', req.body.address)
     res.status(200).json({ isWhitelisted })
   } else res.end(404)

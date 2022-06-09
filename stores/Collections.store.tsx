@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { action, flow, makeAutoObservable } from 'mobx'
 import { createContext } from 'react'
+import { createCollections, deleteCollections, getCollectionsData, renameCollection } from '../functions/api-queries'
 
 export class CollectionsStore {
   collectionsData: Record<string, number> = {}
@@ -15,11 +16,10 @@ export class CollectionsStore {
     this.setCollectionsData({})
 
     try {
-      const request = yield axios.get(`/api/count`)
+      const response = yield getCollectionsData()
+      if (response instanceof Error) return
 
-      if (!(request && request.data)) return
-
-      this.setCollectionsData(request.data)
+      this.setCollectionsData(response)
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
@@ -28,35 +28,20 @@ export class CollectionsStore {
 
   @action.bound
   removeCollections = flow(function* (this: CollectionsStore, collections: string[]) {
-    try {
-      yield axios.delete(`/api/collections`, { data: collections })
-      yield this.fetchCollectionsData()
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    }
+    yield deleteCollections(collections)
+    yield this.fetchCollectionsData()
   })
 
   @action.bound
   renameCollection = flow(function* (this: CollectionsStore, oldName: string, newName: string) {
-    try {
-      yield axios.patch(`/api/collections/${encodeURIComponent(oldName)}`, { newName })
-      yield this.fetchCollectionsData()
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    }
+    yield renameCollection(oldName, newName)
+    yield this.fetchCollectionsData()
   })
 
   @action.bound
   createCollections = flow(function* (this: CollectionsStore, collections: string[]) {
-    try {
-      yield axios.post(`/api/collections`, { data: collections })
-      yield this.fetchCollectionsData()
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    }
+    yield createCollections(collections)
+    yield this.fetchCollectionsData()
   })
 
   @action.bound
