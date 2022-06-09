@@ -81,7 +81,7 @@ export const CollectionRow: React.FC<CollectionRowProps> = observer(({ collectio
       <span className='td collections__td actions'>
         <button
           className='btn btn--green-ghost collections__btn manage-collection'
-          onClick={() => router.push(encodeURIComponent(collection))}
+          onClick={() => router.push(`/collections/${encodeURIComponent(collection)}`)}
         >
           Manage Collection
         </button>

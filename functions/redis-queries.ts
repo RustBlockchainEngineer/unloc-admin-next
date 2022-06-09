@@ -11,77 +11,30 @@ import Redis from 'ioredis'
 const REDIS_URL = process.env.REDIS_URL
 const client = new Redis(REDIS_URL ?? 'redis://localhost:6379')
 
-/**
-   * Function used to set multiple collections and add NFTs to them
-   * @param data {Record<string, string[]>} object of collections and NFTs to bulk set into the `collections` HASH
-   ```
-   const collections = {
-     'TESTOOR': [
-       '4qF6dxxDrQrVbiHtQ3HdyUQ19vADPHyDWAPnAVSpVdqp',
-       '5hfp5AZKAUJpWCEAixe7bUjbJpKuoRDDtsfQwrR4TM7Z',
-       'GpAqVpTQizbngQjdTBfg7vwbaWKPn8zSD5Y13zEH17Z8',
-       'GsUZr1mgz3ytuDmpSx5KJWmPvhoxYnDKRWp9grLksibs'
-     ],
-     '.Blast Ctrl': [
-       '2WKGvLf6DVvxRsNMbyze6KwMjk1QLzNqWxwkARBeJ2yT'
-     ]
-   }
-   ```
-   @returns {string} state of request
-  */
-export const setCollectionsAndNfts = async (data: Record<string, string[]>): Promise<string> => {
-  const parsed: Record<string, string> = {}
-
-  for (const key in data) {
-    parsed[key] = data[key].join(',')
-  }
-
-  return await client.hmset('collections', data)
-}
-
-export const getCollectionsAndNfts = async (): Promise<Record<string, string[]>> => {
-  const response: Record<string, string> = await client.hgetall('collections')
-  const parsed: Record<string, string[]> = {}
-
-  Object.keys(response).forEach((key) => {
-    parsed[key] = response[key].split(',')
-  })
-
-  return parsed
-}
-
-export const getCollections = async (): Promise<string[]> => {
-  return await client.hkeys('collections')
-}
-
 export const addCollections = async (
   collections: string | string[]
-): Promise<[Error | null, number][] | null> => {
-  const notExistingPipeline = client.pipeline()
+): Promise<number> => {
   const newCollectionsPipeline = client.pipeline()
   const newCollections: string[] = Array.isArray(collections) ? collections : [collections]
 
-  newCollections.forEach((collection: string) => {
-    notExistingPipeline.hexists('collections', collection)
+  const currentCollections = await client.hkeys('collections')
+
+  newCollections.forEach((collection) => {
+    if (!currentCollections.includes(collection)) {
+      newCollectionsPipeline.hset('collections', collection, '')
+    }
   })
 
-  const notExisting: [Error | null, number][] | null =
-    (await notExistingPipeline.exec()) as unknown as [Error | null, number][] | null
+  const result = await newCollectionsPipeline.exec()
 
-  if (notExisting === null) return null
-
-  notExisting.forEach((item: [Error | null, number], i: number) => {
-    if (item[1]) return
-
-    newCollectionsPipeline.hset('collections', newCollections[i], '')
-  })
-
-  return newCollectionsPipeline.exec() as unknown as [Error | null, number][] | null
+  return result !== null
+    ? result.map((_err, res) => res).reduce((acc, curr) => acc + curr, 0)
+    : 0
 }
 
 export const deleteCollections = async (
   collections: string | string[]
-): Promise<[Error | null, number][] | null> => {
+): Promise<number> => {
   const pipeline = client.pipeline()
   const toRemove = Array.isArray(collections) ? collections : [collections]
 
@@ -89,23 +42,30 @@ export const deleteCollections = async (
     pipeline.hdel('collections', collection)
   })
 
-  return pipeline.exec() as unknown as [Error | null, number][] | null
+  const result = await pipeline.exec()
+
+  return result !== null
+    ? result.map((_err, res) => res).reduce((acc, curr) => acc + curr, 0)
+    : 0
 }
 
 export const renameCollection = async (
   oldName: string,
   newName: string
-): Promise<[Error | null, number][] | null> => {
+): Promise<number> => {
   const data: string | null = await client.hget('collections', oldName)
-
-  if (data === null) return null
+  if (data === null) return 0
 
   const pipeline = client.pipeline()
 
-  return pipeline
+  const result = await pipeline
     .hdel('collections', oldName)
     .hset('collections', newName, data)
-    .exec() as unknown as [Error | null, number][] | null
+    .exec()
+
+  return result !== null
+    ? result.map((_err, res) => res).reduce((acc, curr) => acc + curr, 0)
+    : 0
 }
 
 export const getNftsFromCollection = async (collection: string): Promise<string[]> => {
@@ -127,7 +87,7 @@ export const getWhitelistedNfts = async (): Promise<string[]> => {
  * @param nfts {string | string[]} single NFT or array of NFTs to be added
  * @returns {number} state of request
  */
-export const addNftsToWhitelistedCollection = async (
+export const addNftsToCollection = async (
   collection: string,
   nfts: string | string[]
 ): Promise<number> => {
@@ -143,23 +103,7 @@ export const addNftsToWhitelistedCollection = async (
   return await client.hset('collections', collection, data)
 }
 
-/**
- * Function used to override NFTs in a whitelisted collection
- * If a collection does not exist, it automatically sets it up
- * @param collection {string} name of a collection in which NFTs will be overriden
- * @param nfts {string | string[]} single NFT or array of NFTs to be used while overriding
- * @returns {number} state of request
- */
-export const setNftsInWhitelistedCollection = async (
-  collection: string,
-  nfts: string | string[]
-): Promise<number> => {
-  const data: string = Array.isArray(nfts) ? nfts.join(',') : nfts
-
-  return await client.hset('collections', collection, data)
-}
-
-export const removeNftsFromWhitelistedCollection = async (
+export const removeNftsFromCollection = async (
   collection: string,
   nfts: string | string[]
 ): Promise<number> => {
@@ -174,11 +118,6 @@ export const removeNftsFromWhitelistedCollection = async (
     .join(',')
 
   return await client.hset('collections', collection, data)
-}
-
-export const getCollectionForNft = async (nft: string) => {
-  const data = await getCollectionsAndNfts()
-  return Object.keys(data).find((key) => data[key].includes(nft))
 }
 
 /**

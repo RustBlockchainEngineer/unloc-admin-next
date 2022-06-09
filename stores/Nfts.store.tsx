@@ -3,6 +3,7 @@ import { action, flow, makeAutoObservable } from 'mobx'
 import { createContext } from 'react'
 import { getSubOfferList, SubOfferState } from '../integration/unloc'
 import { PublicKey } from '@solana/web3.js'
+import { addNFTsToCollection, getNFTsFromCollection, removeNFTsFromCollection } from '../functions/api-queries'
 
 export class NftsStore {
   nfts: string[] = []
@@ -18,10 +19,10 @@ export class NftsStore {
     this.setNfts([])
 
     try {
-      const response = yield axios.get(`/api/collections/${encodeURIComponent(collection)}`)
-      if (!(response && response.data)) return
+      const response = yield getNFTsFromCollection(collection)
+      if (response instanceof Error) return
 
-      this.setNfts(response.data)
+      this.setNfts(response)
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
@@ -61,7 +62,7 @@ export class NftsStore {
   @action.bound
   removeNfts = flow(function* (this: NftsStore, collection: string, nfts: string[]) {
     try {
-      yield axios.delete(`/api/nfts/${encodeURIComponent(collection)}`, { data: nfts })
+      yield removeNFTsFromCollection(collection, nfts)
       yield this.fetchNfts(collection)
       yield this.fetchNftsData()
     } catch (error) {
@@ -71,9 +72,9 @@ export class NftsStore {
   })
 
   @action.bound
-  addNfts = flow(function* (this: NftsStore, collection: string, nft: string | string[]) {
+  addNfts = flow(function* (this: NftsStore, collection: string, nfts: string[]) {
     try {
-      yield axios.patch(`/api/nfts/${encodeURIComponent(collection)}`, { data: nft })
+      yield addNFTsToCollection(collection, nfts)
       yield this.fetchNfts(collection)
       yield this.fetchNftsData()
     } catch (error) {

@@ -55,7 +55,7 @@ code {
 }
 
 main {
-  @apply mt-8 ml-auto mr-auto;
+  @apply mt-8 mr-auto mb-8 ml-auto ;
   @apply w-desktop;
 }
 
@@ -63,6 +63,7 @@ main {
 .h1--global-state {
   @apply mb-8;
 }
+
 @screen md {
   main {
     @apply w-full;
