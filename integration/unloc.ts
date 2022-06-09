@@ -1,7 +1,7 @@
 import { Connection, MemcmpFilter, PublicKey } from '@solana/web3.js'
 import * as anchor from '@project-serum/anchor'
 import { bs58 } from '@project-serum/anchor/dist/cjs/utils/bytes'
-import { IDL as idl } from '../idl/unloc_idl'
+import { UnlocNftLoan, IDL as idl } from '../idl/unloc_idl'
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { AnchorWallet } from '@solana/wallet-adapter-react'
 
@@ -17,7 +17,16 @@ export enum SubOfferState {
   Canceled
 }
 
-export let program: anchor.Program<any> = null as unknown as anchor.Program
+export interface IGlobalState {
+  superOwner: PublicKey,
+  treasuryWallet: PublicKey,
+  accruedInterestNumerator: anchor.BN,
+  aprNumerator: anchor.BN,
+  denominator: anchor.BN,
+  expireDurationForLender: anchor.BN
+}
+
+export let program: anchor.Program<any> = null as unknown as anchor.Program<UnlocNftLoan>
 export let programId: anchor.web3.PublicKey = null as unknown as anchor.web3.PublicKey
 
 const NFT_LOAN_PID = new PublicKey(
@@ -49,6 +58,7 @@ export const initLoanProgram = (wallet: any, pid: anchor.web3.PublicKey = NFT_LO
     return
   }
 
+  console.log(pid.toBase58())
   programId = pid
   const provider = new anchor.AnchorProvider(SOLANA_CONNECTION, wallet, { skipPreflight: true })
   program = new anchor.Program(idl, programId, provider)
@@ -81,6 +91,11 @@ export const setGlobalState = async (
     .transaction()
 
   return tx
+}
+
+export const getGlobalState = async () => {
+  const globalState = await pda([GLOBAL_STATE_TAG], programId);
+  return await program.account.globalState.fetchNullable(globalState) as IGlobalState;
 }
 
 export const getSubOfferList = async (

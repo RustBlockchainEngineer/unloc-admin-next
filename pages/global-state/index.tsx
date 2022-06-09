@@ -2,7 +2,7 @@ import React, { FormEvent, useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { PublicKey } from '@solana/web3.js'
 import { BN } from '@project-serum/anchor'
-import { setGlobalState } from '../../integration/unloc'
+import { IGlobalState, getGlobalState, initLoanProgram, setGlobalState } from '../../integration/unloc'
 import { AdminContext } from '../_app'
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react'
 import { useRouter } from 'next/router'
@@ -14,6 +14,8 @@ const SetGlobalState: React.FC = () => {
   const [duration, setDuration] = useState<BN>(new BN(0))
   const [treasury, setTreasury] = useState<string>('')
   const [programAddress, setProgramAddress] = useState<string>('')
+  const [currentGlobalState, setCurrentGlobalState] = useState<IGlobalState>()
+
   const isAdmin = useContext(AdminContext)
   const wallet = useAnchorWallet()
   const { connection } = useConnection()
@@ -22,8 +24,15 @@ const SetGlobalState: React.FC = () => {
   const treasuryParam = router.query.treasury
 
   useEffect(() => {
+    const fetchGlobalState = async () => {
+      const globalState = await getGlobalState()
+      setCurrentGlobalState(globalState)
+    }
+
+    initLoanProgram(wallet)
     setTreasury(typeof treasuryParam === 'string' ? treasuryParam : '')
-  }, [])
+    fetchGlobalState()
+  }, [treasuryParam])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -114,6 +123,17 @@ const SetGlobalState: React.FC = () => {
   return (
     <main className='main main--global-state'>
       <h1 className='h1 h1--global-state'>Set the UNLOC Program Global State</h1>
+
+      {currentGlobalState && (
+        <div className='current-global-state'>
+          <h2 className='h2'>Current Program Global State</h2>
+          <p>Accrued Interest Numerator: <span>{currentGlobalState.accruedInterestNumerator.toNumber()}</span></p>
+          <p>Denominator: <span>{currentGlobalState.denominator.toNumber()}</span></p>
+          <p>Annual Percentage Ratio Numerator: <span>{currentGlobalState.aprNumerator.toNumber()}</span></p>
+          <p>Expire Duration For Lender: <span>{currentGlobalState.expireDurationForLender.toNumber()}</span></p>
+          <p>Treasury: <span>{currentGlobalState.treasuryWallet.toBase58()}</span></p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <label className='label' htmlFor='prog-addr'>

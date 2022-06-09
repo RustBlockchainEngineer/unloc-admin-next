@@ -44,6 +44,10 @@ h1 {
   @apply text-3xl font-bold;
 }
 
+h2 {
+  @apply text-2xl font-bold mb-4;
+}
+
 a {
   @apply text-black;
   @apply no-underline;
@@ -85,4 +89,12 @@ main {
 .link {
   @apply block;
   @apply text-center;
+}
+
+.current-global-state {
+  @apply mb-8;
+}
+
+.current-global-state p span {
+  @apply font-bold;
 }
