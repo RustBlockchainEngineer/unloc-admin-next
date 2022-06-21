@@ -1,5 +1,8 @@
 module.exports = {
-  content: ['./src/**/*.{ts,tsx}'],
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
     screens: {
       phone: { max: '768px' },

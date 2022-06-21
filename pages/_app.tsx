@@ -14,6 +14,9 @@ import {
 } from '@solana/wallet-adapter-wallets'
 import toast, { Toaster } from 'react-hot-toast'
 import { Navbar } from '../components/navbar'
+import { extend } from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import utc from 'dayjs/plugin/utc'
 
 import '../styles/globals.css'
 import '@solana/wallet-adapter-react-ui/styles.css'
@@ -24,6 +27,8 @@ interface IAdminContext {
 }
 
 export const AdminContext = React.createContext<IAdminContext>({} as IAdminContext)
+extend(relativeTime)
+extend(utc)
 
 const App = ({ Component, pageProps }: AppProps): ReactNode => {
   const [isAdmin, setIsAdmin] = useState(false)

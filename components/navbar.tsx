@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useContext, useEffect, useState } from 'react'
 import { isWalletAdmin } from '../functions/api-queries'
 import { AdminContext } from '../pages/_app'
+import dayjs from 'dayjs'
 
 interface NavbarProps {
   network: WalletAdapterNetwork
@@ -44,11 +45,6 @@ export const Navbar = ({ network }: NavbarProps) => {
           </Link>
         </li>
         <li>
-          <Link href='/airdrop-to'>
-            <a>Multi Airdrop</a>
-          </Link>
-        </li>
-        <li>
           <Link href='/distribute'>
             <a>Distribute NFTs</a>
           </Link>
@@ -56,6 +52,11 @@ export const Navbar = ({ network }: NavbarProps) => {
         <li>
           <Link href='/manage'>
             <a>Manage Authority</a>
+          </Link>
+        </li>
+        <li>
+          <Link href='/users'>
+            <a>Users</a>
           </Link>
         </li>
         {isAdmin ? (
