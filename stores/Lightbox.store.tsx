@@ -1,6 +1,7 @@
 import { PublicKey } from '@solana/web3.js'
 import { action, makeAutoObservable } from 'mobx'
 import { createContext } from 'react'
+import { RootStore } from '.'
 
 export interface ILightBoxData {
   loanValue: number
@@ -12,14 +13,16 @@ export interface ILightBoxData {
 }
 
 export class LightboxStore {
+  root: RootStore
   showCreateCollection = false
   showRemoveCollections = false
   showAddNft = false
   showRemoveNfts = false
   data: string[] = []
 
-  constructor() {
+  constructor(store: RootStore) {
     makeAutoObservable(this)
+    this.root = store
   }
 
   @action.bound
@@ -55,6 +58,3 @@ export class LightboxStore {
     this.showRemoveNfts = show
   }
 }
-
-const lightboxStore = new LightboxStore()
-export const LightboxContext = createContext(lightboxStore)

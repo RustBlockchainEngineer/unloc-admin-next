@@ -54,7 +54,13 @@ const AirdropToMultiple: NextPage = () => {
       const recips = recipients.split('\n').map((r) => new PublicKey(r.trim()))
       const mintPubkey = new PublicKey(mint)
       const decimals = await getMintDecimals(connection, mintPubkey)
-      await airdropToMultiple(wallet, connection, mintPubkey, recips, new BN(amount * 10 ** decimals))
+      await airdropToMultiple(
+        wallet,
+        connection,
+        mintPubkey,
+        recips,
+        new BN(amount * 10 ** decimals)
+      )
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
@@ -63,13 +69,13 @@ const AirdropToMultiple: NextPage = () => {
   }
 
   return (
-    <main className='main main--airdrop'>
-      <h1 className='h1--airdrop'>Airdrop tokens to a list of recipients</h1>
-      <form onSubmit={handleSubmit}>
+    <main className='main grid-content'>
+      <h1 className='mb-8'>Airdrop tokens to a list of recipients</h1>
+      <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
         <label className='label label--mint' htmlFor='mint'>
           Mint
           <input
-            className='input form-input mint'
+            className='input mint form-input'
             type='text'
             id='mint'
             value={mint}
@@ -80,7 +86,7 @@ const AirdropToMultiple: NextPage = () => {
         <label className='label label--recipients' htmlFor='recipients'>
           Addresses of recipients (every address in a new line)
           <textarea
-            className='input form-input recipients'
+            className='input recipients form-input'
             id='recipients'
             value={recipients}
             onChange={handleRecipientsChange}
@@ -91,7 +97,7 @@ const AirdropToMultiple: NextPage = () => {
         <label className='label label--amount' htmlFor='amount'>
           Amount
           <input
-            className='input form-input amount'
+            className='input amount form-input'
             type='number'
             id='amount'
             value={amount}

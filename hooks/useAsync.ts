@@ -14,7 +14,7 @@ export const useAsync = <T, E = string>(
   // useCallback ensures the below useEffect is not called
   // on every render, but only if asyncFunction changes.
   const execute = useCallback(
-    (...params) => {
+    (...params: any[]) => {
       setStatus('pending')
       setValue(null)
       setError(null)

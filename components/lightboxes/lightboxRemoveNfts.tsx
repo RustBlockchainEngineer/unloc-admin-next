@@ -1,34 +1,33 @@
-import React, { useContext } from 'react'
-import { NftsContext } from '../../stores/Nfts.store'
-import { LightboxContext } from '../../stores/Lightbox.store'
+import { useStore } from '../../stores'
 
 interface LightboxRemoveNftsProps {
   collection: string
 }
 
-export const LightboxRemoveNfts: React.FC<LightboxRemoveNftsProps> = ({ collection }: LightboxRemoveNftsProps) => {
-  const store = useContext(NftsContext)
-  const lightboxes = useContext(LightboxContext)
-  const { data } = lightboxes
-  const { nfts } = store
+export const LightboxRemoveNfts: React.FC<LightboxRemoveNftsProps> = ({
+  collection
+}: LightboxRemoveNftsProps) => {
+  const { lightbox, nfts: nftStore } = useStore()
+  const { data } = lightbox
+  const { nfts } = nftStore
 
   const handleRemove = async () => {
     try {
-      await store.removeNfts(collection, data)
+      await nftStore.removeNfts(collection, data)
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
     } finally {
-      lightboxes.setData([])
-      lightboxes.setShowRemoveNfts(false)
+      lightbox.setData([])
+      lightbox.setShowRemoveNfts(false)
     }
   }
 
   const handleCancelRemove = () => {
     // eslint-disable-next-line no-console
     console.log(data)
-    lightboxes.setData([])
-    lightboxes.setShowRemoveNfts(false)
+    lightbox.setData([])
+    lightbox.setShowRemoveNfts(false)
   }
 
   return (
@@ -39,8 +38,9 @@ export const LightboxRemoveNfts: React.FC<LightboxRemoveNftsProps> = ({ collecti
         {data.length === 1 ? 'this NFT' : data.length < nfts.length ? 'these NFTs' : 'all NFTs'}
         ?
         <br />
-        <span className='font-bold underline text-red-600'>
-          WARNING: THIS ACTION IS {data.length === nfts.length ? 'DEFINITELY' : 'POTENTIALLY'} DESTRUCTIVE!
+        <span className='font-bold text-red-600 underline'>
+          WARNING: THIS ACTION IS {data.length === nfts.length ? 'DEFINITELY' : 'POTENTIALLY'}{' '}
+          DESTRUCTIVE!
         </span>
       </div>
       <div className='lightbox__buttons'>

@@ -1,9 +1,9 @@
 import { useConnection } from '@solana/wallet-adapter-react'
 import { BorshInstructionCoder, Instruction } from '@project-serum/anchor'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { PublicKey } from '@solana/web3.js'
 import { NextPage } from 'next'
-import Separator from '../../components/separator'
+import { Separator } from '../../components/common/Separator'
 import { InstructionWithBlocktime, loadAccountHistoryForProgram } from '../../utils/spl/'
 import { IDL } from '../../idl/unloc_idl'
 import { InstructionDisplay } from '@project-serum/anchor/dist/cjs/coder/borsh/instruction'
@@ -12,7 +12,7 @@ import SimpleForm from '../../components/simpleForm'
 import { useAsync } from '../../hooks'
 import { compressAddress } from '../../utils'
 import dayjs from 'dayjs'
-import { Copyable } from '../../components/copyable'
+import { Copyable } from '../../components/common/Copyable'
 
 type ParsedInstructionWithBlocktime = InstructionWithBlocktime & {
   decoded: Instruction
@@ -161,7 +161,7 @@ const Users: NextPage = () => {
   }, [userHistory])
 
   return (
-    <main className='my-8 mx-auto'>
+    <main className='grid-content my-8 mx-12 px-4'>
       <Separator label={'User history'} />
       <section className='my-4' id='loan-contract-single-user'>
         <div className='w-1/2'>
@@ -184,7 +184,7 @@ const Users: NextPage = () => {
         </div>
         {status === 'idle' && <div className='mt-10' />}
         {status === 'pending' && <div>Loading...</div>}
-        {status === 'error' && renderError}
+        {status === 'error' && <>{renderError}</>}
         {status === 'success' && (
           <>
             {HistoryStats}

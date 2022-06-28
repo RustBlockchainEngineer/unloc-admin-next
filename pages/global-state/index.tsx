@@ -121,7 +121,7 @@ const SetGlobalState: React.FC = () => {
   }
 
   return (
-    <main className='main main--global-state'>
+    <main className='main main--global-state px-8'>
       <h1 className='h1 h1--global-state'>Set the UNLOC Program Global State</h1>
 
       {currentGlobalState && (
@@ -135,7 +135,7 @@ const SetGlobalState: React.FC = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
         <label className='label' htmlFor='prog-addr'>
           Program address
           <input

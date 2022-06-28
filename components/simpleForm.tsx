@@ -10,9 +10,7 @@ interface SimpleFormProps {
   showSubmitOnCondition?: (value: string) => boolean
 }
 
-/**
- * Form with a single text-input field
- */
+// Form with a single text-input field
 export default function SimpleForm({
   name,
   placeholder,

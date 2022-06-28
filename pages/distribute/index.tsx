@@ -32,7 +32,7 @@ const DistributeNFTs: React.FC = () => {
     }
 
     fetch()
-  }, [wallet])
+  }, [wallet, connection])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -78,13 +78,13 @@ const DistributeNFTs: React.FC = () => {
   }
 
   return (
-    <main className='main main--didistribute'>
-      <h1 className='h1--distribute'>Distribute NFTs to a list of recipients</h1>
-      <form onSubmit={handleSubmit}>
+    <main className='main grid-content px-4'>
+      <h1 className='mb-8'>Distribute NFTs to a list of recipients</h1>
+      <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
         <label className='label label--recipients' htmlFor='recipients'>
           Addresses of recipients (every address in a new line)
           <textarea
-            className='input form-input recipients'
+            className='input recipients form-input'
             id='recipients'
             value={recipients}
             onChange={handleRecipientsChange}
@@ -95,7 +95,7 @@ const DistributeNFTs: React.FC = () => {
         <label className='label label--amount' htmlFor='amount'>
           Amount
           <input
-            className='input form-input amount'
+            className='input amount form-input'
             type='number'
             min={1}
             id='amount'

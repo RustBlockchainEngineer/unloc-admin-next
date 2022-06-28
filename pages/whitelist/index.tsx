@@ -49,9 +49,9 @@ const WhitelistUsers: React.FC = () => {
   }
 
   return (
-    <main className='main main--airdrop'>
-      <h1 className='h1--airdrop'>Add users to whitelist</h1>
-      <form onSubmit={handleSubmit}>
+    <main className='main px-8'>
+      <h1 className='mb-8'>Add users to whitelist</h1>
+      <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
         <label className='label' htmlFor='mint'>
           Users
           <textarea

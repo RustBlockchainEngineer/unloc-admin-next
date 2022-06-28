@@ -21,7 +21,7 @@ const ManageAuthority: NextPage = () => {
     } else {
       setMint('');
     }
-  }, [])
+  }, [address])
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMint(event.target.value)
@@ -60,7 +60,7 @@ const ManageAuthority: NextPage = () => {
   }
 
   return (
-    <main className='main main--manage-authority'>
+    <main className='main px-8'>
       <form onSubmit={handleSubmit('give')}>
         <label className='label' htmlFor='mint'>
           Mint

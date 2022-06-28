@@ -1,7 +1,3 @@
-form {
-  @apply flex flex-col gap-y-4;
-}
-
 .label,
 .input,
 .form__buttons .btn {

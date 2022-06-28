@@ -10,6 +10,10 @@ export default function Document() {
         <meta name='description' content='Get some tokens' />
         <link rel='apple-touch-icon' href='/logo192.png' />
         <link rel='manifest' href='/manifest.json' />
+        <link
+          href='https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;400;700&display=optional'
+          rel='stylesheet'
+        />
       </Head>
       <body>
         <Main />

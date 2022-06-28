@@ -6,18 +6,16 @@ import { LightboxCreateCollection } from '../../components/lightboxes/lightboxCr
 import { LightboxRemoveCollections } from '../../components/lightboxes/lightboxRemoveCollections'
 import { CollectionRow } from '../../components/collectionRow'
 
-import { CollectionsContext } from '../../stores/Collections.store'
-import { LightboxContext } from '../../stores/Lightbox.store'
 import { AdminContext } from '../_app'
+import { useStore } from '../../stores'
 
 const ManageCollections: React.FC = observer(() => {
-  const store = useContext(CollectionsContext)
-  const lightboxes = useContext(LightboxContext)
+  const { lightbox, collections } = useStore()
   const wallet = useContext(WalletContext)
   const { isAdmin } = useContext(AdminContext)
 
-  const { collectionsData, selected } = store
-  const { showCreateCollection, showRemoveCollections, data } = lightboxes
+  const { collectionsData, selected } = collections
+  const { showCreateCollection, showRemoveCollections, data } = lightbox
 
   const mapCollectionRows = () =>
     Object.entries(collectionsData).map(([collection, count]) => (
@@ -25,25 +23,25 @@ const ManageCollections: React.FC = observer(() => {
     ))
 
   const handleRemoveCollections = async () => {
-    lightboxes.setData(selected)
-    lightboxes.setShowRemoveCollections(true)
+    lightbox.setData(selected)
+    lightbox.setShowRemoveCollections(true)
   }
 
   const handleSelectAll = () => {
-    store.setSelected(Object.keys(collectionsData))
+    collections.setSelected(Object.keys(collectionsData))
   }
 
   const handleClearSelection = () => {
-    store.setSelected([])
+    collections.setSelected([])
   }
 
   const handleCreateCollection = () => {
-    lightboxes.setShowCreateCollection(true)
+    lightbox.setShowCreateCollection(true)
   }
 
   useEffect(() => {
     const fetchData = async () => {
-      await store.fetchCollectionsData()
+      await collections.fetchCollectionsData()
     }
 
     fetchData()
@@ -55,7 +53,10 @@ const ManageCollections: React.FC = observer(() => {
         <h1 className='header__title'>Manage Collections</h1>
 
         {wallet.connected ? (
-          <button className='btn btn--green header__btn add-collection' onClick={() => handleCreateCollection()}>
+          <button
+            className='btn btn--green header__btn add-collection'
+            onClick={() => handleCreateCollection()}
+          >
             Add Collections
           </button>
         ) : (
@@ -65,7 +66,7 @@ const ManageCollections: React.FC = observer(() => {
 
       {wallet.connected ? (
         <>
-          <div className='table table--collections collections'>
+          <div className='table--collections collections table'>
             <div className='thead collections__thead'>
               <div className='tr collections__tr thead__tr'>
                 <div className='th collections__th select'>Select</div>
@@ -78,7 +79,9 @@ const ManageCollections: React.FC = observer(() => {
           </div>
           <footer className='footer collections__footer'>
             <button
-              className={`btn btn--${selected.length > 0 ? 'gray-ghost' : 'disabled'} footer__btn clear-selected`}
+              className={`btn btn--${
+                selected.length > 0 ? 'gray-ghost' : 'disabled'
+              } footer__btn clear-selected`}
               disabled={selected.length === 0}
               onClick={() => handleClearSelection()}
             >
@@ -94,7 +97,9 @@ const ManageCollections: React.FC = observer(() => {
               Select all
             </button>
             <button
-              className={`btn btn--${selected.length > 0 ? 'black' : 'disabled'} footer__btn remove-selected`}
+              className={`btn btn--${
+                selected.length > 0 ? 'black' : 'disabled'
+              } footer__btn remove-selected`}
               disabled={selected.length === 0}
               onClick={() => handleRemoveCollections()}
             >

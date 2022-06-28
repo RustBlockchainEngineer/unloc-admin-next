@@ -3,15 +3,22 @@ import { action, flow, makeAutoObservable } from 'mobx'
 import { createContext } from 'react'
 import { getSubOfferList, SubOfferState } from '../integration/unloc'
 import { PublicKey } from '@solana/web3.js'
-import { addNFTsToCollection, getNFTsFromCollection, removeNFTsFromCollection } from '../functions/api-queries'
+import {
+  addNFTsToCollection,
+  getNFTsFromCollection,
+  removeNFTsFromCollection
+} from '../functions/api-queries'
+import { RootStore } from '.'
 
 export class NftsStore {
+  root: RootStore
   nfts: string[] = []
   nftsData: Record<string, { proposed: number; accepted: number }> = {}
   selected: string[] = []
 
-  constructor() {
+  constructor(store: RootStore) {
     makeAutoObservable(this)
+    this.root = store
   }
 
   @action.bound
@@ -39,8 +46,12 @@ export class NftsStore {
       yield Promise.all(
         this.nfts.map(async (nft: string) => {
           try {
-            const proposed = (await getSubOfferList(undefined, new PublicKey(nft), SubOfferState.Proposed)).length
-            const accepted = (await getSubOfferList(undefined, new PublicKey(nft), SubOfferState.Accepted)).length
+            const proposed = (
+              await getSubOfferList(undefined, new PublicKey(nft), SubOfferState.Proposed)
+            ).length
+            const accepted = (
+              await getSubOfferList(undefined, new PublicKey(nft), SubOfferState.Accepted)
+            ).length
             nftsData[nft] = { proposed, accepted }
             this.setNftsData(nftsData)
           } catch (error) {
@@ -98,6 +109,3 @@ export class NftsStore {
     this.selected = selected
   }
 }
-
-const nftsStore = new NftsStore()
-export const NftsContext = createContext(nftsStore)

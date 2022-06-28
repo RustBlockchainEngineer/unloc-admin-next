@@ -1,13 +1,20 @@
-import axios from 'axios'
 import { action, flow, makeAutoObservable } from 'mobx'
-import { createContext } from 'react'
-import { createCollections, deleteCollections, getCollectionsData, renameCollection } from '../functions/api-queries'
+
+import { RootStore } from '.'
+import {
+  createCollections,
+  deleteCollections,
+  getCollectionsData,
+  renameCollection
+} from '../functions/api-queries'
 
 export class CollectionsStore {
+  root: RootStore
   collectionsData: Record<string, number> = {}
   selected: string[] = []
 
-  constructor() {
+  constructor(store: RootStore) {
+    this.root = store
     makeAutoObservable(this)
   }
 
@@ -54,6 +61,3 @@ export class CollectionsStore {
     this.selected = selected
   }
 }
-
-const collectionsStore = new CollectionsStore()
-export const CollectionsContext = createContext(collectionsStore)

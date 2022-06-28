@@ -1,23 +1,21 @@
 import React, { useContext, useEffect } from 'react'
 import { WalletContext } from '@solana/wallet-adapter-react'
-import { NftsContext } from '../../stores/Nfts.store'
 import { observer } from 'mobx-react-lite'
 import { NftRow } from '../../components/nftRow'
-import { LightboxContext } from '../../stores/Lightbox.store'
 import { Lightbox } from '../../components/lightboxes/lightbox'
 import { LightboxAddNft } from '../../components/lightboxes/lightboxAddNft'
 import { LightboxRemoveNfts } from '../../components/lightboxes/lightboxRemoveNfts'
 import { AdminContext } from '../_app'
 import { useRouter } from 'next/router'
+import { useStore } from '../../stores'
 
 const ManageNFTs: React.FC = observer(() => {
   const router = useRouter()
   const wallet = useContext(WalletContext)
-  const store = useContext(NftsContext)
-  const lightboxes = useContext(LightboxContext)
+  const { nfts: nftStore, lightbox } = useStore()
   const { id } = router.query
-  const { nfts, nftsData, selected } = store
-  const { showAddNft, showRemoveNfts } = lightboxes
+  const { nfts, nftsData, selected } = nftStore
+  const { showAddNft, showRemoveNfts } = lightbox
 
   const isAdmin = useContext(AdminContext)
 
@@ -27,28 +25,28 @@ const ManageNFTs: React.FC = observer(() => {
     ))
 
   const handleAddNft = () => {
-    lightboxes.setShowAddNft(true)
+    lightbox.setShowAddNft(true)
   }
 
   const handleRemoveNfts = async () => {
-    lightboxes.setData(selected)
-    lightboxes.setShowRemoveNfts(true)
+    lightbox.setData(selected)
+    lightbox.setShowRemoveNfts(true)
   }
 
   const handleSelectAll = () => {
-    store.setSelected(nfts)
+    nftStore.setSelected(nfts)
   }
 
   const handleClearSelection = () => {
-    store.setSelected([])
+    nftStore.setSelected([])
   }
 
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return
 
-      await store.fetchNfts(id as string)
-      await store.fetchNftsData()
+      await nftStore.fetchNfts(id as string)
+      await nftStore.fetchNftsData()
     }
 
     if (wallet.connected) fetchData()
@@ -63,7 +61,10 @@ const ManageNFTs: React.FC = observer(() => {
       <header className='header nfts__header'>
         {wallet.connected ? (
           <div className='header__buttons'>
-            <button className='btn btn--gray-ghost back-to-collections' onClick={() => router.push('/collections')}>
+            <button
+              className='btn btn--gray-ghost back-to-collections'
+              onClick={() => router.push('/collections')}
+            >
               Go back to collection list
             </button>
             <button className='btn btn--green add-nft' onClick={() => handleAddNft()}>
@@ -80,7 +81,7 @@ const ManageNFTs: React.FC = observer(() => {
 
       {wallet.connected ? (
         <>
-          <div className='table nfts__table'>
+          <div className='nfts__table table'>
             <div className='thead nfts__thead'>
               <div className='tr nfts__tr'>
                 <div className='th nfts__th select'>Select</div>
@@ -95,21 +96,27 @@ const ManageNFTs: React.FC = observer(() => {
 
           <footer className='footer collections__footer'>
             <button
-              className={`btn btn--${selected.length > 0 ? 'gray-ghost' : 'disabled'} footer__btn clear-selected`}
+              className={`btn btn--${
+                selected.length > 0 ? 'gray-ghost' : 'disabled'
+              } footer__btn clear-selected`}
               disabled={selected.length === 0}
               onClick={() => handleClearSelection()}
             >
               Clear Selection
             </button>
             <button
-              className={`btn btn--${selected.length < nfts.length ? 'gray' : 'disabled'} footer__btn select-all`}
+              className={`btn btn--${
+                selected.length < nfts.length ? 'gray' : 'disabled'
+              } footer__btn select-all`}
               disabled={selected.length >= nfts.length}
               onClick={() => handleSelectAll()}
             >
               Select all
             </button>
             <button
-              className={`btn btn--${selected.length > 0 ? 'black' : 'disabled'} footer__btn remove-selected`}
+              className={`btn btn--${
+                selected.length > 0 ? 'black' : 'disabled'
+              } footer__btn remove-selected`}
               disabled={selected.length === 0}
               onClick={() => handleRemoveNfts()}
             >

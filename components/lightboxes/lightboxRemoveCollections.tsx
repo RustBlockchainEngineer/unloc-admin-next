@@ -1,28 +1,26 @@
-import React, { useContext } from 'react'
-import { CollectionsContext } from '../../stores/Collections.store'
-import { LightboxContext } from '../../stores/Lightbox.store'
+import { observer } from 'mobx-react-lite'
+import { useStore } from '../../stores'
 
-export const LightboxRemoveCollections: React.FC = () => {
-  const store = useContext(CollectionsContext)
-  const lightboxes = useContext(LightboxContext)
-  const { data } = lightboxes
-  const { collectionsData } = store
+export const LightboxRemoveCollections: React.FC = observer(() => {
+  const { lightbox, collections } = useStore()
+  const { data } = lightbox
+  const { collectionsData } = collections
 
   const handleRemove = async () => {
     try {
-      await store.removeCollections(data)
+      await collections.removeCollections(data)
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
     } finally {
-      lightboxes.setData([])
-      lightboxes.setShowRemoveCollections(false)
+      lightbox.setData([])
+      lightbox.setShowRemoveCollections(false)
     }
   }
 
   const handleCancelRemove = () => {
-    lightboxes.setData([])
-    lightboxes.setShowRemoveCollections(false)
+    lightbox.setData([])
+    lightbox.setShowRemoveCollections(false)
   }
 
   return (
@@ -37,8 +35,9 @@ export const LightboxRemoveCollections: React.FC = () => {
           : 'all collections'}
         ?
         <br />
-        <span className='font-bold underline text-red-600'>
-          WARNING: THIS ACTION IS {data.length === Object.keys(collectionsData).length ? 'DEFINITELY' : 'POTENTIALLY'}{' '}
+        <span className='font-bold text-red-600 underline'>
+          WARNING: THIS ACTION IS{' '}
+          {data.length === Object.keys(collectionsData).length ? 'DEFINITELY' : 'POTENTIALLY'}{' '}
           DESTRUCTIVE!
         </span>
       </div>
@@ -52,4 +51,4 @@ export const LightboxRemoveCollections: React.FC = () => {
       </div>
     </>
   )
-}
+})
