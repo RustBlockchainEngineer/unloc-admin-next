@@ -6,6 +6,7 @@ import { SyntheticEvent, useState } from 'react'
 import { Form, Field } from 'react-final-form'
 import { useTokenAccount } from '../../hooks/useAccount'
 import { createSetGlobalStateInstruction } from '../../integration/sdk-generated/loan'
+import { pda } from '../../integration/unloc'
 import { useStore } from '../../stores'
 import { InputAdapter } from './InputAdapter'
 
@@ -13,7 +14,6 @@ interface AccountInputs {
   treasuryWallet: string
   rewardMint: string
   newSuperOwner: string
-  rewardVault: string
 }
 interface DataInputs {
   accruedInterestNumerator: string
@@ -94,7 +94,6 @@ const Accounts = () => {
         label='New Super Owner'
         component={InputAdapter}
       ></Field>
-      <Field name='rewardVault' type='text' label='Reward Vault' component={InputAdapter}></Field>
     </div>
   )
 }
@@ -109,7 +108,6 @@ export const GlobalStateForm = observer(() => {
   const initialValues: Partial<Values> = {
     treasuryWallet: loanGlobalState?.treasuryWallet.toBase58(),
     rewardMint: account?.mint.toBase58(),
-    rewardVault: loanGlobalState?.rewardVault.toBase58(),
     newSuperOwner: loanGlobalState?.superOwner.toBase58(),
     accruedInterestNumerator: loanGlobalState?.accruedInterestNumerator.toString() || '',
     denominator: loanGlobalState?.denominator.toString() || '',
@@ -123,13 +121,15 @@ export const GlobalStateForm = observer(() => {
   const handleSubmit = async (values: Values) => {
     const superOwner = publicKey
     const globalState = programs.loanGlobalStatePda
+    const REWARD_VAULT_TAG = Buffer.from('REWARD_VAULT_SEED')
+    const rewardVault = await pda([REWARD_VAULT_TAG], programs.loanPubkey)
     if (!superOwner) return
 
     const accounts = {
       superOwner,
       globalState,
       rewardMint: new PublicKey(values.rewardMint),
-      rewardVault: new PublicKey(values.rewardVault),
+      rewardVault: rewardVault,
       newSuperOwner: new PublicKey(values.newSuperOwner),
       treasuryWallet: new PublicKey(values.treasuryWallet),
       clock: SYSVAR_CLOCK_PUBKEY
@@ -151,8 +151,14 @@ export const GlobalStateForm = observer(() => {
       feePayer: publicKey,
       ...latestBlockhash
     }).add(ix)
-    const signature = await sendTransaction(tx, connection, {})
-    await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
+
+    try {
+      const signature = await sendTransaction(tx, connection, { skipPreflight: true })
+      console.log(signature)
+      await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   return (
@@ -160,16 +166,22 @@ export const GlobalStateForm = observer(() => {
       onSubmit={handleSubmit}
       render={({ handleSubmit, form }) => {
         const [page, setPage] = useState(0)
+
         const handleFillCurrent = (e: SyntheticEvent) => {
           e.preventDefault()
           form.reset(initialValues)
+        }
+
+        const handlePageChange = (page: number) => (e: SyntheticEvent) => {
+          e.preventDefault()
+          setPage(page)
         }
 
         return (
           <form onSubmit={handleSubmit} className='bg-unlocGray-500 p-4'>
             <div className='mb-4 flex space-x-2 uppercase'>
               <button
-                onClick={() => setPage(0)}
+                onClick={handlePageChange(0)}
                 className={clsx(
                   'rounded-md px-2 py-1',
                   'hover:cursor-pointer hover:bg-unlocGray-200',
@@ -179,7 +191,7 @@ export const GlobalStateForm = observer(() => {
                 Accounts
               </button>
               <button
-                onClick={() => setPage(1)}
+                onClick={handlePageChange(1)}
                 className={clsx(
                   'rounded-md px-2 py-1',
                   'hover:cursor-pointer hover:bg-unlocGray-200',
