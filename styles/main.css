@@ -15,7 +15,7 @@
   @apply min-h-screen;
   @apply bg-white;
   @apply text-black;
-  @apply bg-[url('/background.svg')];
+  @apply bg-slate-900;
   display: grid;
   grid-template-areas:
     'sidebar topbar topbar'
@@ -39,7 +39,7 @@
 
 /* Wallet Button Overrides */
 button.wallet-adapter-button {
-  @apply justify-center bg-unlocGray-200;
+  @apply justify-center bg-slate-500;
   min-width: 212px;
 }
 
@@ -58,12 +58,17 @@ h1 {
 }
 
 h2 {
-  @apply mb-4 text-2xl font-bold;
+  @apply mb-4 text-2xl font-bold  text-slate-400;
 }
 
 .main {
   @apply mt-8 mr-auto mb-8 ml-auto;
 }
+
+.container {
+  @apply bg-slate-700 p-2;
+}
+
 
 @screen md {
   .main {

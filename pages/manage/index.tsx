@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { PublicKey } from '@solana/web3.js'
 import { useRouter } from 'next/router'
 import { NextPage } from 'next'
+import { Button } from '../../components/common/Button'
 
 type SubmitOption = 'give' | 'reclaim'
 
@@ -61,27 +62,39 @@ const ManageAuthority: NextPage = () => {
 
   return (
     <main className='main px-8'>
-      <form onSubmit={handleSubmit('give')}>
-        <label className='label' htmlFor='mint'>
-          Mint
-          <input
-            className='input form-input'
-            type='text'
-            id='mint'
-            value={mint}
-            onChange={handleChange}
-            size={50}
-          ></input>
-        </label>
-        <div className='form__buttons'>
-          <button type='submit' className='btn btn--blue-ghost give-authority'>
-            Give Minting Authority
-          </button>
-          <button type='submit' className='btn btn--green-ghost reclaim-authority' onClick={handleSubmit('reclaim')}>
-            Reclaim Minting Authority
-          </button>
-        </div>
-      </form>
+      <div className='bg-slate-700 p-4 rounded-md'>
+        <form onSubmit={handleSubmit('give')} className='flex flex-col'>
+          <label className='label' htmlFor='mint'>
+            Mint
+            <input
+              className='input form-input'
+              type='text'
+              id='mint'
+              value={mint}
+              onChange={handleChange}
+              size={50}
+            ></input>
+          </label>
+          <div className='form__buttons'>
+            <Button
+              color='gray'
+              ghost={true}
+              type='submit'
+              className='give-authority'
+            >
+              Give Minting Authority
+            </Button>
+            <Button
+              color='gray'
+              ghost={true}
+              type='submit'
+              className='reclaim-authority'
+            >
+              Reclaim Minting Authority
+            </Button>
+          </div>
+        </form>
+      </div>
     </main>
   )
 }

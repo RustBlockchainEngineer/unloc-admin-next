@@ -6,6 +6,7 @@ import { IGlobalState, getGlobalState, initLoanProgram, setGlobalState } from '.
 import { AdminContext } from '../_app'
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react'
 import { useRouter } from 'next/router'
+import { Button } from '../../components/common/Button'
 
 const SetGlobalState: React.FC = () => {
   const [accIntNum, setAccIntNum] = useState<BN>(new BN(0))
@@ -122,97 +123,103 @@ const SetGlobalState: React.FC = () => {
 
   return (
     <main className='main main--global-state px-8'>
-      <h1 className='h1 h1--global-state'>Set the UNLOC Program Global State</h1>
+      <div className='bg-slate-700 p-4 rounded-md'>
+        <h1 className='h1 h1--global-state mb-2 text-slate-400'>Set the UNLOC Program Global State</h1>
 
-      {currentGlobalState && (
-        <div className='current-global-state'>
-          <h2 className='h2'>Current Program Global State</h2>
-          <p>Accrued Interest Numerator: <span>{currentGlobalState.accruedInterestNumerator.toNumber()}</span></p>
-          <p>Denominator: <span>{currentGlobalState.denominator.toNumber()}</span></p>
-          <p>Annual Percentage Ratio Numerator: <span>{currentGlobalState.aprNumerator.toNumber()}</span></p>
-          <p>Expire Duration For Lender: <span>{currentGlobalState.expireDurationForLender.toNumber()}</span></p>
-          <p>Treasury: <span>{currentGlobalState.treasuryWallet.toBase58()}</span></p>
-        </div>
-      )}
+        {currentGlobalState && (
+          <div className='current-global-state'>
+            <h2 className='h2'>Current Program Global State</h2>
+            <p>Accrued Interest Numerator: <span>{currentGlobalState.accruedInterestNumerator.toNumber()}</span></p>
+            <p>Denominator: <span>{currentGlobalState.denominator.toNumber()}</span></p>
+            <p>Annual Percentage Ratio Numerator: <span>{currentGlobalState.aprNumerator.toNumber()}</span></p>
+            <p>Expire Duration For Lender: <span>{currentGlobalState.expireDurationForLender.toNumber()}</span></p>
+            <p>Treasury: <span>{currentGlobalState.treasuryWallet.toBase58()}</span></p>
+          </div>
+        )}
 
-      <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
-        <label className='label' htmlFor='prog-addr'>
-          Program address
-          <input
-            className='input form-input'
-            type='text'
-            id='progAddr'
-            value={programAddress}
-            onChange={handleProgramAddressChange}
-            size={50}
-            min={0}
-          />
-        </label>
-        <label className='label' htmlFor='acc-int-num'>
-          Accrued Interest Numerator
-          <input
-            className='input form-input'
-            type='number'
-            id='accIntNum'
-            value={accIntNum.toNumber()}
-            onChange={handleAccIntNumChange}
-            size={50}
-            min={0}
-          />
-        </label>
-        <label className='label' htmlFor='denomin'>
-          Denominator
-          <input
-            className='input form-input'
-            type='number'
-            id='denomin'
-            value={denomin.toNumber()}
-            onChange={handleDenominChange}
-            size={50}
-            min={0}
-          />
-        </label>
-        <label className='label' htmlFor='apr-num'>
-          Annual Percentage Ratio Numerator (%)
-          <input
-            className='input form-input'
-            type='number'
-            id='apr-num'
-            value={aprNum.toNumber()}
-            onChange={handleAprNumChange}
-            size={50}
-            min={0}
-          />
-        </label>
-        <label className='label' htmlFor='duration'>
-          Expire Duration For Lender
-          <input
-            className='input form-input'
-            type='number'
-            id='duration'
-            value={duration.toNumber()}
-            onChange={handleDurationChange}
-            size={50}
-            min={0}
-          />
-        </label>
-        <label className='label' htmlFor='treasury'>
-          Treasury Wallet Address
-          <input
-            className='input form-input'
-            type='text'
-            id='treasury'
-            value={treasury}
-            onChange={handleTreasuryChange}
-            size={50}
-          />
-        </label>
-        <div className='form__buttons'>
-          <button type='submit' className='btn btn--blue-ghost'>
-            Submit
-          </button>
-        </div>
-      </form>
+        <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
+          <label className='label' htmlFor='prog-addr'>
+            Program address
+            <input
+              className='input form-input'
+              type='text'
+              id='progAddr'
+              value={programAddress}
+              onChange={handleProgramAddressChange}
+              size={50}
+              min={0}
+            />
+          </label>
+          <label className='label' htmlFor='acc-int-num'>
+            Accrued Interest Numerator
+            <input
+              className='input form-input'
+              type='number'
+              id='accIntNum'
+              value={accIntNum.toNumber()}
+              onChange={handleAccIntNumChange}
+              size={50}
+              min={0}
+            />
+          </label>
+          <label className='label' htmlFor='denomin'>
+            Denominator
+            <input
+              className='input form-input'
+              type='number'
+              id='denomin'
+              value={denomin.toNumber()}
+              onChange={handleDenominChange}
+              size={50}
+              min={0}
+            />
+          </label>
+          <label className='label' htmlFor='apr-num'>
+            Annual Percentage Ratio Numerator (%)
+            <input
+              className='input form-input'
+              type='number'
+              id='apr-num'
+              value={aprNum.toNumber()}
+              onChange={handleAprNumChange}
+              size={50}
+              min={0}
+            />
+          </label>
+          <label className='label' htmlFor='duration'>
+            Expire Duration For Lender
+            <input
+              className='input form-input'
+              type='number'
+              id='duration'
+              value={duration.toNumber()}
+              onChange={handleDurationChange}
+              size={50}
+              min={0}
+            />
+          </label>
+          <label className='label' htmlFor='treasury'>
+            Treasury Wallet Address
+            <input
+              className='input form-input'
+              type='text'
+              id='treasury'
+              value={treasury}
+              onChange={handleTreasuryChange}
+              size={50}
+            />
+          </label>
+          <div className='form__buttons'>
+            <Button
+              color='gray'
+              ghost={true}
+              type='submit'
+            >
+              Submit
+            </Button>
+          </div>
+        </form>
+      </div>
     </main>
   )
 }

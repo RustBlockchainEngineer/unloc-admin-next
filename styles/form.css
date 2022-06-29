@@ -4,8 +4,8 @@
   @apply text-xl;
 }
 
-.label {
-  @apply inline-flex justify-between;
+label {
+  @apply inline-flex justify-between text-slate-400;
 }
 
 .input {

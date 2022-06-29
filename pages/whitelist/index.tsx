@@ -3,6 +3,7 @@ import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
 import { AdminContext } from '../_app'
 import { addUsersToWhitelist } from '../../functions/api-queries'
+import { Button } from '../../components/common/Button'
 
 const WhitelistUsers: React.FC = () => {
   const isAdmin = useContext(AdminContext)
@@ -50,25 +51,31 @@ const WhitelistUsers: React.FC = () => {
 
   return (
     <main className='main px-8'>
-      <h1 className='mb-8'>Add users to whitelist</h1>
-      <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
-        <label className='label' htmlFor='mint'>
-          Users
-          <textarea
-            className='input form-input whitelisted-users'
-            id='mint'
-            value={whitelisted}
-            onChange={handleWhitelistedChange}
-            rows={3}
-            cols={50}
-          />
-        </label>
-        <div className='form__buttons'>
-          <button type='submit' className='btn btn--blue-ghost'>
-            Submit
-          </button>
-        </div>
-      </form>
+      <div className='bg-slate-700 p-4 rounded-md'>
+        <h1 className='mb-8 text-slate-400'>Add users to whitelist</h1>
+        <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
+          <label className='label' htmlFor='mint'>
+            Users
+            <textarea
+              className='input form-input whitelisted-users'
+              id='mint'
+              value={whitelisted}
+              onChange={handleWhitelistedChange}
+              rows={3}
+              cols={50}
+            />
+          </label>
+          <div className='form__buttons'>
+            <Button
+              color='gray'
+              ghost={true}
+              type='submit'
+            >
+              Submit
+            </Button>
+          </div>
+        </form>
+      </div>
     </main>
   )
 }

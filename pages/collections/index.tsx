@@ -8,6 +8,7 @@ import { CollectionRow } from '../../components/collectionRow'
 
 import { AdminContext } from '../_app'
 import { useStore } from '../../stores'
+import { Button } from '../../components/common/Button'
 
 const ManageCollections: React.FC = observer(() => {
   const { lightbox, collections } = useStore()
@@ -53,12 +54,13 @@ const ManageCollections: React.FC = observer(() => {
         <h1 className='header__title'>Manage Collections</h1>
 
         {wallet.connected ? (
-          <button
-            className='btn btn--green header__btn add-collection'
+          <Button
+            color='green'
+            className='header__btn add-collection'
             onClick={() => handleCreateCollection()}
           >
             Add Collections
-          </button>
+          </Button>
         ) : (
           ''
         )}
@@ -78,37 +80,35 @@ const ManageCollections: React.FC = observer(() => {
             <div className='tbody collections__tbody'>{mapCollectionRows()}</div>
           </div>
           <footer className='footer collections__footer'>
-            <button
-              className={`btn btn--${
-                selected.length > 0 ? 'gray-ghost' : 'disabled'
-              } footer__btn clear-selected`}
+            <Button
+              color='gray'
+              ghost={true}
+              className='footer__btn clear-selected'
               disabled={selected.length === 0}
               onClick={() => handleClearSelection()}
             >
               Clear Selection
-            </button>
-            <button
-              className={`btn btn--${
-                selected.length < Object.keys(collectionsData).length ? 'gray' : 'disabled'
-              } footer__btn select-all`}
+            </Button>
+            <Button
+              color='gray'
+              ghost={true}
+              className='footer__btn clear-selected'
               disabled={selected.length >= Object.keys(collectionsData).length}
               onClick={() => handleSelectAll()}
             >
               Select all
-            </button>
-            <button
-              className={`btn btn--${
-                selected.length > 0 ? 'black' : 'disabled'
-              } footer__btn remove-selected`}
+            </Button>
+            <Button
+              className='footer__btn remove-selected'
               disabled={selected.length === 0}
               onClick={() => handleRemoveCollections()}
             >
               Remove Selected
-            </button>
+            </Button>
           </footer>
 
           {showCreateCollection ? (
-            <Lightbox classNames='create-collection'>
+            <Lightbox className='create-collection'>
               <LightboxCreateCollection />
             </Lightbox>
           ) : (
@@ -116,7 +116,7 @@ const ManageCollections: React.FC = observer(() => {
           )}
 
           {showRemoveCollections && data.length > 0 ? (
-            <Lightbox classNames='remove-collections'>
+            <Lightbox className='remove-collections'>
               <LightboxRemoveCollections />
             </Lightbox>
           ) : (

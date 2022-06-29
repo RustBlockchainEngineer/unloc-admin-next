@@ -21,7 +21,7 @@ export const NetworkSelect = memo(function NetworkSelect({
     <select
       defaultValue={network}
       onChange={handleChange}
-      className='form-select block min-w-[160px] rounded-md bg-unlocPink text-center font-semibold text-white shadow-md hover:cursor-pointer md:min-w-fit'
+      className='form-select block min-w-[160px] rounded-md bg-pink-600 text-center font-semibold text-white shadow-md hover:cursor-pointer md:min-w-fit'
     >
       {options.map((option) => (
         <option key={option}>{option}</option>

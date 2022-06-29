@@ -1,5 +1,6 @@
 import { createRef } from 'react'
 import { useStore } from '../../stores'
+import { Button } from '../common/Button'
 
 interface LightboxAddNftProps {
   collection: string
@@ -40,12 +41,20 @@ export const LightboxAddNft: React.FC<LightboxAddNftProps> = ({
       <span className='lightbox__title'>Add an NFT to whitelist</span>
       <textarea className='lightbox__input' ref={nftsRef} required={true} rows={5} cols={50} />
       <div className='lightbox__buttons'>
-        <button className='btn btn--green create' onClick={() => handleCreate()}>
+        <Button
+          color='green'
+          className='create'
+          onClick={() => handleCreate()}
+        >
           OK
-        </button>
-        <button className='btn btn--red cancel-create' onClick={() => handleCancelCreate()}>
+        </Button>
+        <Button
+          color='red'
+          className='cancel-create'
+          onClick={() => handleCancelCreate()}
+        >
           Cancel
-        </button>
+        </Button>
       </div>
     </>
   )

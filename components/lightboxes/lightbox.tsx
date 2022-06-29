@@ -1,14 +1,15 @@
 import { observer } from 'mobx-react-lite'
 import React, { useContext } from 'react'
 import { useStore } from '../../stores'
+import { Button } from '../common/Button'
 
 interface LightboxProps {
-  classNames?: string
+  className?: string
   children: JSX.Element
 }
 
 export const Lightbox: React.FC<LightboxProps> = observer(
-  ({ children, classNames }: LightboxProps) => {
+  ({ children, className }: LightboxProps) => {
     const { lightbox } = useStore()
 
     const closeWindow = (e: any, check: boolean) => {
@@ -24,7 +25,7 @@ export const Lightbox: React.FC<LightboxProps> = observer(
         onClick={(e) => {
           closeWindow(e, true)
         }}
-        className={`lightbox ${classNames}`}
+        className={`lightbox ${className}`}
       >
         <div
           className='lightbox__container'
@@ -35,11 +36,11 @@ export const Lightbox: React.FC<LightboxProps> = observer(
             }
           }}
         >
-          <button
-            onClick={(e) => {
-              closeWindow(e, false)
-            }}
-            className='btn btn--ico btn--black-ghost btn--close lightbox__close'
+          <Button
+            onClick={(e) => closeWindow(e, false)}
+            color='black'
+            ghost={true}
+            className='w-7 h-7 bg-unlocClose lightbox__close'
           />
           {children}
         </div>

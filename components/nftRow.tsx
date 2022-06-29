@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { useStore } from '../stores'
+import { Button } from './common/Button'
 
 interface NftRowProps {
   nftMint: string
@@ -45,12 +46,14 @@ export const NftRow: React.FC<NftRowProps> = observer(
         <div className='td nfts__td proposed-count'>{proposed}</div>
         <div className='td nfts__td accepted-count'>{accepted}</div>
         <div className='td nfts__td actions'>
-          <button
-            className='btn btn--red-ghost collections__btn remove-collection'
+          <Button
+            color='red'
+            ghost={true}
+            className='collections__btn remove-collection'
             onClick={() => handleRemoveNft()}
           >
             Remove NFT from whitelist
-          </button>
+          </Button>
         </div>
       </div>
     )

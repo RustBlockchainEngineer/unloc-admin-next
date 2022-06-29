@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { useStore } from '../../stores'
+import { Button } from '../common/Button'
 
 export const LightboxRemoveCollections: React.FC = observer(() => {
   const { lightbox, collections } = useStore()
@@ -42,12 +43,20 @@ export const LightboxRemoveCollections: React.FC = observer(() => {
         </span>
       </div>
       <div className='lightbox__buttons'>
-        <button className='btn btn--red remove' onClick={() => handleRemove()}>
+        <Button
+          color='green'
+          className='remove'
+          onClick={() => handleRemove()}
+        >
           OK
-        </button>
-        <button className='btn btn--gray cancel-remove' onClick={() => handleCancelRemove()}>
+        </Button>
+        <Button
+          color='gray'
+          className='cancel-remove'
+          onClick={() => handleCancelRemove()}
+        >
           Cancel
-        </button>
+        </Button>
       </div>
     </>
   )

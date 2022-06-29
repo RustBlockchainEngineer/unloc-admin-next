@@ -1,4 +1,5 @@
 import { useStore } from '../../stores'
+import { Button } from '../common/Button'
 
 interface LightboxRemoveNftsProps {
   collection: string
@@ -44,12 +45,20 @@ export const LightboxRemoveNfts: React.FC<LightboxRemoveNftsProps> = ({
         </span>
       </div>
       <div className='lightbox__buttons'>
-        <button className='btn btn--red remove' onClick={() => handleRemove()}>
+        <Button
+          color='red'
+          className='remove'
+          onClick={() => handleRemove()}
+        >
           OK
-        </button>
-        <button className='btn btn--gray cancel-remove' onClick={() => handleCancelRemove()}>
+        </Button>
+        <Button
+          color='gray'
+          className='cancel-remove'
+          onClick={() => handleCancelRemove()}
+        >
           Cancel
-        </button>
+        </Button>
       </div>
     </>
   )

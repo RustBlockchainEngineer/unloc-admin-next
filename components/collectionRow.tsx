@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 import React, { createRef, useContext, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useStore } from '../stores'
+import { Button } from './common/Button'
 
 interface CollectionRowProps {
   collection: string
@@ -76,30 +77,38 @@ export const CollectionRow: React.FC<CollectionRowProps> = observer(
             }}
           />
           <div className='collection__actions'>
-            <button
-              className='btn btn--ico btn--yellow-ghost btn--save'
-              onClick={() => handleRenameCollection()}
+            <Button
+              color='yellow'
+              ghost={true}
+              className='bg-save'
+              onClick={handleRenameCollection}
             />
-            <button
-              className='btn btn--ico btn--red-ghost btn--cancel'
-              onClick={() => handleCancelRenameCollection()}
+            <Button
+              color='red'
+              ghost={true}
+              className='bg-unlocCancel'
+              onClick={handleCancelRenameCollection}
             />
           </div>
         </div>
         <span className='td collections__td nft-count'>{count}</span>
         <span className='td collections__td actions'>
-          <button
-            className='btn btn--green-ghost collections__btn manage-collection'
+          <Button
+            color='green'
+            ghost={true}
+            className='collections__btn manage-collection'
             onClick={() => router.push(`/collections/${encodeURIComponent(collection)}`)}
           >
             Manage Collection
-          </button>
-          <button
-            className='btn btn--red-ghost collections__btn remove-collection'
-            onClick={() => handleRemoveCollection()}
+          </Button>
+          <Button
+            color='red'
+            ghost={true}
+            className='collections__btn remove-collection'
+            onClick={handleRemoveCollection}
           >
             Remove Collection
-          </button>
+          </Button>
         </span>
       </div>
     )

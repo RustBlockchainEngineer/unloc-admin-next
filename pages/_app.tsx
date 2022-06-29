@@ -19,7 +19,7 @@ import { Topbar } from '../components/topbar'
 
 import '@solana/wallet-adapter-react-ui/styles.css'
 import { Sidebar } from '../components/sidebar'
-import '../styles/globals.css'
+import '../styles/main.css'
 import rootStore, { StoreContext } from '../stores'
 import { observer } from 'mobx-react-lite'
 

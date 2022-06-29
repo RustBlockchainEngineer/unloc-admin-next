@@ -1,4 +1,5 @@
 import React, { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { Button } from './common/Button'
 
 interface SimpleFormProps {
   name: string
@@ -47,7 +48,7 @@ export default function SimpleForm({
   )
 
   const renderedSubtitle = useMemo(
-    () => subtitle && <small className='m-b-2 block text-left text-sm'>{subtitle}</small>,
+    () => subtitle && <small className='ml-2 mb-2 block text-left text-sm'>{subtitle}</small>,
     [subtitle]
   )
 
@@ -58,22 +59,24 @@ export default function SimpleForm({
 
     return (
       <div className='z-1 absolute right-2 top-1/2 -translate-y-2/3 '>
-        <button
-          className='inline-block rounded-md bg-blue-300 px-4 py-1 text-center text-sm font-semibold text-black transition-colors hover:bg-blue-200'
+        <Button
+          color='gray'
+          ghost={true}
+          className='inline-block rounded-md px-4 py-1 text-center text-sm font-semibold text-black transition-colors hover:bg-blue-200'
           type='submit'
           onSubmit={handleSubmit}
         >
           {submitButtonLabel || 'Submit'}
-        </button>
+        </Button>
       </div>
     )
   }, [showSubmit, submitButtonLabel, handleSubmit])
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className='flex flex-col'>
       <label className='relative' htmlFor={name}>
         <input
-          className='relative mt-2 w-full border border-gray-500 bg-gray-50 p-2 outline-none'
+          className='relative w-full border border-gray-500 bg-gray-50 p-2 outline-none'
           type='text'
           name={name}
           value={input}

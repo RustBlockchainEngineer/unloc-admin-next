@@ -1,7 +1,7 @@
 interface SeparatorProps {
   label: string
   position?: 'left' | 'right' | 'center'
-  classNames?: string
+  className?: string
 }
 
 export function Separator({ label }: SeparatorProps) {

@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite'
 import { createRef } from 'react'
 import { useStore } from '../../stores'
+import { Button } from '../common/Button'
 
 export const LightboxCreateCollection: React.FC = observer(() => {
   const { lightbox, collections } = useStore()
@@ -40,12 +41,20 @@ export const LightboxCreateCollection: React.FC = observer(() => {
         cols={50}
       />
       <div className='lightbox__buttons'>
-        <button className='btn btn--green create' onClick={() => handleCreate()}>
+        <Button
+          color='green'
+          className='create'
+          onClick={() => handleCreate()}
+        >
           Create
-        </button>
-        <button className='btn btn--red cancel-create' onClick={() => handleCancelCreate()}>
+        </Button>
+        <Button
+          color='red'
+          className='cancel-create'
+          onClick={() => handleCancelCreate()}
+        >
           Cancel
-        </button>
+        </Button>
       </div>
     </>
   )
