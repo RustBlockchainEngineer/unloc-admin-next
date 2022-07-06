@@ -5,7 +5,11 @@ import { observer } from 'mobx-react-lite'
 import { SyntheticEvent, useState } from 'react'
 import { Form, Field } from 'react-final-form'
 import { useTokenAccount } from '../../hooks/useAccount'
-import { createSetGlobalStateInstruction } from '../../integration/sdk-generated/loan'
+import {
+  createSetGlobalStateInstruction,
+  SetGlobalStateInstructionAccounts,
+  SetGlobalStateInstructionArgs
+} from '@unloc-dev/unloc-loan-solita'
 import { pda } from '../../integration/unloc'
 import { useStore } from '../../stores'
 import { InputAdapter } from './InputAdapter'
@@ -125,8 +129,9 @@ export const GlobalStateForm = observer(() => {
     const rewardVault = await pda([REWARD_VAULT_TAG], programs.loanPubkey)
     if (!superOwner) return
 
-    const accounts = {
+    const accounts: SetGlobalStateInstructionAccounts = {
       superOwner,
+      payer: superOwner,
       globalState,
       rewardMint: new PublicKey(values.rewardMint),
       rewardVault: rewardVault,
@@ -134,7 +139,7 @@ export const GlobalStateForm = observer(() => {
       treasuryWallet: new PublicKey(values.treasuryWallet),
       clock: SYSVAR_CLOCK_PUBKEY
     }
-    const data = {
+    const data: SetGlobalStateInstructionArgs = {
       accruedInterestNumerator: Number(values.accruedInterestNumerator),
       denominator: Number(values.denominator),
       minRepaidNumerator: Number(values.minRepaidNumerator),
