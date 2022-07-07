@@ -2,7 +2,7 @@ import { Connection, PublicKey } from '@solana/web3.js'
 import { makeAutoObservable, runInAction } from 'mobx'
 import { fromPromise, IPromiseBasedObservable } from 'mobx-utils'
 import { RootStore } from '.'
-import { GlobalState } from '../integration/sdk-generated/loan'
+import { GlobalState } from '@unloc-dev/unloc-loan-solita'
 
 export const initialValues = {
   loan: '6oVXrGCdtnTUR6xCvn2Z3f2CYaiboAGar1DKxzeX8QYh',
