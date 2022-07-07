@@ -20,6 +20,7 @@ export const CollectionRow: React.FC<CollectionRowProps> = observer(
     const handleSelection = () => {
       if (selected.includes(collection)) {
         collections.setSelected(selected.filter((c) => c !== collection))
+        lightbox.setData(selected)
       } else {
         collections.setSelected([...selected, collection])
       }
@@ -58,17 +59,17 @@ export const CollectionRow: React.FC<CollectionRowProps> = observer(
     }
 
     return (
-      <div className='tr collections__tr'>
-        <div className='td collections__td select'>
+      <div className='inline-flex even:bg-white odd:bg-gray-100'>
+        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 select'>
           <input
             type='checkbox'
             onChange={() => handleSelection()}
             checked={selected.includes(collection)}
           />
         </div>
-        <div className='td collections__td collection'>
+        <div className='w-5/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 collection'>
           <input
-            className='input input--collection'
+            className='w-full border-2 border-solid border-gray-100 text-sm p-1 input--collection'
             type='text'
             defaultValue={collection}
             ref={inputRef}
@@ -91,8 +92,8 @@ export const CollectionRow: React.FC<CollectionRowProps> = observer(
             />
           </div>
         </div>
-        <span className='td collections__td nft-count'>{count}</span>
-        <span className='td collections__td actions'>
+        <span className='w-1/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 nft-count'>{count}</span>
+        <span className='w-5/12 flex-wrap text-center inline-flex items-center justify-evenly border-2 border-solid border-gray-200 p-2 actions'>
           <Button
             color='green'
             ghost={true}

@@ -122,7 +122,7 @@ const SetGlobalState: React.FC = () => {
   }
 
   return (
-    <main className='main main--global-state px-8'>
+    <main className='main grid-content px-8'>
       <div className='bg-slate-700 p-4 rounded-md'>
         <h1 className='h1 h1--global-state mb-2 text-slate-400'>Set the UNLOC Program Global State</h1>
 

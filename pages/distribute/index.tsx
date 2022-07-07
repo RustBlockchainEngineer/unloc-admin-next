@@ -84,23 +84,24 @@ const DistributeNFTs: React.FC = () => {
         <h1 className='mb-8 text-slate-400'>Distribute NFTs to a list of recipients</h1>
         <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
           <label className='label label--recipients' htmlFor='recipients'>
-            Addresses of recipients (every address in a new line)
             <textarea
               className='input recipients form-input'
               id='recipients'
               value={recipients}
               onChange={handleRecipientsChange}
+              placeholder='Addresses of recipients (every address in a new line)'
               rows={3}
               cols={50}
             ></textarea>
           </label>
-          <label className='label label--amount' htmlFor='amount'>
+          <label className='flex flex-col' htmlFor='amount'>
             Amount
             <input
               className='input amount form-input'
               type='number'
               min={1}
               id='amount'
+              name='amount'
               value={defaultAmount}
               onChange={handledefaultAmountChange}
             ></input>

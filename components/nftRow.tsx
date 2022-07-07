@@ -16,6 +16,7 @@ export const NftRow: React.FC<NftRowProps> = observer(
     const handleSelection = () => {
       if (selected.includes(nftMint)) {
         nftStore.setSelected(selected.filter((c) => c !== nftMint))
+        lightbox.setData(selected)
       } else {
         nftStore.setSelected([...selected, nftMint])
       }
@@ -32,20 +33,20 @@ export const NftRow: React.FC<NftRowProps> = observer(
     }
 
     return (
-      <div className='tr nfts__tr'>
-        <div className='td nfts__td select'>
+      <div className='inline-flex even:bg-white odd:bg-gray-100'>
+        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 select'>
           <input
             type='checkbox'
             onChange={() => handleSelection()}
             checked={selected.includes(nftMint)}
           />
         </div>
-        <div className='td nfts__td nft-mint'>
+        <div className='w-5/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 nft-mint'>
           <span>{nftMint}</span>
         </div>
-        <div className='td nfts__td proposed-count'>{proposed}</div>
-        <div className='td nfts__td accepted-count'>{accepted}</div>
-        <div className='td nfts__td actions'>
+        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 proposed-count'>{proposed}</div>
+        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 accepted-count'>{accepted}</div>
+        <div className='w-1/3 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 actions'>
           <Button
             color='red'
             ghost={true}

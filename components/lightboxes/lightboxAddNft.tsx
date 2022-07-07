@@ -18,7 +18,7 @@ export const LightboxAddNft: React.FC<LightboxAddNftProps> = ({
 
       await nftStore.addNfts(
         collection,
-        nftsRef.current.value.split('\n').filter((mint) => mint.length)
+        nftsRef.current.value.split('\n').filter((mint) => mint.trim().length)
       )
     } catch (error) {
       // eslint-disable-next-line no-console

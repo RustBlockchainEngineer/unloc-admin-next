@@ -72,7 +72,6 @@ export const createCollections = async (collections: string[]): Promise<string |
 export const getNFTsFromCollection = async (collection: string): Promise<string[] | Error> => {
   try {
     const response = await axios.get(`/api/collections/${encodeURIComponent(collection)}`)
-    console.log(response.data)
     return response.data
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -83,7 +82,7 @@ export const getNFTsFromCollection = async (collection: string): Promise<string[
 
 export const removeNFTsFromCollection = async (collection: string, nfts: string[]): Promise<string | Error> => {
   try {
-    const response = await axios.delete(`/api/collection/${encodeURIComponent(collection)}`, { data: nfts })
+    const response = await axios.delete(`/api/collections/${encodeURIComponent(collection)}`, { data: { data: nfts }})
     return response.data
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -94,7 +93,7 @@ export const removeNFTsFromCollection = async (collection: string, nfts: string[
 
 export const addNFTsToCollection = async (collection: string, nfts: string[]): Promise<string | Error> => {
   try {
-    const response = await axios.post(`/api/collection/${encodeURIComponent(collection)}`, { data: nfts })
+    const response = await axios.post(`/api/collections/${encodeURIComponent(collection)}`, { data: nfts })
     return response.data
   } catch (error) {
     // eslint-disable-next-line no-console

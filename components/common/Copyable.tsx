@@ -29,12 +29,12 @@ export const Copyable = ({ content, children, className }: CopyableProps) => {
   )
 
   return (
-    <Button
-      className={`relative ${className || ''}`}
+    <a
+      className={`cursor-pointer relative ${className || ''}`}
       onClick={handleClick}
     >
       <div className={cls}>Copied!</div>
       {children}
-    </Button>
+    </a>
   )
 }

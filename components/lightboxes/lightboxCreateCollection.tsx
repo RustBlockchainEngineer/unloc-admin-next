@@ -12,7 +12,7 @@ export const LightboxCreateCollection: React.FC = observer(() => {
       if (!(collectionRef.current && collectionRef.current.value)) return
 
       await collections.createCollections(
-        collectionRef.current.value.split('\n').filter((mint) => mint.length)
+        collectionRef.current.value.split('\n').filter((mint) => mint.trim().length)
       )
     } catch (error) {
       // eslint-disable-next-line no-console

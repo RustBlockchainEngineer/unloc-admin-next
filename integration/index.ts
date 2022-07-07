@@ -128,30 +128,35 @@ export const airdrop = async (
   mint: PublicKey,
   amount: BN
 ) => {
-  const [, program] = initAnchorProgram(wallet, connection)
+  const toastId = 'tx-confirmations'
+  let unconfirmed = false
 
-  const managerPDA = await getManagerPDA(mint, program.programId)
+  try {
+    const instruction = await airdropToInstruction(wallet, connection, mint, wallet.publicKey, amount, false)
+    const latestBlockhash = await connection.getLatestBlockhash()
+    
+    const tx = new Transaction({
+      feePayer: wallet.publicKey,
+      ...latestBlockhash
+    }).add(instruction)
 
-  const ata = await getAssociatedTokenAddress(mint, wallet.publicKey, false)
-
-  const signature = await program.methods
-    .airdrop(new BN(amount))
-    .accounts({
-      user: wallet.publicKey,
-      manager: managerPDA,
-      mint: mint,
-      ata: ata,
-      systemProgram: SystemProgram.programId,
-      tokenProgram: TOKEN_PROGRAM_ID,
-      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-      rent: SYSVAR_RENT_PUBKEY
-    })
-    .rpc()
-
-  const tx = await connection.confirmTransaction(signature, 'single')
-
-  // eslint-disable-next-line no-console
-  console.log(tx, signature)
+    const signed = await wallet.signTransaction(tx)
+    const signature = await connection.sendRawTransaction(signed.serialize())
+    await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(e)
+    unconfirmed = true
+  } finally {
+    if (unconfirmed) {
+      toast.error('Failed to confirm the transaction, check the console.', {
+        id: toastId
+      })
+      console.error('Unconfirmed:', unconfirmed)
+    } else {
+      toast.success('The token has been airdropped successfully!', { id: toastId })
+    }
+  }
 }
 
 export const airdropToMultiple = async (
@@ -164,21 +169,6 @@ export const airdropToMultiple = async (
   const [, program] = initAnchorProgram(wallet, connection)
 
   const manager = await getManagerPDA(mint, program.programId)
-
-  const airdropToInstruction = async (recipient: PublicKey) => {
-    const ata = await getAssociatedTokenAddress(mint, recipient, false)
-
-    return await program.methods
-      .airdropTo(new BN(amount))
-      .accounts({
-        user: wallet.publicKey,
-        manager,
-        mint,
-        ata,
-        recipient
-      })
-      .instruction()
-  }
 
   // We will sign and confirm the transactions in chunks of 6
   const chunkSize = 6
@@ -195,7 +185,7 @@ export const airdropToMultiple = async (
     })
 
     const latestBlockhash = await connection.getLatestBlockhash()
-    const ixs = await Promise.all(chunk.map(airdropToInstruction))
+    const ixs = await Promise.all(chunk.map((recipient) => airdropToInstruction(wallet, connection, mint, recipient, amount, false)))
     const tx = new Transaction({
       feePayer: wallet.publicKey,
       ...latestBlockhash
@@ -208,7 +198,7 @@ export const airdropToMultiple = async (
       i++
     } catch (e) {
       unconfirmed.push(...chunk.map((p) => p.toString()))
-      console.log(e)
+      console.error(e)
     }
   }
 
@@ -218,7 +208,7 @@ export const airdropToMultiple = async (
     toast.error('Failed to confirm some transactions, check the console.', {
       id: toastId
     })
-    console.log('Unconfirmed:', unconfirmed)
+    console.error('Unconfirmed:', unconfirmed)
   }
 }
 
@@ -298,4 +288,23 @@ export const distributeNFTsToWallets = async (
     // eslint-disable-next-line no-console
     console.error(error)
   }
+}
+
+export const airdropToInstruction = async (wallet: AnchorWallet, connection: Connection, mint: PublicKey, recipient: PublicKey, amount: BN, allowOwnerOffCurve: boolean = false) => {
+  const [, program] = initAnchorProgram(wallet, connection)
+
+  const manager = await getManagerPDA(mint, program.programId)
+
+  const ata = await getAssociatedTokenAddress(mint, recipient, allowOwnerOffCurve)
+
+  return await program.methods
+    .airdropTo(new BN(amount))
+    .accounts({
+      user: wallet.publicKey,
+      manager,
+      mint,
+      ata,
+      recipient
+    })
+    .instruction()
 }
