@@ -17,9 +17,11 @@ export type ProgramName = typeof programs[number]
 export type ProgramType = {
   [key in ProgramName]: string
 }
+
 export type AddressGetter = {
   [key in `${ProgramName}Pubkey`]: PublicKey
 }
+
 export type AddressSetter = {
   [key in `set${Capitalize<ProgramName>}`]: (address: string) => void
 }

@@ -8,19 +8,22 @@ import { CollectionRow } from '../../components/collectionRow'
 
 import { AdminContext } from '../_app'
 import { useStore } from '../../stores'
+import { Button } from '../../components/common/Button'
 
 const ManageCollections: React.FC = observer(() => {
   const { lightbox, collections } = useStore()
-  const wallet = useContext(WalletContext)
   const { isAdmin } = useContext(AdminContext)
-
+  
   const { collectionsData, selected } = collections
   const { showCreateCollection, showRemoveCollections, data } = lightbox
+  
+  const wallet = useContext(WalletContext)
 
-  const mapCollectionRows = () =>
+  const mapCollectionRows = () => (
     Object.entries(collectionsData).map(([collection, count]) => (
       <CollectionRow key={collection} collection={collection} count={count} />
-    ))
+    )).sort((a, b) => a.key!.toString().localeCompare(b.key!.toString()))
+  )
 
   const handleRemoveCollections = async () => {
     lightbox.setData(selected)
@@ -45,20 +48,21 @@ const ManageCollections: React.FC = observer(() => {
     }
 
     fetchData()
-  }, [])
+  }, [collections])
 
   return isAdmin ? (
-    <main className='main main--manage-collections'>
-      <header className='header collections__header'>
-        <h1 className='header__title'>Manage Collections</h1>
+    <main className='main grid-content w-full px-8'>
+      <header className='w-full text-white inline-flex justify-between mb-4'>
+        <h1>Manage Collections</h1>
 
         {wallet.connected ? (
-          <button
-            className='btn btn--green header__btn add-collection'
+          <Button
+            color='green'
+            className='add-collection'
             onClick={() => handleCreateCollection()}
           >
             Add Collections
-          </button>
+          </Button>
         ) : (
           ''
         )}
@@ -66,49 +70,49 @@ const ManageCollections: React.FC = observer(() => {
 
       {wallet.connected ? (
         <>
-          <div className='table--collections collections table'>
-            <div className='thead collections__thead'>
-              <div className='tr collections__tr thead__tr'>
-                <div className='th collections__th select'>Select</div>
-                <div className='th collections__th collection'>Collection</div>
-                <div className='th collections__th nft-count'>NFT Count</div>
-                <div className='th collections__th actions'>Actions</div>
+          <div className='table--collections collections'>
+            <div className='flex flex-col'>
+              <div className='py-4 bg-gray-800 font-bold text-white inline-flex'>
+                <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center select'>Select</div>
+                <div className='w-5/12 flex-wrap text-center inline-flex justify-center items-center collection'>Collection</div>
+                <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center nft-count'>NFT Count</div>
+                <div className='w-5/12 flex-wrap text-center inline-flex justify-center items-center actions'>Actions</div>
               </div>
             </div>
-            <div className='tbody collections__tbody'>{mapCollectionRows()}</div>
+            <div className='flex flex-col'>{mapCollectionRows()}</div>
           </div>
-          <footer className='footer collections__footer'>
-            <button
-              className={`btn btn--${
-                selected.length > 0 ? 'gray-ghost' : 'disabled'
-              } footer__btn clear-selected`}
+          <footer className='inline-flex justify-end items-center w-full mt-4 space-x-4'>
+            <Button
+              color='gray'
+              ghost={true}
+              className='clear-selected'
               disabled={selected.length === 0}
               onClick={() => handleClearSelection()}
             >
               Clear Selection
-            </button>
-            <button
-              className={`btn btn--${
-                selected.length < Object.keys(collectionsData).length ? 'gray' : 'disabled'
-              } footer__btn select-all`}
+            </Button>
+            <Button
+              color='white'
+              ghost={true}
+              className='clear-selected'
               disabled={selected.length >= Object.keys(collectionsData).length}
               onClick={() => handleSelectAll()}
             >
               Select all
-            </button>
-            <button
-              className={`btn btn--${
-                selected.length > 0 ? 'black' : 'disabled'
-              } footer__btn remove-selected`}
+            </Button>
+            <Button
+              color='red'
+              ghost={false}
+              className='remove-selected'
               disabled={selected.length === 0}
               onClick={() => handleRemoveCollections()}
             >
               Remove Selected
-            </button>
+            </Button>
           </footer>
 
           {showCreateCollection ? (
-            <Lightbox classNames='create-collection'>
+            <Lightbox className='create-collection'>
               <LightboxCreateCollection />
             </Lightbox>
           ) : (
@@ -116,7 +120,7 @@ const ManageCollections: React.FC = observer(() => {
           )}
 
           {showRemoveCollections && data.length > 0 ? (
-            <Lightbox classNames='remove-collections'>
+            <Lightbox className='remove-collections'>
               <LightboxRemoveCollections />
             </Lightbox>
           ) : (
@@ -124,7 +128,7 @@ const ManageCollections: React.FC = observer(() => {
           )}
         </>
       ) : (
-        <div className='not-connected'>Please connect your wallet!</div>
+        <div className='text-slate-500 not-connected'>Please connect your wallet!</div>
       )}
     </main>
   ) : (

@@ -16,15 +16,10 @@ module.exports = {
       fontFamily: {
         sans: ['Red Hat Display', 'Roboto', ...defaultTheme.fontFamily.sans]
       },
-      colors: {
-        unlocGray: {
-          100: '#94a3b8',
-          200: '#64748b',
-          300: '#334155',
-          500: '#1e293b',
-          900: '#0f172a'
-        },
-        unlocPink: '#e0097e'
+      backgroundImage: {
+        'unlocSave': 'url(/images/icon-save.png)',
+        'unlocCancel': 'url(/images/icon-cancel.png)',
+        'unlocClose': 'url(/images/icon-close.png)',
       }
     }
   },

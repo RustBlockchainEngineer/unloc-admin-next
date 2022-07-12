@@ -1,5 +1,6 @@
 import { ChangeEvent, useState } from 'react'
 import { initialValues, ProgramName } from '../../stores/Programs.store'
+import { Button } from '../common/Button'
 
 interface ProgramModalProps {
   name: ProgramName
@@ -25,15 +26,24 @@ export const ProgramModal = ({ name, addressSetter, closeModal }: ProgramModalPr
       <form className='flex flex-col space-y-2' method='dialog'>
         <input className='px-2 py-1' placeholder='Public key' value={input} onChange={handleInput} type='text' />
         <div className='flex justify-end space-x-2'>
-          <button onClick={handleSet(initialValues[name])} className='btn mr-auto'>
+          <Button
+            onClick={handleSet(initialValues[name])}
+            className='mr-auto'
+          >
             Reset to default
-          </button>
-          <button onClick={closeModal} className='btn'>
+          </Button>
+          <Button
+            onClick={closeModal}
+          >
             Close
-          </button>
-          <button type='submit' className='btn btn--black' onClick={handleSet(input)}>
+          </Button>
+          <Button
+            type='submit'
+            color='black'
+            onClick={handleSet(input)}
+          >
             Submit
-          </button>
+          </Button>
         </div>
       </form>
     </div>

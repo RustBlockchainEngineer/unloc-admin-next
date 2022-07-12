@@ -51,7 +51,7 @@ export const Topbar = observer(({ network, setNetwork, className }: NavbarProps)
   }, [connected, publicKey, setIsAdmin])
 
   return (
-    <div className={`flex w-full bg-unlocGray-300 pr-12 ${className || ''}`}>
+    <div className={`flex w-full bg-slate-700 pr-12 ${className || ''}`}>
       <div className='flex w-full py-4'>
         {programs.map((program) => {
           return (

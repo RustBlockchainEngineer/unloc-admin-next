@@ -8,6 +8,7 @@ import { LightboxRemoveNfts } from '../../components/lightboxes/lightboxRemoveNf
 import { AdminContext } from '../_app'
 import { useRouter } from 'next/router'
 import { useStore } from '../../stores'
+import { Button } from '../../components/common/Button'
 
 const ManageNFTs: React.FC = observer(() => {
   const router = useRouter()
@@ -22,7 +23,7 @@ const ManageNFTs: React.FC = observer(() => {
   const mapNftRows = () =>
     Object.entries(nftsData).map(([nftMint, { proposed, accepted }]) => (
       <NftRow key={nftMint} nftMint={nftMint} proposed={proposed} accepted={accepted} />
-    ))
+    )).sort((a, b) => a.key!.toString().localeCompare(b.key!.toString()))
 
   const handleAddNft = () => {
     lightbox.setShowAddNft(true)
@@ -50,26 +51,32 @@ const ManageNFTs: React.FC = observer(() => {
     }
 
     if (wallet.connected) fetchData()
-  }, [wallet])
+  }, [id, nftStore, wallet])
 
   if (!isAdmin) {
     router.push('/')
   }
 
   return (
-    <main className='main main--manage-nfts'>
-      <header className='header nfts__header'>
+    <main className='main grid-content w-full px-8'>
+      <header className='header nfts__header text-white'>
         {wallet.connected ? (
           <div className='header__buttons'>
-            <button
-              className='btn btn--gray-ghost back-to-collections'
+            <Button
+              color='gray'
+              ghost={true}
+              className='back-to-collections'
               onClick={() => router.push('/collections')}
             >
               Go back to collection list
-            </button>
-            <button className='btn btn--green add-nft' onClick={() => handleAddNft()}>
+            </Button>
+            <Button
+              color='green'
+              className='add-nft'
+              onClick={() => handleAddNft()}
+            >
               Add NFTs to the whitelisted collection
-            </button>
+            </Button>
           </div>
         ) : (
           ''
@@ -81,47 +88,46 @@ const ManageNFTs: React.FC = observer(() => {
 
       {wallet.connected ? (
         <>
-          <div className='nfts__table table'>
-            <div className='thead nfts__thead'>
-              <div className='tr nfts__tr'>
-                <div className='th nfts__th select'>Select</div>
-                <div className='th nfts__th nft-mint'>NFT Mint</div>
-                <div className='th nfts__th proposed-count'>Proposed count</div>
-                <div className='th nfts__th accepted-count'>Accepted count</div>
-                <div className='th nfts__th actions'>Actions</div>
+          <div className='nfts__table'>
+            <div className='flex flex-col'>
+              <div className='py-4 bg-gray-800 font-bold text-white inline-flex'>
+                <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center select'>Select</div>
+                <div className='w-5/12 flex-wrap text-center inline-flex justify-center items-center nft-mint'>Mint</div>
+                <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center proposed-count'>Proposed</div>
+                <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center accepted-count'>Accepted</div>
+                <div className='w-1/3 flex-wrap text-center inline-flex justify-center items-center actions'>Actions</div>
               </div>
             </div>
-            <div className='tbody nfts__tbody'>{mapNftRows()}</div>
+            <div className='flex flex-col'>{mapNftRows()}</div>
           </div>
 
-          <footer className='footer collections__footer'>
-            <button
-              className={`btn btn--${
-                selected.length > 0 ? 'gray-ghost' : 'disabled'
-              } footer__btn clear-selected`}
+          <footer className='inline-flex justify-end items-center w-full mt-4 space-x-4'>
+            <Button
+              color='gray'
+              ghost={true}
+              className='clear-selected'
               disabled={selected.length === 0}
               onClick={() => handleClearSelection()}
             >
               Clear Selection
-            </button>
-            <button
-              className={`btn btn--${
-                selected.length < nfts.length ? 'gray' : 'disabled'
-              } footer__btn select-all`}
+            </Button>
+            <Button
+              color='white'
+              ghost={true}
+              className='select-all'
               disabled={selected.length >= nfts.length}
               onClick={() => handleSelectAll()}
             >
               Select all
-            </button>
-            <button
-              className={`btn btn--${
-                selected.length > 0 ? 'black' : 'disabled'
-              } footer__btn remove-selected`}
+            </Button>
+            <Button
+              color='red'
+              className='remove-selected'
               disabled={selected.length === 0}
               onClick={() => handleRemoveNfts()}
             >
               Remove Selected
-            </button>
+            </Button>
           </footer>
 
           {id && showAddNft ? (
@@ -141,7 +147,7 @@ const ManageNFTs: React.FC = observer(() => {
           )}
         </>
       ) : (
-        <div className='not-connected'>Please connect your wallet!</div>
+        <div className='text-slate-500 not-connected'>Please connect your wallet!</div>
       )}
     </main>
   )

@@ -12,6 +12,7 @@ import {
 } from '@unloc-dev/unloc-loan-solita'
 import { pda } from '../../integration/unloc'
 import { useStore } from '../../stores'
+import { Button } from '../common/Button'
 import { InputAdapter } from './InputAdapter'
 
 interface AccountInputs {
@@ -183,38 +184,38 @@ export const GlobalStateForm = observer(() => {
         }
 
         return (
-          <form onSubmit={handleSubmit} className='bg-unlocGray-500 p-4'>
+          <form onSubmit={handleSubmit} className='bg-slate-800 p-4'>
             <div className='mb-4 flex space-x-2 uppercase'>
-              <button
+              <Button
                 onClick={handlePageChange(0)}
                 className={clsx(
                   'rounded-md px-2 py-1',
-                  'hover:cursor-pointer hover:bg-unlocGray-200',
-                  page === 0 && 'bg-unlocGray-100'
+                  'hover:cursor-pointer hover:bg-slate-500',
+                  page === 0 && 'bg-slate-400'
                 )}
               >
                 Accounts
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handlePageChange(1)}
                 className={clsx(
                   'rounded-md px-2 py-1',
-                  'hover:cursor-pointer hover:bg-unlocGray-200',
-                  page === 1 && 'bg-unlocGray-100'
+                  'hover:cursor-pointer hover:bg-slate-500',
+                  page === 1 && 'bg-slate-400'
                 )}
               >
                 Data arguments
-              </button>
+              </Button>
             </div>
             {page === 0 && <Accounts />}
             {page === 1 && <Arguments />}
             <div className='mt-4 flex justify-end space-x-2'>
-              <button className='btn' onClick={handleFillCurrent}>
+              <Button className='btn' onClick={handleFillCurrent}>
                 Fill Current Values
-              </button>
-              <button className='btn' type='submit'>
+              </Button>
+              <Button type='submit'>
                 Submit
-              </button>
+              </Button>
             </div>
           </form>
         )

@@ -22,20 +22,20 @@ const Migration: NextPage = observer(() => {
   }, [connection, loanGlobalState, updateGlobalStateAccount])
 
   return (
-    <main className='grid-content bg-unlocGray-900 text-white'>
+    <main className='grid-content bg-slate-900 text-white'>
       <div className='p-12'>
-        <h1 className='mb-6 text-3xl'>Manage settings for UNLOC contracts v2</h1>
+        <h1 className='mb-6 text-3xl text-slate-700'>Manage settings for UNLOC contracts v2</h1>
         <section id='loan-global-state' className='my-8'>
-          <p className='mb-4 text-2xl'>Manage Global State</p>
+          <p className='mb-4 text-2xl text-slate-700'>Manage Global State</p>
           <div className='grid grid-cols-2 items-start space-x-6 tablet:grid-cols-1'>
             <ContentBox title='Set Global State' icon={<FaEdit />} className='flex-auto'>
               <GlobalStateForm />
             </ContentBox>
             <ContentBox title='Current Global State' icon={<FiEye />} className='flex-auto'>
               <div className='flex items-center'>
-                <strong className='mr-2 font-bold text-unlocGray-100'>PDA:</strong>
+                <strong className='mr-2 font-bold text-slate-400'>PDA:</strong>
                 <Copyable content={programs.loanGlobalStatePda.toBase58()}>
-                  <p className='rounded-md bg-unlocGray-500 px-4 py-1 transition-colors hover:bg-unlocGray-900'>
+                  <p className='rounded-md bg-slate-800 px-4 py-1 transition-colors hover:bg-slate-900'>
                     {compressAddress(4, programs.loanGlobalStatePda.toBase58())}
                   </p>
                 </Copyable>
@@ -58,23 +58,23 @@ const Migration: NextPage = observer(() => {
         </section>
         <hr />
         <section id='loan-staking-pool'>
-          <h3>Staking Pool</h3>
+          <p className='mb-4 text-2xl text-slate-700'>Staking Pool</p>
         </section>
         <hr />
         <section id='loan-deposit-rewards'>
-          <h3>Deposit Rewards</h3>
+          <p className='mb-4 text-2xl text-slate-700'>Deposit Rewards</p>
         </section>
         <hr />
         <section id='loan-withdraw-rewards'>
-          <h3>Withdraw Rewards</h3>
+          <p className='mb-4 text-2xl text-slate-700'>Withdraw Rewards</p>
         </section>
         <hr />
         <section id='loan-voting'>
-          <h3>Set Voting</h3>
+          <p className='mb-4 text-2xl text-slate-700'>Set Voting</p>
         </section>
         <hr />
         <section id='loan-claim-expired'>
-          <h3>Claim Expired Collateral</h3>
+          <p className='mb-4 text-2xl text-slate-700'>Claim Expired Collateral</p>
         </section>
       </div>
     </main>

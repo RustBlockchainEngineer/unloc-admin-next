@@ -109,6 +109,8 @@ export const removeNftsFromCollection = async (
 ): Promise<number> => {
   const whitelisted = await client.hget('collections', collection)
   const toRemove = new Set(Array.isArray(nfts) ? nfts : [nfts])
+  
+  console.log(whitelisted, toRemove, nfts)
 
   if (whitelisted === null) return 0
 

@@ -21,6 +21,7 @@ type ParsedInstructionWithBlocktime = InstructionWithBlocktime & {
 
 const Users: NextPage = () => {
   const { connection } = useConnection()
+
   const loadHistory = async (value: string): Promise<ParsedInstructionWithBlocktime[]> => {
     const programId = new PublicKey('D9bVX8qt7oNrHqGnHqBsEdBZSM6eQeKXucY3vB8qK2uH')
     const pubkey = new PublicKey(value)
@@ -48,6 +49,7 @@ const Users: NextPage = () => {
     })
     return parsed
   }
+
   const {
     execute,
     status,
@@ -164,7 +166,7 @@ const Users: NextPage = () => {
     <main className='grid-content my-8 mx-12 px-4'>
       <Separator label={'User history'} />
       <section className='my-4' id='loan-contract-single-user'>
-        <div className='w-1/2'>
+        <div className='w-1/2 bg-slate-700 p-4 rounded-md'>
           <SimpleForm
             name='address'
             onSubmit={execute}

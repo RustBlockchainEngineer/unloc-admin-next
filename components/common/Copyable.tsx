@@ -1,13 +1,14 @@
 import clsx from 'clsx'
 import React, { ReactNode, useState } from 'react'
+import { Button } from './Button'
 
 interface CopyableProps {
   content: string
-  classNames?: string
+  className?: string
   children?: ReactNode
 }
 
-export const Copyable = ({ content, children, classNames }: CopyableProps) => {
+export const Copyable = ({ content, children, className }: CopyableProps) => {
   const [copied, setCopied] = useState(false)
 
   const handleClick = async () => {
@@ -28,9 +29,12 @@ export const Copyable = ({ content, children, classNames }: CopyableProps) => {
   )
 
   return (
-    <button className={`relative ${classNames || ''}`} onClick={handleClick}>
+    <a
+      className={`cursor-pointer relative ${className || ''}`}
+      onClick={handleClick}
+    >
       <div className={cls}>Copied!</div>
       {children}
-    </button>
+    </a>
   )
 }

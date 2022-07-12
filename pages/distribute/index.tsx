@@ -4,6 +4,7 @@ import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import toast from 'react-hot-toast'
 import { PublicKey } from '@solana/web3.js'
 import { distributeNFTsToWallets } from '../../integration'
+import { Button } from '../../components/common/Button'
 
 const DistributeNFTs: React.FC = () => {
   const wallet = useAnchorWallet()
@@ -79,36 +80,43 @@ const DistributeNFTs: React.FC = () => {
 
   return (
     <main className='main grid-content px-4'>
-      <h1 className='mb-8'>Distribute NFTs to a list of recipients</h1>
-      <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
-        <label className='label label--recipients' htmlFor='recipients'>
-          Addresses of recipients (every address in a new line)
-          <textarea
-            className='input recipients form-input'
-            id='recipients'
-            value={recipients}
-            onChange={handleRecipientsChange}
-            rows={3}
-            cols={50}
-          ></textarea>
-        </label>
-        <label className='label label--amount' htmlFor='amount'>
-          Amount
-          <input
-            className='input amount form-input'
-            type='number'
-            min={1}
-            id='amount'
-            value={defaultAmount}
-            onChange={handledefaultAmountChange}
-          ></input>
-        </label>
-        <div className='form__buttons'>
-          <button type='submit' className='btn btn--blue-ghost'>
-            Submit
-          </button>
-        </div>
-      </form>
+      <div className='bg-slate-700 p-4 rounded-md'>
+        <h1 className='mb-8 text-slate-400'>Distribute NFTs to a list of recipients</h1>
+        <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
+          <label className='label label--recipients' htmlFor='recipients'>
+            <textarea
+              className='input recipients form-input'
+              id='recipients'
+              value={recipients}
+              onChange={handleRecipientsChange}
+              placeholder='Addresses of recipients (every address in a new line)'
+              rows={3}
+              cols={50}
+            ></textarea>
+          </label>
+          <label className='flex flex-col' htmlFor='amount'>
+            Amount
+            <input
+              className='input amount form-input'
+              type='number'
+              min={1}
+              id='amount'
+              name='amount'
+              value={defaultAmount}
+              onChange={handledefaultAmountChange}
+            ></input>
+          </label>
+          <div className='form__buttons'>
+            <Button
+              color='gray'
+              ghost={true}
+              type='submit'
+            >
+              Submit
+            </Button>
+          </div>
+        </form>
+      </div>
     </main>
   )
 }

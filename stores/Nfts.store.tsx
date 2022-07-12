@@ -1,6 +1,4 @@
-import axios from 'axios'
-import { action, flow, makeAutoObservable } from 'mobx'
-import { createContext } from 'react'
+import { action, flow, makeAutoObservable, toJS } from 'mobx'
 import { getSubOfferList, SubOfferState } from '../integration/unloc'
 import { PublicKey } from '@solana/web3.js'
 import {
@@ -73,7 +71,7 @@ export class NftsStore {
   @action.bound
   removeNfts = flow(function* (this: NftsStore, collection: string, nfts: string[]) {
     try {
-      yield removeNFTsFromCollection(collection, nfts)
+      yield removeNFTsFromCollection(collection, toJS(nfts))
       yield this.fetchNfts(collection)
       yield this.fetchNftsData()
     } catch (error) {

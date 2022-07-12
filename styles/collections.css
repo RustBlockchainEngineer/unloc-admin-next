@@ -1,28 +1,3 @@
-.collections__header {
-  @apply inline-flex justify-between;
-}
-
-.collections__header .header__title {
-  @apply block;
-}
-
-.collections__footer {
-  @apply inline-flex justify-end items-center;
-  @apply w-full;
-  @apply mt-4;
-}
-
-.collections__th.select,
-.collections__td.select {
-  @apply w-1/12;
-}
-
-.collections__th.collection,
-.collections__td.collection {
-  @apply w-1/2;
-  @apply justify-evenly;
-}
-
 .collections__td input:focus {
   @apply w-5/6;
 }

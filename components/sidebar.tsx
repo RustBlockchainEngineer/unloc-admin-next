@@ -3,6 +3,7 @@ import Image from 'next/image'
 import logoImage from '../public/unlock_logo_dark.svg'
 import { NavItem } from './navItem'
 import { useRouter } from 'next/router'
+
 // -------------------- Current
 // Airdrop
 // Distribute NFTs
@@ -47,7 +48,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const path = useMemo(() => router.pathname.slice(1), [router])
 
   return (
-    <div className={`h-1/1 bg-unlocGray-300 ${className || ''}`}>
+    <div className={`h-1/1 bg-slate-700 ${className || ''}`}>
       <div className='fixed'>
         <div className='flex h-24 items-center p-10'>
           <Image src={logoImage} width={150} height={38} alt='logo'></Image>
