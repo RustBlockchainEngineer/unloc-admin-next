@@ -9,6 +9,10 @@ import { useStore } from '../../stores'
 import { compressAddress } from '../../utils'
 import { FaEdit } from 'react-icons/fa'
 import { FiEye } from 'react-icons/fi'
+import { StakingPoolForm } from '../../components/migration/stakingPoolForm'
+import { VotingForm } from '../../components/migration/votingForm'
+import { DepositRewardsForm } from '../../components/migration/depositRewardsForm'
+import { ClaimExpiredCollateralForm } from '../../components/migration/claimExpiredCollateralForm'
 
 const Migration: NextPage = observer(() => {
   const { connection } = useConnection()
@@ -58,23 +62,48 @@ const Migration: NextPage = observer(() => {
         </section>
         <hr />
         <section id='loan-staking-pool'>
-          <p className='mb-4 text-2xl text-slate-700'>Staking Pool</p>
-        </section>
-        <hr />
-        <section id='loan-deposit-rewards'>
-          <p className='mb-4 text-2xl text-slate-700'>Deposit Rewards</p>
-        </section>
-        <hr />
-        <section id='loan-withdraw-rewards'>
-          <p className='mb-4 text-2xl text-slate-700'>Withdraw Rewards</p>
+          <p className='my-4 text-2xl text-slate-700'>Set Staking Pool</p>
+          <div className='grid grid-cols-2 items-start space-x-6 pt-4 pb-8 tablet:grid-cols-1'>
+            <ContentBox title='Set Staking Pool' icon={<FaEdit />} className='flex-auto'>
+              <StakingPoolForm />
+            </ContentBox>
+          </div>
         </section>
         <hr />
         <section id='loan-voting'>
-          <p className='mb-4 text-2xl text-slate-700'>Set Voting</p>
+          <p className='my-4 text-2xl text-slate-700'>Set Voting Accounts</p>
+          <div className='grid grid-cols-2 items-start space-x-6 pt-4 pb-8 tablet:grid-cols-1'>
+            <ContentBox title='Vote Accounts' icon={<FaEdit />} className='flex-auto'>
+              <VotingForm />
+            </ContentBox>
+          </div>
+        </section>
+        <hr />
+        <section id='loan-deposit-rewards'>
+          <p className='my-4 text-2xl text-slate-700'>Deposit Rewards</p>
+          <div className='grid grid-cols-2 items-start space-x-6 pt-4 pb-8 tablet:grid-cols-1'>
+            <ContentBox title='Set deposit amount' icon={<FaEdit />} className='flex-auto'>
+              <DepositRewardsForm />
+            </ContentBox>
+          </div>
+        </section>
+        <hr />
+        <section id='loan-withdraw-rewards'>
+          <p className='my-4 text-2xl text-slate-700'>Withdraw Rewards</p>
+          <div className='grid grid-cols-2 items-start space-x-6 pt-4 pb-8 tablet:grid-cols-1'>
+            <ContentBox title='Withdraw amount' icon={<FaEdit />} className='flex-auto'>
+              <DepositRewardsForm />
+            </ContentBox>
+          </div>
         </section>
         <hr />
         <section id='loan-claim-expired'>
-          <p className='mb-4 text-2xl text-slate-700'>Claim Expired Collateral</p>
+          <p className='my-4 text-2xl text-slate-700'>Claim Expired Collateral</p>
+          <div className='grid grid-cols-2 items-start space-x-6 pt-4 pb-8 tablet:grid-cols-1'>
+            <ContentBox title='Claim collateral' icon={<FaEdit />} className='flex-auto'>
+              <ClaimExpiredCollateralForm />
+            </ContentBox>
+          </div>
         </section>
       </div>
     </main>

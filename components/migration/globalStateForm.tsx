@@ -150,8 +150,7 @@ export const GlobalStateForm = observer(() => {
       lenderRewardsPercentage: Number(values.lenderRewardsPercentage)
     }
 
-    const ix = createSetGlobalStateInstruction({ ...accounts }, { ...data })
-    ix.programId = programs.loanPubkey
+    const ix = createSetGlobalStateInstruction({ ...accounts }, { ...data }, programs.loanPubkey)
     const latestBlockhash = await connection.getLatestBlockhash()
     const tx = new Transaction({
       feePayer: publicKey,
