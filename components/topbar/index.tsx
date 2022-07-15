@@ -26,7 +26,7 @@ function getSetterAccessor(name: ProgramName): keyof AddressSetter {
 
 export const Topbar = observer(({ network, setNetwork, className }: NavbarProps) => {
   const { connected, publicKey } = useWallet()
-  const { isAdmin, setIsAdmin } = useContext(AdminContext)
+  const { setIsAdmin } = useContext(AdminContext)
   const { programs: programStore } = useStore()
 
   useEffect(() => {
@@ -51,8 +51,8 @@ export const Topbar = observer(({ network, setNetwork, className }: NavbarProps)
   }, [connected, publicKey, setIsAdmin])
 
   return (
-    <div className={`flex w-full bg-slate-700 pr-12 ${className || ''}`}>
-      <div className='flex w-full py-4'>
+    <div className={`inline-flex w-full py-4 bg-slate-700 ${className || ''}`}>
+      <div className='inline-flex w-full'>
         {programs.map((program) => {
           return (
             <ProgramDisplay
@@ -64,9 +64,9 @@ export const Topbar = observer(({ network, setNetwork, className }: NavbarProps)
           )
         })}
       </div>
-      <div className='ml-6 inline-flex gap-x-4 py-6'>
+      <div className='hidden xl:inline-flex items-center h-16 px-8 gap-x-8 border-l-slate-400 last:border-l-[1px]'>
         <NetworkSelect network={network} setNetwork={setNetwork} />
-        <WalletMultiButton className='shadow-md transition-colors' />
+        <WalletMultiButton className='shadow-md transition-colors min-w-[160px]' />
       </div>
     </div>
   )

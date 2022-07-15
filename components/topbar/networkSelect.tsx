@@ -2,11 +2,13 @@ import { ChangeEvent, memo } from 'react'
 import { NetworkName } from '../../pages/_app'
 
 interface NetworkSelectProps {
+  className?: string
   network: NetworkName
   setNetwork: React.Dispatch<React.SetStateAction<NetworkName>>
 }
 
 export const NetworkSelect = memo(function NetworkSelect({
+  className,
   network,
   setNetwork
 }: NetworkSelectProps) {
@@ -21,7 +23,7 @@ export const NetworkSelect = memo(function NetworkSelect({
     <select
       defaultValue={network}
       onChange={handleChange}
-      className='form-select block min-w-[160px] rounded-md bg-pink-600 text-center font-semibold text-white shadow-md hover:cursor-pointer md:min-w-fit'
+      className={`form-select block h-12 !min-w-[160px] rounded-md bg-pink-600 text-center font-semibold text-white shadow-md hover:cursor-pointer md:min-w-fit ${className}`}
     >
       {options.map((option) => (
         <option key={option}>{option}</option>

@@ -50,8 +50,8 @@ const WhitelistUsers: React.FC = () => {
   }
 
   return (
-    <main className='main px-8'>
-      <div className='bg-slate-700 p-4 rounded-md'>
+    <main className='main grid-content px-8 mx-auto'>
+      <div className='w-1/2 mx-auto bg-slate-700 p-4 rounded-md'>
         <h1 className='mb-8 text-slate-400'>Add users to whitelist</h1>
         <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
           <label className='label' htmlFor='mint'>

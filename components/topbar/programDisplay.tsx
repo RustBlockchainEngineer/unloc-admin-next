@@ -22,7 +22,7 @@ export const ProgramDisplay = observer(
 
     return (
       <div
-        className={`relative flex flex-1 flex-col items-center justify-center border-l-[1px] border-x-slate-400 text-white transition-colors last:border-r-[1px] hover:bg-slate-500 md:min-w-fit md:flex-row md:px-4 ${
+        className={`relative flex flex-1 flex-col items-center justify-center border-l-[1px] border-l-slate-400 text-white transition-colors hover:bg-slate-500 md:min-w-fit md:flex-row md:px-4 ${
           className || ''
         }`}
       >
@@ -32,13 +32,13 @@ export const ProgramDisplay = observer(
             <span className='text-center'>{compressAddress(4, getAddress())}</span>
           </Copyable>
         </div>
-        <Button
+        <a
           aria-label='Edit address'
           onClick={handleEditClick}
           className='absolute right-4 text-xl hover:cursor-pointer md:relative md:right-0 md:pl-3'
         >
           <FaEdit />
-        </Button>
+        </a>
         <dialog
           ref={dialogRef}
           className='rounded-md shadow-md backdrop:bg-black backdrop:bg-opacity-40'

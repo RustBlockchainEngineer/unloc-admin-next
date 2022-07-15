@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react'
-import Image from 'next/image'
-import logoImage from '../public/unlock_logo_dark.svg'
+import React from 'react'
 import { NavItem } from './navItem'
-import { useRouter } from 'next/router'
+import { NavListItem } from './navListItem'
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { NetworkSelect } from './topbar/networkSelect'
+import { NetworkName } from '../pages/_app'
 
 // -------------------- Current
 // Airdrop
@@ -26,49 +27,46 @@ import { useRouter } from 'next/router'
 // Staking
 // Users
 
-const navItems = [
-  { label: 'Airdrop', path: '' },
-  { label: 'Distribute NFTs', path: 'distribute' },
-  { label: 'Manage Authority', path: 'manage' },
-  { label: 'Users', path: 'users' },
-  { label: 'Contracts V2', path: 'migration' },
-  { label: 'Manage Collections', path: 'collections' },
-  { label: 'Set Global State', path: 'global-state' },
-  { label: 'Whitelist Users', path: 'whitelist' }
-] as const
-
-type NavOption = typeof navItems[number]['label']
-
 interface SidebarProps {
   className?: string
+  network: NetworkName
+  setNetwork: React.Dispatch<React.SetStateAction<NetworkName>>
 }
 
-export const Sidebar = ({ className }: SidebarProps) => {
-  const router = useRouter()
-  const path = useMemo(() => router.pathname.slice(1), [router])
-
+export const Sidebar = ({ className, network, setNetwork }: SidebarProps) => {
   return (
     <div className={`h-1/1 bg-slate-700 ${className || ''}`}>
-      <div className='fixed'>
-        <div className='flex h-24 items-center p-10'>
-          <Image src={logoImage} width={150} height={38} alt='logo'></Image>
-        </div>
-        <div className='px-9'>
-          <nav className='flex'>
-            <ul className='flex flex-col space-y-2'>
-              {navItems.map((item) => {
-                return (
-                  <NavItem
-                    key={item.label}
-                    label={item.label}
-                    target={item.path}
-                    expanded={path === item.path}
-                  />
-                )
-              })}
-            </ul>
-          </nav>
-        </div>
+      <div className='px-9'>
+        <nav className='flex'>
+          <ul className='flex flex-col space-y-2'>
+            <NavItem label={network} mode='list'>
+              <NavListItem label='Whitelist' path='whitelist' />
+              <NavListItem label='Manage Authority' path='manage' />
+              <NavListItem label='Manage Collections' path='collections' />
+              <NavListItem label='NFT Distribution' path='distribute' />
+              <NavListItem label='Token Airdropper' path='' />
+              <NavListItem label='Set Global State' path='global-state' />
+            </NavItem>
+
+            <NavItem label='Rewards' mode='list'>
+            </NavItem>
+
+            <NavItem label='Staking' mode='list'>
+            </NavItem>
+
+            <NavItem label='Users' mode='list'>
+              <NavListItem label='History' path='users' />
+            </NavItem>
+
+            <NavItem label='Loan' mode='link' path='loan' />
+
+            <NavItem label='Contracts v2' mode='link' path='migration' />
+          </ul>
+        </nav>
+      </div>
+      <div className='flex flex-col xl:hidden m-6 gap-y-6'>
+        <NetworkSelect network={network} setNetwork={setNetwork} className='h-12' />
+        <WalletMultiButton className='shadow-md transition-colors w-full' />
       </div>
     </div>
   )

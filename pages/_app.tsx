@@ -23,6 +23,10 @@ import '../styles/main.css'
 import rootStore, { StoreContext } from '../stores'
 import { observer } from 'mobx-react-lite'
 
+import Link from 'next/link'
+import Image from 'next/image'
+import logoImage from '../public/unlock_logo_dark.svg'
+
 interface IAdminContext {
   isAdmin: boolean
   setIsAdmin: Dispatch<React.SetStateAction<boolean>>
@@ -88,7 +92,12 @@ const App = ({ Component, pageProps }: AppProps): ReactNode => {
           <AdminContext.Provider value={{ isAdmin, setIsAdmin }}>
             <StoreContext.Provider value={rootStore}>
               <div className='app'>
-                <Sidebar className='grid-sidebar' />
+                <div className='grid-logo bg-slate-700 inline-flex h-24 items-center justify-center p-10'>
+                  <Link href='/'>
+                    <Image src={logoImage} width={150} height={38} alt='logo' />
+                  </Link>
+                </div>
+                <Sidebar className='grid-sidebar' network={uiNetwork} setNetwork={setUiNetwork} />
                 <Topbar className='grid-topbar' network={uiNetwork} setNetwork={setUiNetwork} />
                 <Component className='grid-content' {...pageProps} />
               </div>
