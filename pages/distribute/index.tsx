@@ -80,7 +80,7 @@ const DistributeNFTs: React.FC = () => {
 
   return (
     <main className='main grid-content px-4'>
-      <div className='bg-slate-700 p-4 rounded-md'>
+      <div className='w-1/2 mx-auto bg-slate-700 p-4 rounded-md'>
         <h1 className='mb-8 text-slate-400'>Distribute NFTs to a list of recipients</h1>
         <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
           <label className='label label--recipients' htmlFor='recipients'>

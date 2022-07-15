@@ -61,18 +61,17 @@ const ManageAuthority: NextPage = () => {
   }
 
   return (
-    <main className='main px-8'>
-      <div className='bg-slate-700 p-4 rounded-md'>
+    <main className='main grid-content px-8'>
+      <div className='w-1/2 mx-auto bg-slate-700 p-4 rounded-md'>
         <form onSubmit={handleSubmit('give')} className='flex flex-col'>
           <label className='label' htmlFor='mint'>
             Mint
             <input
-              className='input form-input'
+              className='w-full ml-1 rounded-md border-2 border-slate-700'
               type='text'
               id='mint'
               value={mint}
               onChange={handleChange}
-              size={50}
             ></input>
           </label>
           <div className='form__buttons'>

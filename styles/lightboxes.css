@@ -24,7 +24,6 @@
 .lightbox__title {
   @apply text-2xl;
   @apply font-bold;
-  font-family: 'Red Hat Display';
 }
 
 .lightbox__buttons {

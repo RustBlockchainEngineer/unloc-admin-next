@@ -163,7 +163,7 @@ const Users: NextPage = () => {
   }, [userHistory])
 
   return (
-    <main className='grid-content my-8 mx-12 px-4'>
+    <main className='main grid-content my-8 mx-12 px-4'>
       <Separator label={'User history'} />
       <section className='my-4' id='loan-contract-single-user'>
         <div className='w-1/2 bg-slate-700 p-4 rounded-md'>

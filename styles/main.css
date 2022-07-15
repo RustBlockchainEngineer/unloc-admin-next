@@ -14,15 +14,20 @@
   @apply bg-white;
   @apply text-black;
   @apply bg-slate-900;
+
   display: grid;
   grid-template-areas:
-    'sidebar topbar topbar'
+    'logo topbar topbar'
     'sidebar content content';
   grid-template-rows: min-content 1fr;
   grid-template-columns: 18rem 1fr 1fr;
 }
 
 /* Grid areas */
+.grid-logo {
+  grid-area: logo;
+}
+
 .grid-sidebar {
   grid-area: sidebar;
 }
@@ -38,13 +43,6 @@
 /* Wallet Button Overrides */
 button.wallet-adapter-button {
   @apply justify-center bg-slate-500;
-  min-width: 212px;
-}
-
-@screen md {
-  button.wallet-adapter-button {
-    min-width: max-content;
-  }
 }
 
 .wallet-adapter-button-start-icon {
@@ -97,4 +95,8 @@ h2 {
 
 .current-global-state p span {
   @apply font-bold;
+}
+
+.wallet-adapter-dropdown-list {
+  @apply w-full;
 }

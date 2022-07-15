@@ -26,7 +26,7 @@ const Migration: NextPage = observer(() => {
   }, [connection, loanGlobalState, updateGlobalStateAccount])
 
   return (
-    <main className='grid-content bg-slate-900 text-white'>
+    <main className='main grid-content bg-slate-900 text-white'>
       <div className='p-12'>
         <h1 className='mb-6 text-3xl text-slate-700'>Manage settings for UNLOC contracts v2</h1>
         <section id='loan-global-state' className='my-8'>
