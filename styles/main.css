@@ -8,6 +8,7 @@
 @import url('./collections.css');
 @import url('./lightboxes.css');
 @import url('./nfts.css');
+@import url('./checkboxes.css');
 
 .app {
   @apply min-h-screen;

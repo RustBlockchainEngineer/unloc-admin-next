@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router'
-import React, { createRef, useContext, useState } from 'react'
+import { FaSave, FaTimes } from 'react-icons/fa'
+import React, { createRef, useEffect, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useStore } from '../stores'
 import { Button } from './common/Button'
@@ -14,7 +15,8 @@ export const CollectionRow: React.FC<CollectionRowProps> = observer(
     const { collections, lightbox } = useStore()
     const router = useRouter()
     const inputRef = createRef<HTMLInputElement>()
-    const [blur, setBlur] = useState(false)
+    const [show, setShow] = useState(false)
+    const [localPressed, setLocalPressed] = useState(false)
     const { selected } = collections
 
     const handleSelection = () => {
@@ -29,8 +31,6 @@ export const CollectionRow: React.FC<CollectionRowProps> = observer(
     const handleCancelRenameCollection = () => {
       if (!(inputRef.current && inputRef.current.value)) return
 
-      setBlur(true)
-      inputRef.current.blur()
       inputRef.current.value = collection
     }
 
@@ -38,8 +38,6 @@ export const CollectionRow: React.FC<CollectionRowProps> = observer(
       try {
         if (!(inputRef.current && inputRef.current.value)) return
 
-        setBlur(true)
-        inputRef.current.blur()
         await collections.renameCollection(collection, inputRef.current.value)
         await collections.fetchCollectionsData()
       } catch (error) {
@@ -58,44 +56,61 @@ export const CollectionRow: React.FC<CollectionRowProps> = observer(
       }
     }
 
+    const handleBlur = () => {
+      setShow(false)
+    
+      if (localPressed) {
+        // setLocalPressed(false)
+        return
+      }
+
+      handleCancelRenameCollection()
+    }
+
     return (
-      <div className='inline-flex even:bg-white odd:bg-gray-100'>
-        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 select'>
-          <input
-            type='checkbox'
-            onChange={() => handleSelection()}
-            checked={selected.includes(collection)}
-          />
+      <div className='inline-flex odd:bg-slate-800 even:bg-[#34425680] text-sm text-white'>
+        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2'>
+          <label className='control control-checkbox' htmlFor='select-collection' onClick={() => handleSelection()}>
+            <input name='select-collection' type='checkbox' checked={selected.includes(collection)} onChange={() => handleSelection()} />
+            <div className='control_indicator'></div>
+          </label>
         </div>
-        <div className='w-5/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 collection'>
+        <div className={`w-5/12 flex-wrap text-center inline-flex items-center justify-center first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2 ${show && 'pr-0'} ${encodeURIComponent(collection)}`}>
           <input
-            className='w-full border-2 border-solid border-gray-100 text-sm p-1 input--collection'
+            className={`${show ? 'w-3/4' : 'w-full'} bg-transparent border-[1px] border-solid border-slate-600 text-sm p-1 input--collection`}
             type='text'
             defaultValue={collection}
             ref={inputRef}
-            onBlur={() => {
-              !blur ? inputRef.current?.focus() : setBlur(false)
-            }}
+            onFocus={() => setShow(true)}
+            onBlur={handleBlur}
           />
-          <div className='collection__actions'>
+          <div className={`${show ? 'inline-flex' : 'hidden'} w-1/4 justify-evenly`}>
             <Button
               color='yellow'
               ghost={true}
-              className='bg-save'
-              onClick={handleRenameCollection}
-            />
+              onMouseDown={() => {
+                setLocalPressed(true)
+                handleRenameCollection()
+              }}
+            >
+              <FaSave />
+            </Button>
             <Button
               color='red'
               ghost={true}
-              className='bg-unlocCancel'
-              onClick={handleCancelRenameCollection}
-            />
+              onMouseDown={() => {
+                setLocalPressed(true)
+                handleCancelRenameCollection()
+              }}
+            >
+              <FaTimes />
+            </Button>
           </div>
         </div>
-        <span className='w-1/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 nft-count'>{count}</span>
-        <span className='w-5/12 flex-wrap text-center inline-flex items-center justify-evenly border-2 border-solid border-gray-200 p-2 actions'>
+        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2'>{count}</div>
+        <div className='w-5/12 flex-wrap text-center inline-flex items-center justify-evenly first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2'>
           <Button
-            color='green'
+            color='lime'
             ghost={true}
             className='collections__btn manage-collection'
             onClick={() => router.push(`/collections/${encodeURIComponent(collection)}`)}
@@ -110,7 +125,7 @@ export const CollectionRow: React.FC<CollectionRowProps> = observer(
           >
             Remove Collection
           </Button>
-        </span>
+        </div>
       </div>
     )
   }

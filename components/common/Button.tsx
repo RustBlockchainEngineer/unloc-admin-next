@@ -2,7 +2,7 @@ import { ButtonHTMLAttributes, FC, MouseEventHandler, ReactNode } from 'react'
 
 export interface IButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children?: ReactNode
-  color?: 'black' | 'gray' | 'white' | 'red' | 'green' | 'blue' | 'yellow' | 'purple'
+  color?: 'black' | 'gray' | 'white' | 'red' | 'lime' | 'green' | 'blue' | 'yellow' | 'purple'
   ghost?: boolean
   disabled?: boolean
 }
@@ -34,6 +34,9 @@ export const Button: FC<IButtonProps> = ({
 
       case 'red':
         return `border-red-600 hover:bg-red-500 ${ghost ? 'text-red-600 bg-transparent hover:text-white' : 'bg-red-600 text-white'}`
+
+      case 'lime':
+        return `border-lime-600 hover:bg-lime-500 ${ghost ? 'text-lime-600 bg-transparent hover:text-white' : 'bg-lime-600 text-white'}`
 
       case 'green':
         return `border-green-600 hover:bg-green-500 ${ghost ? 'text-green-600 bg-transparent hover:text-white' : 'bg-green-600 text-white'}`
