@@ -33,7 +33,6 @@ export const Topbar = observer(({ network, setNetwork, className }: NavbarProps)
     const checkIfAdmin = async () => {
       if (publicKey) {
         const check = await isWalletAdmin(publicKey.toBase58())
-        console.log(check)
 
         if (typeof check === 'boolean') {
           setIsAdmin(check)

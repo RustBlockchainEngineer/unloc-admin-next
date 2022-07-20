@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react'
-import { WalletContext } from '@solana/wallet-adapter-react'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { observer } from 'mobx-react-lite'
 import { NftRow } from '../../components/nftRow'
 import { Lightbox } from '../../components/lightboxes/lightbox'
@@ -12,7 +12,7 @@ import { Button } from '../../components/common/Button'
 
 const ManageNFTs: React.FC = observer(() => {
   const router = useRouter()
-  const wallet = useContext(WalletContext)
+  const { connected } = useWallet()
   const { nfts: nftStore, lightbox } = useStore()
   const { id } = router.query
   const { nfts, nftsData, selected } = nftStore
@@ -50,8 +50,8 @@ const ManageNFTs: React.FC = observer(() => {
       await nftStore.fetchNftsData()
     }
 
-    if (wallet.connected) fetchData()
-  }, [id, nftStore, wallet])
+    if (connected) fetchData()
+  }, [connected, id, nftStore])
 
   if (!isAdmin) {
     router.push('/')
@@ -60,7 +60,7 @@ const ManageNFTs: React.FC = observer(() => {
   return (
     <main className='main grid-content w-full px-8'>
       <header className='header nfts__header text-white'>
-        {wallet.connected ? (
+        {connected ? (
           <div className='header__buttons'>
             <Button
               color='gray'
@@ -86,7 +86,7 @@ const ManageNFTs: React.FC = observer(() => {
         </h1>
       </header>
 
-      {wallet.connected ? (
+      {connected ? (
         <>
           <div className='nfts__table'>
             <div className='flex flex-col'>

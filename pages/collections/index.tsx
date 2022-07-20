@@ -1,6 +1,7 @@
 import { WalletContext } from '@solana/wallet-adapter-react'
 import { observer } from 'mobx-react-lite'
-import React, { useEffect, useContext } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
+import { FaSearch } from 'react-icons/fa'
 import { Lightbox } from '../../components/lightboxes/lightbox'
 import { LightboxCreateCollection } from '../../components/lightboxes/lightboxCreateCollection'
 import { LightboxRemoveCollections } from '../../components/lightboxes/lightboxRemoveCollections'
@@ -13,16 +14,20 @@ import { Button } from '../../components/common/Button'
 const ManageCollections: React.FC = observer(() => {
   const { lightbox, collections } = useStore()
   const { isAdmin } = useContext(AdminContext)
-  
+  const { connected } = useContext(WalletContext)
   const { collectionsData, selected } = collections
   const { showCreateCollection, showRemoveCollections, data } = lightbox
-  
-  const wallet = useContext(WalletContext)
+
+  const [filter, setFilter] = useState<string>('')
+  const [checked, setChecked] = useState<boolean>(false)
 
   const mapCollectionRows = () => (
-    Object.entries(collectionsData).map(([collection, count]) => (
+    Object.entries(collectionsData)
+      .filter(([collection]) => collection.toLowerCase().includes(filter))
+      .map(([collection, count]) => (
       <CollectionRow key={collection} collection={collection} count={count} />
-    )).sort((a, b) => a.key!.toString().localeCompare(b.key!.toString()))
+    )).sort((a, b) => a.key!.toString()
+    .localeCompare(b.key!.toString()))
   )
 
   const handleRemoveCollections = async () => {
@@ -31,7 +36,9 @@ const ManageCollections: React.FC = observer(() => {
   }
 
   const handleSelectAll = () => {
-    collections.setSelected(Object.keys(collectionsData))
+    collections.setSelected(checked ? [] : Object.keys(collectionsData))
+
+    setChecked(!checked)
   }
 
   const handleClearSelection = () => {
@@ -50,89 +57,78 @@ const ManageCollections: React.FC = observer(() => {
     fetchData()
   }, [collections])
 
-  return isAdmin ? (
+  return isAdmin && connected ? (
     <main className='main grid-content w-full px-8'>
-      <header className='w-full text-white inline-flex justify-between mb-4'>
-        <h1>Manage Collections</h1>
+      <header className='w-full inline-flex justify-between mb-4'>
+        <h1 className='text-slate-500'>Manage Collections</h1>
 
-        {wallet.connected ? (
+        <div className='inline-flex gap-4'>
+          <div className='inline-flex relative'>
+            <FaSearch className='text-slate-700 absolute top-[14px] left-[10px]' />
+            <input
+              className='bg-transparent border-solid border-slate-500 border-[1px] rounded-lg pl-8 pr-4 text-slate-500 placeholder:text-slate-700'
+              placeholder='Search for collection'
+              onChange={(e) => setFilter(e.target.value.toLowerCase())}
+            />
+          </div>
+
           <Button
-            color='green'
-            className='add-collection'
+            color='white'
+            ghost={true}
+            className='w-64'
             onClick={() => handleCreateCollection()}
           >
             Add Collections
           </Button>
-        ) : (
-          ''
-        )}
+        </div>
       </header>
 
-      {wallet.connected ? (
-        <>
-          <div className='table--collections collections'>
-            <div className='flex flex-col'>
-              <div className='py-4 bg-gray-800 font-bold text-white inline-flex'>
-                <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center select'>Select</div>
-                <div className='w-5/12 flex-wrap text-center inline-flex justify-center items-center collection'>Collection</div>
-                <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center nft-count'>NFT Count</div>
-                <div className='w-5/12 flex-wrap text-center inline-flex justify-center items-center actions'>Actions</div>
-              </div>
+      <div className='table--collections collections'>
+        <div className='flex flex-col'>
+          <div className='py-4 bg-slate-700 font-bold text-lg text-slate-400 inline-flex rounded-t'>
+            <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center'>
+              <label className='control control-checkbox' htmlFor='select-all' onClick={handleSelectAll}>
+                <input name='select-all' type='checkbox' onChange={handleSelectAll} checked={checked} />
+                <div className='control_indicator border-none bg-slate-800'></div>
+              </label>
             </div>
-            <div className='flex flex-col'>{mapCollectionRows()}</div>
+            <div className='w-5/12 flex-wrap text-center inline-flex justify-center items-center'>Collection</div>
+            <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center'>NFT Count</div>
+            <div className='w-5/12 flex-wrap text-center inline-flex justify-center items-center'>Actions</div>
           </div>
-          <footer className='inline-flex justify-end items-center w-full mt-4 space-x-4'>
-            <Button
-              color='gray'
-              ghost={true}
-              className='clear-selected'
-              disabled={selected.length === 0}
-              onClick={() => handleClearSelection()}
-            >
-              Clear Selection
-            </Button>
-            <Button
-              color='white'
-              ghost={true}
-              className='clear-selected'
-              disabled={selected.length >= Object.keys(collectionsData).length}
-              onClick={() => handleSelectAll()}
-            >
-              Select all
-            </Button>
-            <Button
-              color='red'
-              ghost={false}
-              className='remove-selected'
-              disabled={selected.length === 0}
-              onClick={() => handleRemoveCollections()}
-            >
-              Remove Selected
-            </Button>
-          </footer>
+        </div>
+        <div className='flex flex-col'>{mapCollectionRows()}</div>
+      </div>
+      <footer className='inline-flex justify-end items-center w-full mt-4 space-x-4'>
+        <Button
+          color='red'
+          ghost={false}
+          className='remove-selected'
+          disabled={selected.length === 0}
+          onClick={() => handleRemoveCollections()}
+        >
+          Remove Selected
+        </Button>
+      </footer>
 
-          {showCreateCollection ? (
-            <Lightbox className='create-collection'>
-              <LightboxCreateCollection />
-            </Lightbox>
-          ) : (
-            ''
-          )}
-
-          {showRemoveCollections && data.length > 0 ? (
-            <Lightbox className='remove-collections'>
-              <LightboxRemoveCollections />
-            </Lightbox>
-          ) : (
-            ''
-          )}
-        </>
+      {showCreateCollection ? (
+        <Lightbox className='create-collection'>
+          <LightboxCreateCollection />
+        </Lightbox>
       ) : (
-        <div className='text-slate-500 not-connected'>Please connect your wallet!</div>
+        ''
+      )}
+
+      {showRemoveCollections && data.length > 0 ? (
+        <Lightbox className='remove-collections'>
+          <LightboxRemoveCollections />
+        </Lightbox>
+      ) : (
+        ''
       )}
     </main>
   ) : (
-    <></>
+    <div className='text-slate-500 not-connected'>Please connect a wallet with administrative permissions!</div>
   )
 })
 
