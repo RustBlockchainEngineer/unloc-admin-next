@@ -23,7 +23,7 @@ const ManageNFTs: React.FC = observer(() => {
   const [filter, setFilter] = useState<string>('')
   const [checked, setChecked] = useState<boolean>(false)
 
-  if (!(isAdmin && connected)) router.push('/')
+  if (typeof window !== 'undefined' && !(isAdmin && connected)) router.push('/')
 
   const mapNftRows = () =>
     Object.entries(nftsData)

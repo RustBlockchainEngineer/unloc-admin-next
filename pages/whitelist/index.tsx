@@ -49,7 +49,7 @@ const WhitelistUsers: React.FC = () => {
     }
   }
 
-  if (!(isAdmin && connected)) router.push('/')
+  if (typeof window !== 'undefined' && !(isAdmin && connected)) router.push('/')
 
   return (
     <main className='main grid-content w-full px-4 space-x-4 inline-flex'>

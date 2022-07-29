@@ -9,7 +9,7 @@ const LoanPage: React.FC = () => {
   const { connected } = useWallet()
   const router = useRouter()
 
-  if (!(isAdmin && connected)) router.push('/')
+  if (typeof window !== 'undefined' && !(isAdmin && connected)) router.push('/')
 
   return (
     <main className='main grid-content px-8'>

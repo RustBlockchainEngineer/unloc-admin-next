@@ -23,7 +23,7 @@ const ManageCollections: React.FC = observer(() => {
   const [checked, setChecked] = useState<boolean>(false)
   
   const router = useRouter()
-  if (!(isAdmin && connected)) router.push('/')
+  if (typeof window !== 'undefined' && !(isAdmin && connected)) router.push('/')
 
   const mapCollectionRows = () => (
     Object.entries(collectionsData)
