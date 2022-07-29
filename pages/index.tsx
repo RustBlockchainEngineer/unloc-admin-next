@@ -125,7 +125,7 @@ const AirdropToMultiple: NextPage = () => {
               value={mint}
               onChange={handleMintChange}
               size={50}
-            ></input>
+            />
           </div>
           <textarea
             className='w-full rounded-md bg-slate-800 text-white text-sm px-4 py-2'
@@ -145,7 +145,7 @@ const AirdropToMultiple: NextPage = () => {
               name='amount'
               value={amount}
               onChange={handleAmountChange}
-            ></input>
+            />
           </div>
           <div className='form__buttons'>
             <Button

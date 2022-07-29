@@ -24,7 +24,7 @@ const ManageAuthority: NextPage = () => {
     }
   }, [address])
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleMintChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMint(event.target.value)
   }
 
@@ -62,32 +62,33 @@ const ManageAuthority: NextPage = () => {
 
   return (
     <main className='main grid-content px-8'>
-      <div className='w-1/2 mx-auto bg-slate-700 p-4 rounded-md'>
-        <form onSubmit={handleSubmit('give')} className='flex flex-col'>
-          <label className='label' htmlFor='mint'>
-            Mint
+      <div className='w-1/2 mx-auto p-4 bg-slate-700 rounded-md'>
+        <form className='flex flex-col space-y-2'>
+          <div className='flex flex-col'>
+            <label htmlFor='mint'>Mint</label>
             <input
-              className='w-full ml-1 rounded-md border-2 border-slate-700'
+              className='rounded-sm bg-slate-800 text-white px-2 py-1'
               type='text'
               id='mint'
               value={mint}
-              onChange={handleChange}
-            ></input>
-          </label>
+              onChange={handleMintChange}
+              size={50}
+            />
+          </div>
           <div className='form__buttons'>
             <Button
               color='gray'
               ghost={true}
-              type='submit'
               className='give-authority'
+              onClick={() => handleSubmit('give')}
             >
               Give Minting Authority
             </Button>
             <Button
               color='gray'
               ghost={true}
-              type='submit'
               className='reclaim-authority'
+              onClick={() => handleSubmit('reclaim')}
             >
               Reclaim Minting Authority
             </Button>
