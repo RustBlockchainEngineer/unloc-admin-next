@@ -25,6 +25,27 @@ export const addUsersToWhitelist = async (addresses: string[]): Promise<string |
   }
 }
 
+export const addAdminsToWhitelist = async (wallet: string, addresses: string[]): Promise<string[] | Error> => {
+  try {
+    const authResponse = await isWalletAdmin(wallet)
+
+    if (authResponse instanceof Error) return authResponse
+
+    if (!authResponse) return new Error('Wallet is not an admin')
+
+    const [whitelistResponse, adminResponse] = await axios.all([
+      await axios.post(`/api/whitelist`, addresses),
+      await axios.post(`/api/admin`, addresses)
+    ])
+
+    return [whitelistResponse.data, adminResponse.data]
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+    return error as Error
+  }
+}
+
 export const getCollectionsData = async (): Promise<Record<string, number> | Error> => {
   try {
     const response = await axios.get(`/api/collections`)

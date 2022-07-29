@@ -13,12 +13,12 @@ import { Button } from '../../components/common/Button'
 const ManageNFTs: React.FC = observer(() => {
   const router = useRouter()
   const { connected } = useWallet()
+  const { isAdmin } = useContext(AdminContext)
   const { nfts: nftStore, lightbox } = useStore()
   const { id } = router.query
   const { nfts, nftsData, selected } = nftStore
   const { showAddNft, showRemoveNfts } = lightbox
 
-  const isAdmin = useContext(AdminContext)
 
   const mapNftRows = () =>
     Object.entries(nftsData).map(([nftMint, { proposed, accepted }]) => (
@@ -53,9 +53,7 @@ const ManageNFTs: React.FC = observer(() => {
     if (connected) fetchData()
   }, [connected, id, nftStore])
 
-  if (!isAdmin) {
-    router.push('/')
-  }
+  if (!(isAdmin && connected)) router.push('/')
 
   return (
     <main className='main grid-content w-full px-8'>

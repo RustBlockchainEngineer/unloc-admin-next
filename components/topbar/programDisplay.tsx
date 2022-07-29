@@ -27,7 +27,7 @@ export const ProgramDisplay = observer(
         }`}
       >
         <div>
-          <span className='mb-1 block text-center text-2xl capitalize'>{name}</span>
+          <span className='mb-1 block text-center text-xl capitalize'>{name}</span>
           <Copyable content={getAddress()} className='block text-center text-xs mx-auto'>
             <span className='text-center'>{compressAddress(4, getAddress())}</span>
           </Copyable>
@@ -35,7 +35,7 @@ export const ProgramDisplay = observer(
         <a
           aria-label='Edit address'
           onClick={handleEditClick}
-          className='absolute right-4 text-xl hover:cursor-pointer md:relative md:right-0 md:pl-3'
+          className='absolute right-4 text-md hover:cursor-pointer md:relative md:right-0 md:pl-3'
         >
           <FaEdit />
         </a>

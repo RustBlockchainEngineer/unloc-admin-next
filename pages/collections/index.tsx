@@ -10,6 +10,7 @@ import { CollectionRow } from '../../components/collectionRow'
 import { AdminContext } from '../_app'
 import { useStore } from '../../stores'
 import { Button } from '../../components/common/Button'
+import { useRouter } from 'next/router'
 
 const ManageCollections: React.FC = observer(() => {
   const { lightbox, collections } = useStore()
@@ -17,9 +18,11 @@ const ManageCollections: React.FC = observer(() => {
   const { connected } = useContext(WalletContext)
   const { collectionsData, selected } = collections
   const { showCreateCollection, showRemoveCollections, data } = lightbox
-
+  
   const [filter, setFilter] = useState<string>('')
   const [checked, setChecked] = useState<boolean>(false)
+  
+    const router = useRouter()
 
   const mapCollectionRows = () => (
     Object.entries(collectionsData)
@@ -41,10 +44,6 @@ const ManageCollections: React.FC = observer(() => {
     setChecked(!checked)
   }
 
-  const handleClearSelection = () => {
-    collections.setSelected([])
-  }
-
   const handleCreateCollection = () => {
     lightbox.setShowCreateCollection(true)
   }
@@ -57,7 +56,9 @@ const ManageCollections: React.FC = observer(() => {
     fetchData()
   }, [collections])
 
-  return isAdmin && connected ? (
+  if (!(isAdmin && connected)) router.push('/')
+
+  return (
     <main className='main grid-content w-full px-8'>
       <header className='w-full inline-flex justify-between mb-4'>
         <h1 className='text-slate-500'>Manage Collections</h1>
@@ -127,8 +128,6 @@ const ManageCollections: React.FC = observer(() => {
         ''
       )}
     </main>
-  ) : (
-    <div className='text-slate-500 not-connected'>Please connect a wallet with administrative permissions!</div>
   )
 })
 

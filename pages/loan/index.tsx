@@ -2,14 +2,14 @@ import React, { useState, ChangeEvent, FormEvent, useContext } from 'react'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
 import { AdminContext } from '../_app'
+import { useWallet } from '@solana/wallet-adapter-react'
 
 const LoanPage: React.FC = () => {
-  const isAdmin = useContext(AdminContext)
+  const { isAdmin } = useContext(AdminContext)
+  const { connected } = useWallet()
   const router = useRouter()
 
-  if (!isAdmin) {
-    router.push('/')
-  }
+  if (!(isAdmin && connected)) router.push('/')
 
   return (
     <main className='main grid-content px-8'>

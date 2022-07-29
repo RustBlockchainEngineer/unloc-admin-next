@@ -4,7 +4,7 @@ import { PublicKey } from '@solana/web3.js'
 import { BN } from '@project-serum/anchor'
 import { IGlobalState, getGlobalState, initLoanProgram, setGlobalState } from '../../integration/unloc'
 import { AdminContext } from '../_app'
-import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react'
+import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { useRouter } from 'next/router'
 import { Button } from '../../components/common/Button'
 
@@ -17,9 +17,10 @@ const SetGlobalState: React.FC = () => {
   const [programAddress, setProgramAddress] = useState<string>('')
   const [currentGlobalState, setCurrentGlobalState] = useState<IGlobalState>()
 
-  const isAdmin = useContext(AdminContext)
-  const wallet = useAnchorWallet()
+  const { isAdmin } = useContext(AdminContext)
   const { connection } = useConnection()
+  const { connected } = useWallet()
+  const wallet = useAnchorWallet()
 
   const router = useRouter()
   const treasuryParam = router.query.treasury
@@ -33,7 +34,7 @@ const SetGlobalState: React.FC = () => {
     initLoanProgram(wallet)
     setTreasury(typeof treasuryParam === 'string' ? treasuryParam : '')
     fetchGlobalState()
-  }, [treasuryParam])
+  }, [treasuryParam, wallet])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -117,9 +118,7 @@ const SetGlobalState: React.FC = () => {
     setProgramAddress(event.target.value)
   }
 
-  if (!isAdmin) {
-    router.push('/')
-  }
+  if (!(isAdmin && connected)) router.push('/')
 
   return (
     <main className='main grid-content px-8'>

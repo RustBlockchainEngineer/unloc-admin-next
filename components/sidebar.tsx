@@ -38,7 +38,7 @@ export const Sidebar = ({ className, network, setNetwork }: SidebarProps) => {
     <div className={`h-1/1 bg-slate-700 ${className || ''}`}>
       <div className='px-9'>
         <nav className='flex'>
-          <ul className='flex flex-col space-y-2'>
+          <ul className='flex flex-col space-y-2 w-full'>
             <NavItem label={network} mode='list'>
               <NavListItem label='Whitelist' path='whitelist' />
               <NavListItem label='Manage Authority' path='manage' />

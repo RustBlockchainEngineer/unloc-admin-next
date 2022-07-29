@@ -127,17 +127,15 @@ const AirdropToMultiple: NextPage = () => {
               size={50}
             ></input>
           </div>
-          <div className='label label--recipients'>
-            <textarea
-              className='w-full rounded-md bg-slate-800 text-white text-sm px-4 py-2'
-              id='recipients'
-              value={recipients}
-              onChange={handleRecipientsChange}
-              placeholder='Addresses of recipients (every address in a new line)'
-              rows={3}
-              cols={48}
-            />
-          </div>
+          <textarea
+            className='w-full rounded-md bg-slate-800 text-white text-sm px-4 py-2'
+            id='recipients'
+            value={recipients}
+            onChange={handleRecipientsChange}
+            placeholder='Addresses of recipients (every address in a new line)'
+            rows={3}
+            cols={48}
+          />
           <div className='flex flex-col'>
             <label htmlFor='amount font-bold'>Amount</label>
             <input
