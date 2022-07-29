@@ -101,3 +101,7 @@ h2 {
 .wallet-adapter-dropdown-list {
   @apply w-full;
 }
+
+.program-display:hover .edit-address {
+  @apply block;
+}
