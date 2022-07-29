@@ -33,20 +33,19 @@ export const NftRow: React.FC<NftRowProps> = observer(
     }
 
     return (
-      <div className='inline-flex even:bg-white odd:bg-gray-100'>
-        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 select'>
-          <input
-            type='checkbox'
-            onChange={() => handleSelection()}
-            checked={selected.includes(nftMint)}
-          />
+      <div className='inline-flex odd:bg-slate-800 even:bg-[#34425680] text-sm text-white'>
+        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2'>
+          <label className='control control-checkbox' htmlFor='select-collection' onClick={() => handleSelection()}>
+            <input name='select-collection' type='checkbox' checked={selected.includes(nftMint)} onChange={() => handleSelection()} />
+            <div className='control_indicator'></div>
+          </label>
         </div>
-        <div className='w-5/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 nft-mint'>
+        <div className='w-6/12 flex-wrap text-center inline-flex items-center justify-center first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2'>
           <span>{nftMint}</span>
         </div>
-        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 proposed-count'>{proposed}</div>
-        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 accepted-count'>{accepted}</div>
-        <div className='w-1/3 flex-wrap text-center inline-flex items-center justify-center border-2 border-solid border-gray-200 p-2 actions'>
+        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2'>{proposed}</div>
+        <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2'>{accepted}</div>
+        <div className='w-3/12 flex-wrap text-center inline-flex items-center justify-center first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2'>
           <Button
             color='red'
             ghost={true}

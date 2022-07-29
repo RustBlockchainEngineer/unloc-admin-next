@@ -22,15 +22,15 @@ const ManageCollections: React.FC = observer(() => {
   const [filter, setFilter] = useState<string>('')
   const [checked, setChecked] = useState<boolean>(false)
   
-    const router = useRouter()
+  const router = useRouter()
+  if (!(isAdmin && connected)) router.push('/')
 
   const mapCollectionRows = () => (
     Object.entries(collectionsData)
       .filter(([collection]) => collection.toLowerCase().includes(filter))
       .map(([collection, count]) => (
-      <CollectionRow key={collection} collection={collection} count={count} />
-    )).sort((a, b) => a.key!.toString()
-    .localeCompare(b.key!.toString()))
+        <CollectionRow key={collection} collection={collection} count={count} />
+      )).sort((a, b) => a.key!.toString().localeCompare(b.key!.toString()))
   )
 
   const handleRemoveCollections = async () => {
@@ -40,8 +40,6 @@ const ManageCollections: React.FC = observer(() => {
 
   const handleSelectAll = () => {
     collections.setSelected(checked ? [] : Object.keys(collectionsData))
-
-    setChecked(!checked)
   }
 
   const handleCreateCollection = () => {
@@ -56,12 +54,14 @@ const ManageCollections: React.FC = observer(() => {
     fetchData()
   }, [collections])
 
-  if (!(isAdmin && connected)) router.push('/')
+  useEffect(() => {
+    setChecked(selected.length === Object.keys(collectionsData).length)
+  }, [collectionsData, selected])
 
   return (
     <main className='main grid-content w-full px-8'>
       <header className='w-full inline-flex justify-between mb-4'>
-        <h1 className='text-slate-500'>Manage Collections</h1>
+        <h1 className='text-slate-500 align-middle'>Manage Collections</h1>
 
         <div className='inline-flex gap-4'>
           <div className='inline-flex relative'>
@@ -93,9 +93,9 @@ const ManageCollections: React.FC = observer(() => {
                 <div className='control_indicator border-none bg-slate-800'></div>
               </label>
             </div>
-            <div className='w-5/12 flex-wrap text-center inline-flex justify-center items-center'>Collection</div>
+            <div className='w-6/12 flex-wrap text-center inline-flex justify-center items-center'>Collection</div>
             <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center'>NFT Count</div>
-            <div className='w-5/12 flex-wrap text-center inline-flex justify-center items-center'>Actions</div>
+            <div className='w-4/12 flex-wrap text-center inline-flex justify-center items-center'>Actions</div>
           </div>
         </div>
         <div className='flex flex-col'>{mapCollectionRows()}</div>

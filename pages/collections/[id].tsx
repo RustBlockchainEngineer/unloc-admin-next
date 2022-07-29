@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { observer } from 'mobx-react-lite'
 import { NftRow } from '../../components/nftRow'
@@ -9,6 +9,7 @@ import { AdminContext } from '../_app'
 import { useRouter } from 'next/router'
 import { useStore } from '../../stores'
 import { Button } from '../../components/common/Button'
+import { FaSearch } from 'react-icons/fa'
 
 const ManageNFTs: React.FC = observer(() => {
   const router = useRouter()
@@ -19,13 +20,20 @@ const ManageNFTs: React.FC = observer(() => {
   const { nfts, nftsData, selected } = nftStore
   const { showAddNft, showRemoveNfts } = lightbox
 
+  const [filter, setFilter] = useState<string>('')
+  const [checked, setChecked] = useState<boolean>(false)
+
+  if (!(isAdmin && connected)) router.push('/')
 
   const mapNftRows = () =>
-    Object.entries(nftsData).map(([nftMint, { proposed, accepted }]) => (
+    Object.entries(nftsData)
+    .filter(([nft, { proposed, accepted }]) => nft.toLowerCase().includes(filter) || [proposed, accepted].includes(Number(filter)))
+    .map(([nftMint, { proposed, accepted }]) => (
       <NftRow key={nftMint} nftMint={nftMint} proposed={proposed} accepted={accepted} />
-    )).sort((a, b) => a.key!.toString().localeCompare(b.key!.toString()))
+    ))
+    .sort((a, b) => a.key!.toString().localeCompare(b.key!.toString()))
 
-  const handleAddNft = () => {
+  const handleAddNfts = () => {
     lightbox.setShowAddNft(true)
   }
 
@@ -35,11 +43,7 @@ const ManageNFTs: React.FC = observer(() => {
   }
 
   const handleSelectAll = () => {
-    nftStore.setSelected(nfts)
-  }
-
-  const handleClearSelection = () => {
-    nftStore.setSelected([])
+    nftStore.setSelected(checked ? [] : nfts)
   }
 
   useEffect(() => {
@@ -53,99 +57,90 @@ const ManageNFTs: React.FC = observer(() => {
     if (connected) fetchData()
   }, [connected, id, nftStore])
 
-  if (!(isAdmin && connected)) router.push('/')
+  useEffect(() => {
+    setChecked(selected.length === nfts.length)
+  }, [nfts, selected])
 
   return (
     <main className='main grid-content w-full px-8'>
-      <header className='header nfts__header text-white'>
-        {connected ? (
-          <div className='header__buttons'>
-            <Button
-              color='gray'
-              ghost={true}
-              className='back-to-collections'
-              onClick={() => router.push('/collections')}
-            >
-              Go back to collection list
-            </Button>
-            <Button
-              color='green'
-              className='add-nft'
-              onClick={() => handleAddNft()}
-            >
-              Add NFTs to the whitelisted collection
-            </Button>
+      <header className='w-full inline-flex justify-between mb-4'>
+        <div className='inline-flex'>
+          <Button
+            color='gray'
+            ghost={true}
+            className='back-to-collections'
+            onClick={() => router.push('/collections')}
+          >
+            Go back to collection list
+          </Button>
+          <h1 className='text-slate-500 ml-4 align-middle'>Manage <span className='underline'>{id}</span></h1>
+        </div>
+
+        <div className='inline-flex gap-4'>
+          <div className='inline-flex relative'>
+            <FaSearch className='text-slate-700 absolute top-[14px] left-[10px]' />
+            <input
+              className='bg-transparent border-solid border-slate-500 border-[1px] rounded-lg pl-8 pr-4 text-slate-500 placeholder:text-slate-700'
+              placeholder='Search for collection'
+              onChange={(e) => setFilter(e.target.value.toLowerCase())}
+            />
           </div>
-        ) : (
-          ''
-        )}
-        <h1 className='header__title'>
-          Manage <span className='underline'>{id}</span>
-        </h1>
+
+          <Button
+            color='white'
+            ghost={true}
+            className='w-64'
+            onClick={() => handleAddNfts()}
+          >
+            Add NFTs to the collection
+          </Button>
+        </div>
       </header>
 
-      {connected ? (
-        <>
-          <div className='nfts__table'>
-            <div className='flex flex-col'>
-              <div className='py-4 bg-gray-800 font-bold text-white inline-flex'>
-                <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center select'>Select</div>
-                <div className='w-5/12 flex-wrap text-center inline-flex justify-center items-center nft-mint'>Mint</div>
-                <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center proposed-count'>Proposed</div>
-                <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center accepted-count'>Accepted</div>
-                <div className='w-1/3 flex-wrap text-center inline-flex justify-center items-center actions'>Actions</div>
-              </div>
+      <div className='nfts__table'>
+      <div className='flex flex-col'>
+          <div className='py-4 bg-slate-700 font-bold text-lg text-slate-400 inline-flex rounded-t'>
+            <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center'>
+              <label className='control control-checkbox' htmlFor='select-all' onClick={handleSelectAll}>
+                <input name='select-all' type='checkbox' onChange={handleSelectAll} checked={checked} />
+                <div className='control_indicator border-none bg-slate-800'></div>
+              </label>
             </div>
-            <div className='flex flex-col'>{mapNftRows()}</div>
+            <div className='w-6/12 flex-wrap text-center inline-flex justify-center items-center'>NFT Mint</div>
+            <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center'>Proposed Count</div>
+            <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center'>Accepted Count</div>
+            <div className='w-3/12 flex-wrap text-center inline-flex justify-center items-center'>Actions</div>
           </div>
+        </div>
+        <div className='flex flex-col'>{mapNftRows()}</div>
+      </div>
 
-          <footer className='inline-flex justify-end items-center w-full mt-4 space-x-4'>
-            <Button
-              color='gray'
-              ghost={true}
-              className='clear-selected'
-              disabled={selected.length === 0}
-              onClick={() => handleClearSelection()}
-            >
-              Clear Selection
-            </Button>
-            <Button
-              color='white'
-              ghost={true}
-              className='select-all'
-              disabled={selected.length >= nfts.length}
-              onClick={() => handleSelectAll()}
-            >
-              Select all
-            </Button>
-            <Button
-              color='red'
-              className='remove-selected'
-              disabled={selected.length === 0}
-              onClick={() => handleRemoveNfts()}
-            >
-              Remove Selected
-            </Button>
-          </footer>
+      <footer className='inline-flex justify-end items-center w-full mt-4 space-x-4'>
+        <Button
+          color='red'
+          ghost={true}
+          className='remove-selected'
+          disabled={selected.length === 0}
+          onClick={() => handleRemoveNfts()}
+        >
+          Remove Selected
+        </Button>
+      </footer>
 
-          {id && showAddNft ? (
-            <Lightbox>
-              <LightboxAddNft collection={id as string} />
-            </Lightbox>
-          ) : (
-            ''
-          )}
-
-          {id && showRemoveNfts ? (
-            <Lightbox>
-              <LightboxRemoveNfts collection={id as string} />
-            </Lightbox>
-          ) : (
-            ''
-          )}
-        </>
+      {id && showAddNft ? (
+        <Lightbox>
+          <LightboxAddNft collection={id as string} />
+        </Lightbox>
       ) : (
-        <div className='text-slate-500 not-connected'>Please connect your wallet!</div>
+        ''
+      )}
+
+      {id && showRemoveNfts ? (
+        <Lightbox>
+          <LightboxRemoveNfts collection={id as string} />
+        </Lightbox>
+      ) : (
+        ''
       )}
     </main>
   )
