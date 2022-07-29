@@ -61,6 +61,11 @@ const ManageNFTs: React.FC = observer(() => {
     setChecked(selected.length === nfts.length)
   }, [nfts, selected])
 
+  useEffect(() => {
+    lightbox.hideAllLightboxes()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  
   return (
     <main className='main grid-content w-full px-8'>
       <header className='w-full inline-flex justify-between mb-4'>

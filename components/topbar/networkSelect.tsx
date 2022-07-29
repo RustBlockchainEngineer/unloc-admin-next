@@ -19,6 +19,7 @@ export const NetworkSelect = memo(function NetworkSelect({
     setNetwork(event.currentTarget.value as NetworkName)
   }
 
+  // TODO: Change it to a custom component
   return (
     <select
       defaultValue={network}

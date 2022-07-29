@@ -58,6 +58,11 @@ const ManageCollections: React.FC = observer(() => {
     setChecked(selected.length === Object.keys(collectionsData).length)
   }, [collectionsData, selected])
 
+  useEffect(() => {
+    lightbox.hideAllLightboxes()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <main className='main grid-content w-full px-8'>
       <header className='w-full inline-flex justify-between mb-4'>
@@ -112,20 +117,16 @@ const ManageCollections: React.FC = observer(() => {
         </Button>
       </footer>
 
-      {showCreateCollection ? (
+      {showCreateCollection && (
         <Lightbox className='create-collection'>
           <LightboxCreateCollection />
         </Lightbox>
-      ) : (
-        ''
       )}
 
-      {showRemoveCollections && data.length > 0 ? (
+      {showRemoveCollections && data.length > 0 && (
         <Lightbox className='remove-collections'>
           <LightboxRemoveCollections />
         </Lightbox>
-      ) : (
-        ''
       )}
     </main>
   )

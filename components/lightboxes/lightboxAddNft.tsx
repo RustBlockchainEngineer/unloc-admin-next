@@ -38,24 +38,23 @@ export const LightboxAddNft: React.FC<LightboxAddNftProps> = ({
 
   return (
     <>
-      <span className='lightbox__title'>Add an NFT to whitelist</span>
-      <textarea className='lightbox__input' ref={nftsRef} required={true} rows={5} cols={50} />
-      <div className='lightbox__buttons'>
-        <Button
-          color='green'
-          className='create'
-          onClick={() => handleCreate()}
-        >
-          OK
-        </Button>
-        <Button
-          color='red'
-          className='cancel-create'
-          onClick={() => handleCancelCreate()}
-        >
-          Cancel
-        </Button>
-      </div>
+      <span className='text-2xl font-bold text-slate-400 mb-3'>Add an NFT to whitelist</span>
+      <textarea
+        className='rounded-md bg-slate-800 text-slate-500 placeholder:text-slate-700 px-4 py-3'
+        ref={nftsRef}
+        required={true}
+        rows={4}
+        cols={60}
+        placeholder='Enter NFT mints, one per line'
+      />
+      <Button
+        color='white'
+        ghost={true}
+        className='create w-2/3 self-center mt-4'
+        onClick={() => handleCreate()}
+      >
+        Create
+      </Button>
     </>
   )
 }
