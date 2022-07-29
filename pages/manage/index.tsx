@@ -63,7 +63,7 @@ const ManageAuthority: NextPage = () => {
   return (
     <main className='main grid-content px-8'>
       <div className='w-1/2 mx-auto p-4 bg-slate-700 rounded-md'>
-        <form className='flex flex-col space-y-2'>
+        <form className='flex flex-col space-y-4'>
           <div className='flex flex-col'>
             <label htmlFor='mint'>Mint</label>
             <input

@@ -27,7 +27,7 @@ export const Lightbox: React.FC<LightboxProps> = observer(
         }}
         className={`fixed top-0 left-0 flex flex-col justify-center items-center w-full h-full bg-slate-900/50 ${className}`}
       >
-        <div
+        <dialog
           className='relative flex flex-col bg-slate-700 rounded-lg px-4 pt-3 pb-3'
           tabIndex={0}
           onKeyDown={(e) => {
@@ -40,7 +40,7 @@ export const Lightbox: React.FC<LightboxProps> = observer(
             <FaTimes className='w-7 h-7 text-white' />
           </a>
           {children}
-        </div>
+        </dialog>
       </div>
     )
   }
