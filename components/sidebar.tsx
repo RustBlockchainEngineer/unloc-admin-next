@@ -53,7 +53,6 @@ export const Sidebar = ({ className, network, setNetwork }: SidebarProps) => {
               <NavListItem label='Manage Collections' path='collections' />
               <NavListItem label='NFT Distribution' path='distribute' />
               <NavListItem label='Token Airdropper' path='' />
-              <NavListItem label='Set Global State' path='global-state' />
             </NavItem>
 
             <NavItem label='Rewards' mode='list'>

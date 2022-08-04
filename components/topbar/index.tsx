@@ -72,11 +72,10 @@ export const Topbar = observer(({ network, setNetwork, className }: NavbarProps)
       </div>
 
       {showProgram && (
-          <Lightbox>
-            <LightboxProgram />
-          </Lightbox>
-        )
-      }
+        <Lightbox>
+          <LightboxProgram />
+        </Lightbox>
+      )}
     </div>
   )
 })

@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { PublicKey } from '@solana/web3.js'
 import { distributeNFTsToWallets } from '../../integration'
 import { Button } from '../../components/common/Button'
+import { FaExpandArrowsAlt } from 'react-icons/fa'
 
 const DistributeNFTs: React.FC = () => {
   const wallet = useAnchorWallet()
@@ -74,41 +75,41 @@ const DistributeNFTs: React.FC = () => {
     setRecipients(e.target.value)
   }
 
-  const handledefaultAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleDefaultAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
     setDefaultAmount(Number(e.target.value))
   }
 
   return (
     <main className='main grid-content px-4'>
       <div className='w-1/2 mx-auto bg-slate-700 p-4 rounded-md'>
-        <h1 className='mb-8 text-slate-400'>Distribute NFTs to a list of recipients</h1>
-        <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
+        <h2 className='inline-flex mb-8 text-slate-400'><FaExpandArrowsAlt className='mr-3 self-center' /> Distribute NFTs to a list of recipients</h2>
+        <form className='relative flex flex-col space-y-2 text-sm' onSubmit={handleSubmit}>
           <label className='label label--recipients' htmlFor='recipients'>
             <textarea
-              className='input recipients form-input'
-              id='recipients'
+              className='w-full rounded-md bg-slate-800 text-white text-sm px-4 py-2'
+              id='textarea-admin'
               value={recipients}
               onChange={handleRecipientsChange}
-              placeholder='Addresses of recipients (every address in a new line)'
               rows={3}
               cols={50}
-            ></textarea>
+              placeholder='Addresses of recipients (every address in a new line)'
+            />
           </label>
-          <label className='flex flex-col' htmlFor='amount'>
-            Amount
+          <div className='flex flex-col'>
+            <label htmlFor='amount font-bold'>Amount</label>
             <input
-              className='input amount form-input'
+              className='w-1/3 rounded-sm bg-slate-800 text-white px-2 py-1'
               type='number'
-              min={1}
               id='amount'
               name='amount'
               value={defaultAmount}
-              onChange={handledefaultAmountChange}
-            ></input>
-          </label>
+              onChange={handleDefaultAmountChange}
+            />
+          </div>
           <div className='form__buttons'>
             <Button
-              color='gray'
+              className='w-1/3 absolute right-0 bottom-0'
+              color='white'
               ghost={true}
               type='submit'
             >

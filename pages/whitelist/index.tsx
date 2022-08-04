@@ -54,7 +54,7 @@ const WhitelistUsers: React.FC = () => {
   return (
     <main className='main grid-content w-full px-4 space-x-4 inline-flex'>
       <div className='w-1/2 h-max bg-slate-700 p-4 rounded-md'>
-        <h2 className='mb-8 text-slate-400'><FaUsers className='inline pb-1' /> Add users to whitelist</h2>
+        <h2 className='inline-flex mb-8 text-slate-400'><FaUsers className='self-center mr-3 pb-1' /> Add users to whitelist</h2>
         <form className='relative flex flex-col space-y-2 text-sm' onSubmit={(e) => handleSubmit(e, 'users')}>
           <label htmlFor='users'>
             <textarea
@@ -80,17 +80,17 @@ const WhitelistUsers: React.FC = () => {
       </div>
 
       <div className='w-1/2 h-max bg-slate-700 p-4 rounded-md'>
-        <h2 className='mb-8 text-slate-400'><FaUserCog className='inline pb-1' /> Add admins to whitelist</h2>
+        <h2 className='inline-flex mb-8 text-slate-400'><FaUserCog className='self-center mr-3 pb-1' /> Add admins to whitelist</h2>
         <form className='relative flex flex-col space-y-2 text-sm' onSubmit={(e) => handleSubmit(e, 'admins')}>
-            <textarea
-              className='w-full rounded-md bg-slate-800 text-white text-sm px-4 py-2'
-              id='textarea-admin'
-              value={admins}
-              onChange={(e) => handleWhitelistedChange(e, 'admins')}
-              rows={3}
-              cols={50}
-              placeholder='Add admins adressess'
-            />
+          <textarea
+            className='w-full rounded-md bg-slate-800 text-white text-sm px-4 py-2'
+            id='textarea-admin'
+            value={admins}
+            onChange={(e) => handleWhitelistedChange(e, 'admins')}
+            rows={3}
+            cols={50}
+            placeholder='Add admins adressess'
+          />
           <div className='form__buttons'>
             <Button
               color='gray'

@@ -49,31 +49,5 @@ export const LightboxProgram = () => {
         </Button>
       </div>
     </>
-    // <div className='flex w-[50ch] flex-col space-y-6'>
-    //   <h3>Edit {name} program address</h3>
-    //   <form className='flex flex-col space-y-2' method='dialog'>
-    //     <input className='px-2 py-1' placeholder='Public key' value={input} onChange={handleInput} type='text' />
-    //     <div className='flex justify-end space-x-2'>
-    //       <Button
-    //         onClick={handleSet(initialValues[name])}
-    //         className='mr-auto'
-    //       >
-    //         Reset to default
-    //       </Button>
-    //       <Button
-    //         onClick={closeModal}
-    //       >
-    //         Close
-    //       </Button>
-    //       <Button
-    //         type='submit'
-    //         color='black'
-    //         onClick={handleSet(input)}
-    //       >
-    //         Submit
-    //       </Button>
-    //     </div>
-    //   </form>
-    // </div>
   )
 }
