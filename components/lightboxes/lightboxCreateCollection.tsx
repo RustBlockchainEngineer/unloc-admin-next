@@ -22,14 +22,6 @@ export const LightboxCreateCollection: React.FC = observer(() => {
     }
   }
 
-  const handleCancelCreate = () => {
-    lightbox.setShowCreateCollection(false)
-
-    if (!(collectionRef.current && collectionRef.current.value)) return
-
-    collectionRef.current.value = ''
-  }
-
   return (
     <>
       <span className='text-2xl font-bold text-slate-400 mb-3'>Create Collections</span>

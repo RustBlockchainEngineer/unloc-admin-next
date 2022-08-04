@@ -28,14 +28,6 @@ export const LightboxAddNft: React.FC<LightboxAddNftProps> = ({
     }
   }
 
-  const handleCancelCreate = () => {
-    lightbox.setShowAddNft(false)
-
-    if (!nftsRef.current) return
-
-    nftsRef.current.value = ''
-  }
-
   return (
     <>
       <span className='text-2xl font-bold text-slate-400 mb-3'>Add an NFT to whitelist</span>

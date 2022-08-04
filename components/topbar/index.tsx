@@ -6,6 +6,8 @@ import { isWalletAdmin } from '../../functions/api-queries'
 import { AdminContext, NetworkName } from '../../pages/_app'
 import { useStore } from '../../stores'
 import { AddressSetter, ProgramName, programs } from '../../stores/Programs.store'
+import { Lightbox } from '../lightboxes/lightbox'
+import { LightboxProgram } from '../lightboxes/lightboxProgram'
 
 import { NetworkSelect } from './networkSelect'
 import { ProgramDisplay } from './programDisplay'
@@ -27,7 +29,8 @@ function getSetterAccessor(name: ProgramName): keyof AddressSetter {
 export const Topbar = observer(({ network, setNetwork, className }: NavbarProps) => {
   const { connected, publicKey } = useWallet()
   const { setIsAdmin } = useContext(AdminContext)
-  const { programs: programStore } = useStore()
+  const { programs: programStore, lightbox: lightboxStore } = useStore()
+  const { showProgram } = lightboxStore
 
   useEffect(() => {
     const checkIfAdmin = async () => {
@@ -67,6 +70,13 @@ export const Topbar = observer(({ network, setNetwork, className }: NavbarProps)
         <NetworkSelect network={network} setNetwork={setNetwork} />
         <WalletMultiButton className='shadow-md transition-colors min-w-[160px]' />
       </div>
+
+      {showProgram && (
+          <Lightbox>
+            <LightboxProgram />
+          </Lightbox>
+        )
+      }
     </div>
   )
 })

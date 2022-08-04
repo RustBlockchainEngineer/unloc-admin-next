@@ -25,7 +25,7 @@ export const Lightbox: React.FC<LightboxProps> = observer(
         onClick={(e) => {
           closeWindow(e, true)
         }}
-        className={`fixed top-0 left-0 flex flex-col justify-center items-center w-full h-full bg-slate-900/50 ${className}`}
+        className={`fixed z-50 top-0 left-0 flex flex-col justify-center items-center w-full h-full bg-slate-900/50 ${className}`}
       >
         <dialog
           className='relative flex flex-col bg-slate-700 rounded-lg px-4 pt-3 pb-3'

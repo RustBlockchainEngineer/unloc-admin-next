@@ -2,10 +2,12 @@ import { observer } from 'mobx-react-lite'
 import { useContext, useRef } from 'react'
 import { FaEdit } from 'react-icons/fa'
 import { AdminContext } from '../../pages/_app'
+import { useStore } from '../../stores'
 import { ProgramName } from '../../stores/Programs.store'
 import { compressAddress } from '../../utils'
 import { Copyable } from '../common/Copyable'
-import { ProgramModal } from './programModal'
+import { Lightbox } from '../lightboxes/lightbox'
+import { LightboxProgram } from '../lightboxes/lightboxProgram'
 
 interface ProgramDisplayProps {
   name: ProgramName
@@ -17,9 +19,14 @@ interface ProgramDisplayProps {
 export const ProgramDisplay = observer(
   ({ name, getAddress, getSetter, className }: ProgramDisplayProps) => {
     const { isAdmin } = useContext(AdminContext)
-    const dialogRef = useRef<HTMLDialogElement>(null)
-    const handleEditClick = () => dialogRef.current?.showModal()
-    const handleCloseClick = () => dialogRef.current?.close()
+
+    const { lightbox: lightboxStore } = useStore()
+
+    const handleEditClick = () => {
+      lightboxStore.setName(name)
+      lightboxStore.setLightboxFunction(getSetter)
+      lightboxStore.setShowProgram(true)
+    }
 
     return (
       <div
@@ -41,12 +48,6 @@ export const ProgramDisplay = observer(
             <span className='text-center'>{compressAddress(4, getAddress())}</span>
           </Copyable>
         </div>
-        <dialog
-          ref={dialogRef}
-          className='rounded-md shadow-md backdrop:bg-black backdrop:bg-opacity-40'
-        >
-          <ProgramModal name={name} addressSetter={getSetter} closeModal={handleCloseClick} />
-        </dialog>
       </div>
     )
   }
