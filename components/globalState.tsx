@@ -2,11 +2,11 @@ import React, { FormEvent, useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { PublicKey } from '@solana/web3.js'
 import { BN } from '@project-serum/anchor'
-import { IGlobalState, getGlobalState, initLoanProgram, setGlobalState } from '../../integration/unloc'
-import { AdminContext } from '../_app'
+import { IGlobalState, getGlobalState, initLoanProgram, setGlobalState } from '../integration/unloc'
+import { AdminContext } from '../pages/_app'
 import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { useRouter } from 'next/router'
-import { Button } from '../../components/common/Button'
+import { Button } from './common/Button'
 
 const SetGlobalState: React.FC = () => {
   const [accIntNum, setAccIntNum] = useState<BN>(new BN(0))
@@ -121,7 +121,7 @@ const SetGlobalState: React.FC = () => {
   if (typeof window !== 'undefined' && !(isAdmin && connected)) router.push('/')
 
   return (
-    <main className='main grid-content px-8'>
+    <div className=''>
       <div className='bg-slate-700 p-4 rounded-md'>
         <h1 className='h1 h1--global-state mb-2 text-slate-400'>Set the UNLOC Program Global State</h1>
 
@@ -219,7 +219,7 @@ const SetGlobalState: React.FC = () => {
           </div>
         </form>
       </div>
-    </main>
+    </div>
   )
 }
 
