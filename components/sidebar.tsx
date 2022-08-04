@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavItem } from './navItem'
 import { NavListItem } from './navListItem'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { NetworkSelect } from './topbar/networkSelect'
 import { NetworkName } from '../pages/_app'
+import { FaBars } from 'react-icons/fa'
 
 // -------------------- Current
 // Airdrop
@@ -34,9 +35,16 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ className, network, setNetwork }: SidebarProps) => {
+  const [hidden, setHidden] = useState(true)
+
+  const toggleSideNav = (): void => setHidden(!hidden)
+
   return (
-    <div className={`h-1/1 bg-slate-700 ${className || ''}`}>
-      <div className='px-9'>
+    <div className={`transition-all ${hidden ? 'w-16 bg-slate-800 delay-100' : 'w-full bg-slate-700'} ${className || ''}`}>
+      <a className={`transition-all block mt-2 mb-4 hover:cursor-pointer ${hidden ? 'rotate-0' : 'rotate-180'}`} onClick={toggleSideNav}>
+        <FaBars className='block text-white w-12 h-12 m-auto' />
+      </a>
+      <div className={`transition-all px-9 ${hidden ? 'invisibile opacity-0' : 'invisibile opacity-100 delay-100'}`}>
         <nav className='flex'>
           <ul className='flex flex-col space-y-2 w-full'>
             <NavItem label={network} mode='list'>
