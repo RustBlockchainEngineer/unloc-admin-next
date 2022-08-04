@@ -18,7 +18,6 @@ export const VotingForm = () => {
   const { loanGlobalState } = programs
 
   const initialValues: Partial<Values> = {
-    votingPid: loanGlobalState?.votingPid.toBase58(),
     voting: loanGlobalState?.voting.toBase58()
   }
 
@@ -33,7 +32,6 @@ export const VotingForm = () => {
         superOwner
       },
       {
-        unlocStakingPid: new PublicKey(values.voting),
         unlocStakingPoolId: new PublicKey(values.votingPid)
       },
       programs.loanPubkey

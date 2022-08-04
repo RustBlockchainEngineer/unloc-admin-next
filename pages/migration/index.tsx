@@ -13,6 +13,10 @@ import { StakingPoolForm } from '../../components/migration/stakingPoolForm'
 import { VotingForm } from '../../components/migration/votingForm'
 import { DepositRewardsForm } from '../../components/migration/depositRewardsForm'
 import { ClaimExpiredCollateralForm } from '../../components/migration/claimExpiredCollateralForm'
+import { VotingGlobalState } from '../../components/migration/forms/votingGlobalState'
+import { VotingAccount } from '../../components/migration/forms/votingAccount'
+import { VotingItem } from '../../components/migration/forms/votingItem'
+import { Vote } from '../../components/migration/forms/vote'
 
 const Migration: NextPage = observer(() => {
   const { connection } = useConnection()
@@ -28,7 +32,7 @@ const Migration: NextPage = observer(() => {
   return (
     <main className='main grid-content bg-slate-900 text-white'>
       <div className='p-12'>
-        <h1 className='mb-6 text-3xl text-slate-700'>Manage settings for UNLOC contracts v2</h1>
+        <h1 className='mb-6 text-3xl text-slate-700'>Manage settings for UNLOC Loan contract v2</h1>
         <section id='loan-global-state' className='my-8'>
           <p className='mb-4 text-2xl text-slate-700'>Manage Global State</p>
           <div className='grid grid-cols-2 items-start space-x-6 tablet:grid-cols-1'>
@@ -105,6 +109,44 @@ const Migration: NextPage = observer(() => {
             </ContentBox>
           </div>
         </section>
+      </div>
+      <div className='p-12'>
+        <h1 className='mb-6 text-3xl text-slate-700'>Manage settings for UNLOC Voting contract</h1>
+        <section>
+          <p className='my-4 text-2xl text-slate-700'>Set Vote Global State</p>
+          <div className='grid grid-cols-2 items-start space-x-6 pt-4 pb-8 tablet:grid-cols-1'>
+            <ContentBox title='Voting Global State' icon={<FaEdit />} className='flex-auto'>
+              <VotingGlobalState />
+            </ContentBox>
+          </div>
+        </section>
+        <section>
+          <p className='my-4 text-2xl text-slate-700'>Set Voting Account</p>
+          <div className='grid grid-cols-2 items-start space-x-6 pt-4 pb-8 tablet:grid-cols-1'>
+            <ContentBox title='Voting Instance' icon={<FaEdit />} className='flex-auto'>
+              <VotingAccount />
+            </ContentBox>
+          </div>
+        </section>
+        <section>
+          <p className='my-4 text-2xl text-slate-700'>Set Voting Items</p>
+          <div className='grid grid-cols-2 items-start space-x-6 pt-4 pb-8 tablet:grid-cols-1'>
+            <ContentBox title='Voting Item' icon={<FaEdit />} className='flex-auto'>
+              <VotingItem />
+            </ContentBox>
+          </div>
+        </section>
+        <section>
+          <p className='my-4 text-2xl text-slate-700'>Vote Instruction</p>
+          <div className='grid grid-cols-2 items-start space-x-6 pt-4 pb-8 tablet:grid-cols-1'>
+            <ContentBox title='Vote for a Collection' icon={<FaEdit />} className='flex-auto'>
+              <Vote />
+            </ContentBox>
+          </div>
+        </section>
+      </div>
+      <div className='p-12'>
+        <h1 className='mb-6 text-3xl text-slate-700'>Manage settings for UNLOC Staking contract</h1>
       </div>
     </main>
   )

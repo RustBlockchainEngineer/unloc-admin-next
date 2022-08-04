@@ -14,6 +14,7 @@ import { pda } from '../../integration/unloc'
 import { useStore } from '../../stores'
 import { Button } from '../common/Button'
 import { InputAdapter } from './InputAdapter'
+import { BN } from 'bn.js'
 
 interface AccountInputs {
   treasuryWallet: string
@@ -136,8 +137,6 @@ export const GlobalStateForm = observer(() => {
       globalState,
       rewardMint: new PublicKey(values.rewardMint),
       rewardVault: rewardVault,
-      newSuperOwner: new PublicKey(values.newSuperOwner),
-      treasuryWallet: new PublicKey(values.treasuryWallet),
       clock: SYSVAR_CLOCK_PUBKEY
     }
     const data: SetGlobalStateInstructionArgs = {
@@ -147,7 +146,9 @@ export const GlobalStateForm = observer(() => {
       aprNumerator: Number(values.aprNumerator),
       expireLoanDuration: Number(values.expireLoanDuration),
       rewardRate: Number(values.rewardRate),
-      lenderRewardsPercentage: Number(values.lenderRewardsPercentage)
+      lenderRewardsPercentage: Number(values.lenderRewardsPercentage),
+      newSuperOwner: new PublicKey(values.newSuperOwner),
+      treasuryWallet: new PublicKey(values.treasuryWallet),
     }
 
     const ix = createSetGlobalStateInstruction({ ...accounts }, { ...data }, programs.loanPubkey)
@@ -212,9 +213,7 @@ export const GlobalStateForm = observer(() => {
               <Button className='btn' onClick={handleFillCurrent}>
                 Fill Current Values
               </Button>
-              <Button type='submit'>
-                Submit
-              </Button>
+              <Button type='submit'>Submit</Button>
             </div>
           </form>
         )

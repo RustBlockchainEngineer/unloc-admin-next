@@ -18,7 +18,6 @@ export const StakingPoolForm = () => {
   const { loanGlobalState } = programs
 
   const initialValues: Partial<Values> = {
-    unlocStakingPid: loanGlobalState?.unlocStakingPid.toBase58(),
     unlocStakingPoolId: loanGlobalState?.unlocStakingPoolId.toBase58()
   }
 
@@ -33,7 +32,6 @@ export const StakingPoolForm = () => {
         superOwner
       },
       {
-        unlocStakingPid: new PublicKey(values.unlocStakingPid),
         unlocStakingPoolId: new PublicKey(values.unlocStakingPoolId)
       },
       programs.loanPubkey
