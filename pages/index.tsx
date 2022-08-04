@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 import { airdrop, airdropToMultiple, getMintDecimals } from '../integration'
 import { NextPage } from 'next'
 import { Button } from '../components/common/Button'
+import { FaArrowAltCircleDown, FaSortAmountDown } from 'react-icons/fa'
 
 const AirdropToMultiple: NextPage = () => {
   const wallet = useAnchorWallet()
@@ -114,7 +115,7 @@ const AirdropToMultiple: NextPage = () => {
   return (
     <main className='main grid-content w-full px-4 space-x-4 inline-flex'>
       <div className='w-1/2 bg-slate-700 p-4 rounded-md h-max'>
-        <h2 className='mb-8 text-slate-400'>Airdrop tokens to a list of recipients</h2>
+      <h2 className='inline-flex mb-8 text-slate-400'><FaSortAmountDown className='self-center mr-3' /> Airdrop tokens to a list of recipients</h2>
         <form className='relative flex flex-col space-y-2 text-sm' onSubmit={handleSubmit}>
           <div className='flex flex-col'>
             <label htmlFor='mint'>Mint</label>
@@ -160,7 +161,7 @@ const AirdropToMultiple: NextPage = () => {
         </form>
       </div>
       <div className='w-1/2 bg-slate-700 p-4 rounded-md h-max'>
-        <h2 className='mb-8 text-slate-400'>Airdrop tokens owned by the program to yourself</h2>
+        <h2 className='inline-flex mb-8 text-slate-400'><FaArrowAltCircleDown className='self-center mr-3' /> Airdrop tokens owned by the program to yourself</h2>
         <form className='relative flex flex-col space-y-2 text-sm' onSubmit={handleSelfSubmit}>
           <div className='flex flex-col'>
             <label htmlFor='self-mint'>Mint</label>
