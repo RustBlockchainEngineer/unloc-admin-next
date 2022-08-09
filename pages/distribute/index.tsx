@@ -1,6 +1,6 @@
 import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react'
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import { TOKEN_PROGRAM_ID } from '../../node_modules/@solana/spl-token'
 import toast from 'react-hot-toast'
 import { PublicKey } from '@solana/web3.js'
 import { distributeNFTsToWallets } from '../../integration'

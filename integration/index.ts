@@ -13,7 +13,7 @@ import {
   MintLayout,
   createAssociatedTokenAccountInstruction,
   createTransferCheckedInstruction
-} from '@solana/spl-token'
+} from '../node_modules/@solana/spl-token'
 
 import { AnchorWallet } from '@solana/wallet-adapter-react'
 import { Program, BN, AnchorProvider } from '@project-serum/anchor'

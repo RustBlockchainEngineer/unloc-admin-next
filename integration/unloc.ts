@@ -2,7 +2,7 @@ import { Connection, MemcmpFilter, PublicKey } from '@solana/web3.js'
 import * as anchor from '@project-serum/anchor'
 import { bs58 } from '@project-serum/anchor/dist/cjs/utils/bytes'
 import { UnlocNftLoan, IDL as idl } from '../idl/unloc_idl'
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import { TOKEN_PROGRAM_ID } from '../node_modules/@solana/spl-token'
 import { AnchorWallet } from '@solana/wallet-adapter-react'
 
 const DEVNET = true

@@ -1,5 +1,5 @@
 import { useConnection } from '@solana/wallet-adapter-react'
-import { getAccount, Account } from '@solana/spl-token'
+import { getAccount, Account } from '../node_modules/@solana/spl-token'
 import { PublicKey } from '@solana/web3.js'
 import { useEffect, useState } from 'react'
 
