@@ -15,6 +15,8 @@ import { useStore } from '../../stores'
 import { Button } from '../common/Button'
 import { InputAdapter } from './InputAdapter'
 import { BN } from 'bn.js'
+import * as anchor from '@project-serum/anchor'
+import { setLoanGlobalState } from '@unloc-dev/unloc-sdk'
 
 interface AccountInputs {
   treasuryWallet: string
@@ -125,46 +127,59 @@ export const GlobalStateForm = observer(() => {
   }
 
   const handleSubmit = async (values: Values) => {
-    const superOwner = publicKey
-    const globalState = programs.loanGlobalStatePda
-    const REWARD_VAULT_TAG = Buffer.from('REWARD_VAULT_SEED')
-    const rewardVault = await pda([REWARD_VAULT_TAG], programs.loanPubkey)
-    if (!superOwner) return
+    // const superOwner = publicKey
+    // const globalState = programs.loanGlobalStatePda
+    // const REWARD_VAULT_TAG = Buffer.from('REWARD_VAULT_SEED')
+    // const rewardVault = await pda([REWARD_VAULT_TAG], programs.loanPubkey)
+    // if (!superOwner) return
 
-    const accounts: SetGlobalStateInstructionAccounts = {
-      superOwner,
-      payer: superOwner,
-      globalState,
-      rewardMint: new PublicKey(values.rewardMint),
-      rewardVault: rewardVault,
-      clock: SYSVAR_CLOCK_PUBKEY
-    }
-    const data: SetGlobalStateInstructionArgs = {
-      accruedInterestNumerator: Number(values.accruedInterestNumerator),
-      denominator: Number(values.denominator),
-      minRepaidNumerator: Number(values.minRepaidNumerator),
-      aprNumerator: Number(values.aprNumerator),
-      expireLoanDuration: Number(values.expireLoanDuration),
-      rewardRate: Number(values.rewardRate),
-      lenderRewardsPercentage: Number(values.lenderRewardsPercentage),
-      newSuperOwner: new PublicKey(values.newSuperOwner),
-      treasuryWallet: new PublicKey(values.treasuryWallet),
-    }
+    // const accounts: SetGlobalStateInstructionAccounts = {
+    //   superOwner,
+    //   payer: superOwner,
+    //   globalState,
+    //   rewardMint: new PublicKey(values.rewardMint),
+    //   rewardVault: rewardVault,
+    //   clock: SYSVAR_CLOCK_PUBKEY
+    // }
+    // const data: SetGlobalStateInstructionArgs = {
+    //   accruedInterestNumerator: Number(values.accruedInterestNumerator),
+    //   denominator: Number(values.denominator),
+    //   minRepaidNumerator: Number(values.minRepaidNumerator),
+    //   aprNumerator: Number(values.aprNumerator),
+    //   expireLoanDuration: Number(values.expireLoanDuration),
+    //   rewardRate: Number(values.rewardRate),
+    //   lenderRewardsPercentage: Number(values.lenderRewardsPercentage),
+    //   newSuperOwner: new PublicKey(values.newSuperOwner),
+    //   treasuryWallet: new PublicKey(values.treasuryWallet),
+    // }
 
-    const ix = createSetGlobalStateInstruction({ ...accounts }, { ...data }, programs.loanPubkey)
-    const latestBlockhash = await connection.getLatestBlockhash()
-    const tx = new Transaction({
-      feePayer: publicKey,
-      ...latestBlockhash
-    }).add(ix)
+    // const ix = createSetGlobalStateInstruction({ ...accounts }, { ...data }, programs.loanPubkey)
+    // const latestBlockhash = await connection.getLatestBlockhash()
+    // const tx = new Transaction({
+    //   feePayer: publicKey,
+    //   ...latestBlockhash
+    // }).add(ix)
 
-    try {
-      const signature = await sendTransaction(tx, connection, { skipPreflight: true })
-      console.log(signature)
-      await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
-    } catch (e) {
-      console.error(e)
-    }
+    // try {
+    //   const signature = await sendTransaction(tx, connection, { skipPreflight: true })
+    //   console.log(signature)
+    //   await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
+    // } catch (e) {
+    //   console.error(e)
+    // }
+
+    await setLoanGlobalState(
+      new anchor.BN(values.accruedInterestNumerator),
+      new anchor.BN(values.denominator),
+      new anchor.BN(values.minRepaidNumerator),
+      new anchor.BN(values.aprNumerator),
+      new anchor.BN(values.expireLoanDuration),
+      new anchor.BN(values.rewardRate),
+      new anchor.BN(values.lenderRewardsPercentage),
+      new anchor.web3.PublicKey(values.rewardMint),
+      new anchor.web3.PublicKey(values.treasuryWallet),
+      new anchor.web3.PublicKey(values.newSuperOwner),
+    )
   }
 
   return (
