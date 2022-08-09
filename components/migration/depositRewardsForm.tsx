@@ -1,4 +1,4 @@
-import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import {
   SystemProgram,
@@ -57,41 +57,41 @@ export const DepositRewardsForm = () => {
   }
 
   const handleSubmit = async (values: Values) => {
-    const globalState = programs.loanGlobalStatePda
-    const authority = publicKey
-    if (!authority || !loanGlobalState?.rewardVault) return
+    // const globalState = programs.loanGlobalStatePda
+    // const authority = publicKey
+    // if (!authority || !loanGlobalState?.rewardVault) return
 
-    const userRewardVault = await getAssociatedTokenAddress(loanGlobalState.rewardVault, authority)
-    const ix = createDepositRewardsInstruction(
-      {
-        globalState,
-        authority,
-        rewardVault: loanGlobalState.rewardVault,
-        userRewardVault,
-        chainlinkProgram: new PublicKey(values.chainlinkProgram),
-        solFeed: new PublicKey(values.solFeed),
-        usdcFeed: new PublicKey(values.usdcFeed),
-        clock: defaults.clock,
-        tokenProgram: defaults.tokenProgram
-      },
-      {
-        amount: values.amount
-      },
-      programs.loanPubkey
-    )
-    const latestBlockhash = await connection.getLatestBlockhash()
-    const tx = new Transaction({
-      feePayer: publicKey,
-      ...latestBlockhash
-    }).add(ix)
+    // const userRewardVault = await getAssociatedTokenAddress(loanGlobalState.rewardVault, authority)
+    // const ix = createDepositRewardsInstruction(
+    //   {
+    //     globalState,
+    //     authority,
+    //     rewardVault: loanGlobalState.rewardVault,
+    //     userRewardVault,
+    //     chainlinkProgram: new PublicKey(values.chainlinkProgram),
+    //     solFeed: new PublicKey(values.solFeed),
+    //     usdcFeed: new PublicKey(values.usdcFeed),
+    //     clock: defaults.clock,
+    //     tokenProgram: defaults.tokenProgram
+    //   },
+    //   {
+    //     amount: values.amount
+    //   },
+    //   programs.loanPubkey
+    // )
+    // const latestBlockhash = await connection.getLatestBlockhash()
+    // const tx = new Transaction({
+    //   feePayer: publicKey,
+    //   ...latestBlockhash
+    // }).add(ix)
 
-    try {
-      const signature = await sendTransaction(tx, connection, { skipPreflight: true })
-      console.log(signature)
-      await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
-    } catch (e) {
-      console.error(e)
-    }
+    // try {
+    //   const signature = await sendTransaction(tx, connection, { skipPreflight: true })
+    //   console.log(signature)
+    //   await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
+    // } catch (e) {
+    //   console.error(e)
+    // }
   }
 
   return (
