@@ -1,13 +1,13 @@
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, Transaction } from '@solana/web3.js'
 import { createSetStakingPoolInstruction } from '@unloc-dev/unloc-loan-solita'
+import { setLoanStakingPool } from '@unloc-dev/unloc-sdk'
 import { SyntheticEvent, useCallback } from 'react'
 import { Field, Form } from 'react-final-form'
 import { useStore } from '../../stores'
 import { InputAdapter } from './InputAdapter'
 
 interface Values {
-  unlocStakingPid: string
   unlocStakingPoolId: string
 }
 
@@ -22,33 +22,12 @@ export const StakingPoolForm = () => {
   }
 
   const handleSubmit = async (values: Values) => {
-    const globalState = programs.loanGlobalStatePda
     const superOwner = publicKey
     if (!superOwner) return
-
-    const ix = createSetStakingPoolInstruction(
-      {
-        globalState,
-        superOwner
-      },
-      {
-        unlocStakingPoolId: new PublicKey(values.unlocStakingPoolId)
-      },
-      programs.loanPubkey
+    
+    await setLoanStakingPool(
+      new PublicKey(values.unlocStakingPoolId)
     )
-    const latestBlockhash = await connection.getLatestBlockhash()
-    const tx = new Transaction({
-      feePayer: publicKey,
-      ...latestBlockhash
-    }).add(ix)
-
-    try {
-      const signature = await sendTransaction(tx, connection, { skipPreflight: true })
-      console.log(signature)
-      await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
-    } catch (e) {
-      console.error(e)
-    }
   }
 
   return (
@@ -63,13 +42,6 @@ export const StakingPoolForm = () => {
         return (
           <form onSubmit={handleSubmit} className='bg-unlocGray-500 p-4'>
             <div className='flex flex-col'>
-              <Field<string>
-                name='unlocStakingPid'
-                type='text'
-                label='UNLOC Staking PID'
-                component={InputAdapter}
-                required
-              ></Field>
               <Field<string>
                 name='unlocStakingPoolId'
                 type='text'

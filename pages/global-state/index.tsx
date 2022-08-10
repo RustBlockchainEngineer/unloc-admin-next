@@ -2,11 +2,12 @@ import React, { FormEvent, useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { PublicKey } from '@solana/web3.js'
 import { BN } from '@project-serum/anchor'
-import { IGlobalState, getGlobalState, initLoanProgram, setGlobalState } from '../../integration/unloc'
+import { IGlobalState, getGlobalState, setGlobalState } from '../../integration/unloc'
 import { AdminContext } from '../_app'
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react'
 import { useRouter } from 'next/router'
 import { Button } from '../../components/common/Button'
+import { initLoanProgram } from '@unloc-dev/unloc-sdk'
 
 const SetGlobalState: React.FC = () => {
   const [accIntNum, setAccIntNum] = useState<BN>(new BN(0))
@@ -30,7 +31,7 @@ const SetGlobalState: React.FC = () => {
       setCurrentGlobalState(globalState)
     }
 
-    initLoanProgram(wallet)
+    initLoanProgram(wallet, connection)
     setTreasury(typeof treasuryParam === 'string' ? treasuryParam : '')
     fetchGlobalState()
   }, [treasuryParam])

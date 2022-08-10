@@ -1,4 +1,4 @@
-import { useConnection } from '@solana/wallet-adapter-react'
+import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react'
 import { observer } from 'mobx-react-lite'
 import { NextPage } from 'next'
 import { useEffect } from 'react'
@@ -17,11 +17,14 @@ import { VotingGlobalState } from '../../components/migration/forms/votingGlobal
 import { VotingAccount } from '../../components/migration/forms/votingAccount'
 import { VotingItem } from '../../components/migration/forms/votingItem'
 import { Vote } from '../../components/migration/forms/vote'
+import { initLoanProgram } from '@unloc-dev/unloc-sdk'
 
 const Migration: NextPage = observer(() => {
   const { connection } = useConnection()
   const { programs } = useStore()
   const { loanGlobalStatePromiseState, loanGlobalState, updateGlobalStateAccount } = programs
+  const wallet = useAnchorWallet()
+  initLoanProgram(wallet, connection)
 
   useEffect(() => {
     if (!loanGlobalState) {
