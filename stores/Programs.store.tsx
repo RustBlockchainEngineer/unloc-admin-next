@@ -5,10 +5,10 @@ import { RootStore } from '.'
 import { GlobalState } from '@unloc-dev/unloc-loan-solita'
 
 export const initialValues = {
-  loan: '6oVXrGCdtnTUR6xCvn2Z3f2CYaiboAGar1DKxzeX8QYh',
-  stake: 'EmS3wD1UF9UhejugSrfUydMzWrCKBCxz4Dr1tBUsodfU',
-  vote: '6z6RuFauTG511XRakJnPhxUTCVPohv6oC69xieMdm4Z9',
-  buyback: '37TgoUgxSshhJmhNEAQMmAWF7XRhXEaY5HxcTZ6eYs6r'
+  loan: 'TkpSRsB8yB2qRETXLuPxuZ6Fkg2vuJnmfsQiJLfVpmG',
+  stake: 'GMdNWaWuQQAMTFr1gWd5VeT6CLbwn6QwiTy3Ek8F6Xvr',
+  vote: '7ZQhqWKTKbZZxvRVDVBLTfZneKyTsEyUTQKwbraLyAP3',
+  buyback: '2v8ZEC4QzHVf9ogZBvwtgasJsiNJfR3EtKqgtH39bTsw'
 }
 
 export const programs = ['loan', 'stake', 'vote', 'buyback'] as const
