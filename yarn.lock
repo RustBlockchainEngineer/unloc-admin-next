@@ -1295,10 +1295,10 @@
     "@solana/spl-token" "^0.2.0"
     "@solana/web3.js" "^1.47.3"
 
-"@unloc-dev/unloc-sdk@^0.2.6":
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/@unloc-dev/unloc-sdk/-/unloc-sdk-0.2.6.tgz#57a92787e71ab6965a90513c3a7e6979a0e28f25"
-  integrity sha512-uNpyBv7xCLwcPEvQc60WjpFzLdFPQm5E8vbfl9T9MFXWZwrCKLpWjIFxt6a6AtfpF+6j9WXItMidvqbbcun+3A==
+"@unloc-dev/unloc-sdk@^0.2.82":
+  version "0.2.82"
+  resolved "https://registry.yarnpkg.com/@unloc-dev/unloc-sdk/-/unloc-sdk-0.2.82.tgz#35591f79138570f5bbdcd2095ccc05fb5d193f63"
+  integrity sha512-nvQbO4KG3Kd13r3wSMI6FTeljXwLH1V+SV7Jup+6PoR2z6vhAaiYW+mh5oxufLbF2HoJqsrnG8sZNUbQC5b8iQ==
   dependencies:
     "@colors/colors" "^1.5.0"
     "@metaplex-foundation/mpl-token-metadata" "1.1.0"

@@ -23,9 +23,11 @@ const Migration: NextPage = observer(() => {
   const { connection } = useConnection()
   const { programs } = useStore()
   const { loanGlobalStatePromiseState, loanGlobalState, updateGlobalStateAccount } = programs
+  
   const wallet = useAnchorWallet()
-  initLoanProgram(wallet, connection)
-
+  useEffect(() => {
+    initLoanProgram(wallet, connection, programs.loanPubkey)
+  }, [connection, programs.loanPubkey, wallet])
   useEffect(() => {
     if (!loanGlobalState) {
       updateGlobalStateAccount(connection)
