@@ -18,6 +18,7 @@ import { VotingAccount } from '../../components/migration/forms/votingAccount'
 import { VotingItem } from '../../components/migration/forms/votingItem'
 import { Vote } from '../../components/migration/forms/vote'
 import { initLoanProgram } from '@unloc-dev/unloc-sdk'
+import { WithdrawRewardsForm } from '../../components/migration/withdrawRewardsForm'
 
 const Migration: NextPage = observer(() => {
   const { connection } = useConnection()
@@ -101,7 +102,7 @@ const Migration: NextPage = observer(() => {
           <p className='my-4 text-2xl text-slate-700'>Withdraw Rewards</p>
           <div className='grid grid-cols-2 items-start space-x-6 pt-4 pb-8 tablet:grid-cols-1'>
             <ContentBox title='Withdraw amount' icon={<FaEdit />} className='flex-auto'>
-              <DepositRewardsForm />
+              <WithdrawRewardsForm />
             </ContentBox>
           </div>
         </section>

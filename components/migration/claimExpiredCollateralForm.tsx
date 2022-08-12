@@ -7,6 +7,7 @@ import { SyntheticEvent, useCallback } from 'react'
 import { Field, Form } from 'react-final-form'
 import { useStore } from '../../stores'
 import { InputAdapter } from './InputAdapter'
+import { claimExpiredCollateral } from '@unloc-dev/unloc-sdk'
 
 interface Values {
   unlocStakingPid: string
@@ -24,41 +25,10 @@ export const ClaimExpiredCollateralForm = () => {
   }
 
   const handleSubmit = async (values: Values) => {
-    const globalState = programs.loanGlobalStatePda
     const superOwner = publicKey
     if (!superOwner) return
 
-    const ix = createClaimExpiredCollateralInstruction(
-      {
-        globalState,
-        superOwner,
-        treasuryWallet: superOwner,
-        offer: superOwner,
-        borrowerNftVault: superOwner,
-        subOffer: superOwner,
-        edition: superOwner,
-        nftMint: superOwner,
-        userNftVault: superOwner,
-        metadataProgram: superOwner,
-        clock: superOwner,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID
-      },
-      programs.loanPubkey
-    )
-    const latestBlockhash = await connection.getLatestBlockhash()
-    const tx = new Transaction({
-      feePayer: publicKey,
-      ...latestBlockhash
-    }).add(ix)
-
-    try {
-      const signature = await sendTransaction(tx, connection, { skipPreflight: true })
-      console.log(signature)
-      await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
-    } catch (e) {
-      console.error(e)
-    }
+    // await claimExpiredCollateral()
   }
 
   return (

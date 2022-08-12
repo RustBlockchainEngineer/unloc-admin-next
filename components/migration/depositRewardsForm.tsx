@@ -1,31 +1,12 @@
-import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from '../../node_modules/@solana/spl-token'
-import { useConnection, useWallet } from '@solana/wallet-adapter-react'
+import { useWallet } from '@solana/wallet-adapter-react'
 import {
-  SystemProgram,
-  Transaction,
-  SYSVAR_CLOCK_PUBKEY,
-  SYSVAR_RENT_PUBKEY,
   PublicKey
 } from '@solana/web3.js'
-import {
-  createDepositRewardsInstruction,
-  createWithdrawRewardsInstruction
-} from '@unloc-dev/unloc-loan-solita'
 import { SyntheticEvent } from 'react'
 import { Field, Form } from 'react-final-form'
-import { useStore } from '../../stores'
 import { InputAdapter } from './InputAdapter'
-
-const systemProgram = SystemProgram.programId
-const tokenProgram = TOKEN_PROGRAM_ID
-const rent = SYSVAR_RENT_PUBKEY
-const clock = SYSVAR_CLOCK_PUBKEY
-const defaults = {
-  systemProgram,
-  tokenProgram,
-  rent,
-  clock
-}
+import { depositRewards } from '@unloc-dev/unloc-sdk'
+import anchor from '@project-serum/anchor'
 
 const CHAINLINK_STORE_PROGRAM = new PublicKey('HEvSKofvBgfaexv23kMabbYqxasxU3mQ4ibBMEmJWHny')
 export const CHAINLINK_SOL_FEED = new PublicKey('HgTtcbcmp5BeThax5AU8vg4VwK79qAvAKKFMs8txMLW6')
@@ -45,10 +26,7 @@ interface Values {
 }
 
 export const DepositRewardsForm = () => {
-  const { connection } = useConnection()
-  const { programs } = useStore()
-  const { publicKey, sendTransaction } = useWallet()
-  const { loanGlobalState } = programs
+  const { publicKey } = useWallet()
 
   const defaultValues: Partial<Values> = {
     chainlinkProgram: chainlinkIds.chainlinkProgram.toBase58(),
@@ -57,41 +35,12 @@ export const DepositRewardsForm = () => {
   }
 
   const handleSubmit = async (values: Values) => {
-    const globalState = programs.loanGlobalStatePda
     const authority = publicKey
-    if (!authority || !loanGlobalState?.rewardVault) return
+    if (!authority) return
 
-    const userRewardVault = await getAssociatedTokenAddress(loanGlobalState.rewardVault, authority)
-    const ix = createDepositRewardsInstruction(
-      {
-        globalState,
-        authority,
-        rewardVault: loanGlobalState.rewardVault,
-        userRewardVault,
-        chainlinkProgram: new PublicKey(values.chainlinkProgram),
-        solFeed: new PublicKey(values.solFeed),
-        usdcFeed: new PublicKey(values.usdcFeed),
-        clock: defaults.clock,
-        tokenProgram: defaults.tokenProgram
-      },
-      {
-        amount: values.amount
-      },
-      programs.loanPubkey
+    await depositRewards(
+      new anchor.BN(values.amount)
     )
-    const latestBlockhash = await connection.getLatestBlockhash()
-    const tx = new Transaction({
-      feePayer: publicKey,
-      ...latestBlockhash
-    }).add(ix)
-
-    try {
-      const signature = await sendTransaction(tx, connection, { skipPreflight: true })
-      console.log(signature)
-      await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
-    } catch (e) {
-      console.error(e)
-    }
   }
 
   return (
