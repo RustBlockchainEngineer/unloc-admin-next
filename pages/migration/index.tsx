@@ -17,7 +17,7 @@ import { VotingGlobalState } from '../../components/migration/forms/votingGlobal
 import { VotingAccount } from '../../components/migration/forms/votingAccount'
 import { VotingItem } from '../../components/migration/forms/votingItem'
 import { Vote } from '../../components/migration/forms/vote'
-import { initLoanProgram } from '@unloc-dev/unloc-sdk'
+import { initLoanProgram, initVotingProgram } from '@unloc-dev/unloc-sdk'
 import { WithdrawRewardsForm } from '../../components/migration/withdrawRewardsForm'
 
 const Migration: NextPage = observer(() => {
@@ -28,7 +28,8 @@ const Migration: NextPage = observer(() => {
   const wallet = useAnchorWallet()
   useEffect(() => {
     initLoanProgram(wallet, connection, programs.loanPubkey)
-  }, [connection, programs.loanPubkey, wallet])
+    initVotingProgram(wallet, connection, programs.votePubkey)
+  }, [connection, programs.loanPubkey, programs.votePubkey, wallet])
   useEffect(() => {
     if (!loanGlobalState) {
       updateGlobalStateAccount(connection)

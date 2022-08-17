@@ -1,63 +1,24 @@
-import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { PublicKey, SYSVAR_CLOCK_PUBKEY, Transaction } from '@solana/web3.js'
-import clsx from 'clsx'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { PublicKey } from '@solana/web3.js'
 import { observer } from 'mobx-react-lite'
-import { SyntheticEvent, useState } from 'react'
+import { SyntheticEvent } from 'react'
 import { Form, Field } from 'react-final-form'
-import { useTokenAccount } from '../../../hooks/useAccount'
-import {
-  createSetGlobalStateInstruction,
-  SetGlobalStateInstructionAccounts,
-  SetGlobalStateInstructionArgs
-} from '@unloc-dev/unloc-voting-solita'
-import { pda } from '../../../integration/unloc'
-import { useStore } from '../../../stores'
 import { Button } from '../../common/Button'
 import { InputAdapter } from '../InputAdapter'
+import { setVotingGlobalState } from '@unloc-dev/unloc-sdk'
 
 interface Values {
   newSuperOwner: string
-  stakingPid: string
 }
 
 export const VotingGlobalState = observer(() => {
-  const { connection } = useConnection()
-  const { publicKey, sendTransaction } = useWallet()
-  const { programs } = useStore()
-
-  const initialValues: Partial<Values> = {
-    stakingPid: programs.stake
-  }
-
+  const { publicKey } = useWallet()
   const handleSubmit = async (values: Values) => {
     const superOwner = publicKey
     const payer = publicKey
-    const globalState = PublicKey.findProgramAddressSync(
-      [Buffer.from('GLOBAL_STATE_TAG')],
-      programs.votePubkey
-    )[0]
     if (!superOwner || !payer) return
 
-    const ix = createSetGlobalStateInstruction(
-      { globalState, payer, superOwner },
-      {
-        newSuperOwner: new PublicKey(values.newSuperOwner),
-        stakingPid: new PublicKey(values.stakingPid)
-      }
-    )
-    const latestBlockhash = await connection.getLatestBlockhash()
-    const tx = new Transaction({
-      feePayer: publicKey,
-      ...latestBlockhash
-    }).add(ix)
-
-    try {
-      const signature = await sendTransaction(tx, connection, { skipPreflight: true })
-      console.log(signature)
-      await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
-    } catch (e) {
-      console.error(e)
-    }
+    await setVotingGlobalState(new PublicKey(values.newSuperOwner))
   }
 
   return (
@@ -66,7 +27,7 @@ export const VotingGlobalState = observer(() => {
       render={({ handleSubmit, form }) => {
         const handleFillCurrent = (e: SyntheticEvent) => {
           e.preventDefault()
-          form.reset(initialValues)
+          // form.reset(initialValues)
         }
 
         return (
@@ -76,13 +37,6 @@ export const VotingGlobalState = observer(() => {
                 name='newSuperOwner'
                 type='text'
                 label='New Super Owner'
-                component={InputAdapter}
-                required
-              ></Field>
-              <Field<string>
-                name='stakingPid'
-                type='text'
-                label='Staking PID'
                 component={InputAdapter}
                 required
               ></Field>
