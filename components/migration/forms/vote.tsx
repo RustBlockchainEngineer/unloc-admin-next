@@ -10,6 +10,7 @@ import { useStore } from '../../../stores'
 import { Button } from '../../common/Button'
 import { InputAdapter } from '../InputAdapter'
 import { BN } from 'bn.js'
+import { vote } from '@unloc-dev/unloc-sdk'
 
 interface Values {
   votingNumber: number
@@ -17,34 +18,17 @@ interface Values {
 }
 
 export const Vote = observer(() => {
-  const { connection } = useConnection()
-  const { publicKey, sendTransaction } = useWallet()
+  const { publicKey } = useWallet()
   const { programs } = useStore()
 
   const handleSubmit = async (values: Values) => {
     const user = publicKey
     const payer = publicKey
-    const globalState = PublicKey.findProgramAddressSync(
-      [Buffer.from('GLOBAL_STATE_TAG')],
-      programs.votePubkey
-    )[0]
     const VOTING_TAG = Buffer.from('VOTING_TAG')
     const VOTING_ITEM_TAG = Buffer.from('VOTING_ITEM_TAG')
-    const VOTING_USER_TAG = Buffer.from('VOTING_USER_TAG')
     const key = new PublicKey(values.collectionKey)
 
-    const rewardMint = new PublicKey('Bt8KVz26uLrXrMzRKaJgX9rYd2VcfBh8J67D4s3kRmut')
     if (!user || !payer) return
-
-    const [stakePool] = PublicKey.findProgramAddressSync(
-      [rewardMint.toBuffer()],
-      programs.stakePubkey
-    )
-    const [stakingUser] = PublicKey.findProgramAddressSync(
-      [stakePool.toBuffer(), user.toBuffer()],
-      programs.stakePubkey
-    )
-
     const voting = await pda(
       [VOTING_TAG, new BN(values.votingNumber).toArrayLike(Buffer, 'be', 8)],
       programs.votePubkey
@@ -53,27 +37,8 @@ export const Vote = observer(() => {
       [VOTING_ITEM_TAG, voting.toBuffer(), key.toBuffer()],
       programs.votePubkey
     )
-    const votingUser = await pda(
-      [VOTING_USER_TAG, voting.toBuffer(), user.toBuffer()],
-      programs.votePubkey
-    )
 
-    const ix = createVoteInstruction(
-      { globalState, payer, user, voting, votingItem, votingUser, stakingUser },
-    )
-    const latestBlockhash = await connection.getLatestBlockhash()
-    const tx = new Transaction({
-      feePayer: publicKey,
-      ...latestBlockhash
-    }).add(ix)
-
-    try {
-      const signature = await sendTransaction(tx, connection, { skipPreflight: true })
-      console.log(signature)
-      await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
-    } catch (e) {
-      console.error(e)
-    }
+    await vote(votingItem)
   }
 
   return (
