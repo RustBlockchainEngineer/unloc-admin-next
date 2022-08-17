@@ -143,14 +143,14 @@ const Migration: NextPage = observer(() => {
             </ContentBox>
           </div>
         </section>
-        <section>
+        {/* <section>
           <p className='my-4 text-2xl text-slate-700'>Vote Instruction</p>
           <div className='grid grid-cols-2 items-start space-x-6 pt-4 pb-8 tablet:grid-cols-1'>
             <ContentBox title='Vote for a Collection' icon={<FaEdit />} className='flex-auto'>
               <Vote />
             </ContentBox>
           </div>
-        </section>
+        </section> */}
       </div>
       <div className='p-12'>
         <h1 className='mb-6 text-3xl text-slate-700'>Manage settings for UNLOC Staking contract</h1>
