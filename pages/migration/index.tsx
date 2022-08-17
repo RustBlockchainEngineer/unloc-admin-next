@@ -155,6 +155,9 @@ const Migration: NextPage = observer(() => {
       <div className='p-12'>
         <h1 className='mb-6 text-3xl text-slate-700'>Manage settings for UNLOC Staking contract</h1>
       </div>
+      <div className='p-12'>
+        <h1 className='mb-6 text-3xl text-slate-700'>Manage settings for UNLOC Buyback contract</h1>
+      </div>
     </main>
   )
 })
