@@ -1,15 +1,13 @@
-import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { PublicKey, SYSVAR_CLOCK_PUBKEY, Transaction } from '@solana/web3.js'
-import clsx from 'clsx'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { PublicKey } from '@solana/web3.js'
 import { observer } from 'mobx-react-lite'
-import { SyntheticEvent, useState } from 'react'
 import { Form, Field } from 'react-final-form'
-import { createSetVotingItemInstruction } from '@unloc-dev/unloc-voting-solita/'
 import { pda } from '../../../integration/unloc'
 import { useStore } from '../../../stores'
 import { Button } from '../../common/Button'
 import { InputAdapter } from '../InputAdapter'
 import { BN } from 'bn.js'
+import { setVotingItem } from '@unloc-dev/unloc-sdk'
 
 interface Values {
   votingNumber: number
@@ -17,48 +15,25 @@ interface Values {
 }
 
 export const VotingItem = observer(() => {
-  const { connection } = useConnection()
-  const { publicKey, sendTransaction } = useWallet()
+  const { publicKey } = useWallet()
   const { programs } = useStore()
 
   const handleSubmit = async (values: Values) => {
     const superOwner = publicKey
     const payer = publicKey
-    const globalState = PublicKey.findProgramAddressSync(
-      [Buffer.from('GLOBAL_STATE_TAG')],
-      programs.votePubkey
-    )[0]
     const VOTING_TAG = Buffer.from('VOTING_TAG')
-    const VOTING_ITEM_TAG = Buffer.from('VOTING_ITEM_TAG')
     const key = new PublicKey(values.collectionKey)
 
     const voting = await pda(
       [VOTING_TAG, new BN(values.votingNumber).toArrayLike(Buffer, 'be', 8)],
       programs.votePubkey
     )
-    const votingItem = await pda(
-      [VOTING_ITEM_TAG, voting.toBuffer(), key.toBuffer()],
-      programs.votePubkey
-    )
     if (!superOwner || !payer) return
 
-    const ix = createSetVotingItemInstruction(
-      { globalState, payer, superOwner, voting, votingItem },
-      { key },
+    await setVotingItem(
+      key,
+      voting
     )
-    const latestBlockhash = await connection.getLatestBlockhash()
-    const tx = new Transaction({
-      feePayer: publicKey,
-      ...latestBlockhash
-    }).add(ix)
-
-    try {
-      const signature = await sendTransaction(tx, connection, { skipPreflight: true })
-      console.log(signature)
-      await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
-    } catch (e) {
-      console.error(e)
-    }
   }
 
   return (
