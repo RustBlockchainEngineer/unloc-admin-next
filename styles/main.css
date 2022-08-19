@@ -17,17 +17,13 @@
 
   display: grid;
   grid-template-areas:
-    'logo topbar topbar'
+    'topbar topbar topbar'
     'sidebar content content';
   grid-template-rows: min-content 1fr;
-  grid-template-columns: 18rem 1fr 1fr;
+  grid-template-columns: auto 1fr 1fr;
 }
 
 /* Grid areas */
-.grid-logo {
-  grid-area: logo;
-}
-
 .grid-sidebar {
   grid-area: sidebar;
 }

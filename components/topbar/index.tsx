@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import Image from 'next/image'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { observer } from 'mobx-react-lite'
@@ -11,6 +13,8 @@ import { LightboxProgram } from '../lightboxes/lightboxProgram'
 
 import { NetworkSelect } from './networkSelect'
 import { ProgramDisplay } from './programDisplay'
+
+import logoImage from '/public/unlock_logo_dark.svg'
 
 interface NavbarProps {
   network: NetworkName
@@ -54,6 +58,11 @@ export const Topbar = observer(({ network, setNetwork, className }: NavbarProps)
 
   return (
     <div className={`inline-flex w-full py-4 bg-slate-700 ${className || ''}`}>
+      <div className='inline-flex w-72 items-center justify-center py-4'>
+        <Link href='/'>
+          <Image src={logoImage} width={150} height={38} alt='logo' />
+        </Link>
+      </div>
       <div className='inline-flex w-full'>
         {programs.map((program) => {
           return (

@@ -2,7 +2,7 @@ import { ButtonHTMLAttributes, FC, ReactNode } from 'react'
 
 export interface IButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children?: ReactNode
-  color?: 'black' | 'gray' | 'white' | 'red' | 'lime' | 'green' | 'blue' | 'yellow' | 'purple'
+  color?: 'black' | 'gray' | 'white' | 'red' | 'lime' | 'green' | 'blue' | 'yellow' | 'purple' | 'light-slate'
   ghost?: boolean
   disabled?: boolean
 }
@@ -49,6 +49,9 @@ export const Button: FC<IButtonProps> = ({
 
       case 'purple':
         return `border-purple-700 hover:bg-purple-600 ${ghost ? 'text-purple-700 bg-transparent hover:text-white' : 'bg-purple-700 text-white'}`
+
+      case 'light-slate':
+        return `border-slate-400 bg-slate-700 hover:bg-slate-600 text-white`
 
       default:
         return ''

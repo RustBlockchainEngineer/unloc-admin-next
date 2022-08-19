@@ -120,12 +120,14 @@ const AirdropToMultiple: NextPage = () => {
           <div className='flex flex-col'>
             <label htmlFor='mint'>Mint</label>
             <input
-              className='rounded-sm bg-slate-800 text-white px-2 py-1'
+              className='rounded-md bg-slate-800 text-white px-2 py-1'
               type='text'
               id='mint'
               value={mint}
               onChange={handleMintChange}
               size={50}
+              minLength={32}
+              maxLength={44}
             />
           </div>
           <textarea
@@ -140,7 +142,7 @@ const AirdropToMultiple: NextPage = () => {
           <div className='flex flex-col'>
             <label htmlFor='amount font-bold'>Amount</label>
             <input
-              className='w-1/3 rounded-sm bg-slate-800 text-white px-2 py-1'
+              className='w-1/3 rounded-md bg-slate-800 text-white px-2 py-1'
               type='number'
               id='amount'
               name='amount'
@@ -166,24 +168,26 @@ const AirdropToMultiple: NextPage = () => {
           <div className='flex flex-col'>
             <label htmlFor='self-mint'>Mint</label>
             <input
-              className='rounded-sm bg-slate-800 text-white px-2 py-1'
+              className='rounded-md bg-slate-800 text-white px-2 py-1'
               type='text'
               id='mint'
               value={selfMint}
               onChange={handleSelfMintChange}
               size={50}
-            ></input>
+              minLength={32}
+              maxLength={44}
+            />
           </div>
           <div className='flex flex-col'>
             <label htmlFor='self-amount'>Amount</label>
             <input
-              className='w-1/3 rounded-sm bg-slate-800 text-white px-2 py-1'
+              className='w-1/3 rounded-md bg-slate-800 text-white px-2 py-1'
               type='number'
               id='self-amount'
               name='self-amount'
               value={selfAmount}
               onChange={handleSelfAmountChange}
-            ></input>
+            />
           </div>
           <div className='form__buttons'>
             <Button

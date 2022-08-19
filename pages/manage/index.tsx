@@ -67,7 +67,7 @@ const ManageAuthority: NextPage = () => {
           <div className='flex flex-col'>
             <label htmlFor='mint'>Mint</label>
             <input
-              className='rounded-sm bg-slate-800 text-white px-2 py-1'
+              className='rounded-md bg-slate-800 text-white px-2 py-1'
               type='text'
               id='mint'
               value={mint}

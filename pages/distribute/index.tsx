@@ -98,7 +98,7 @@ const DistributeNFTs: React.FC = () => {
           <div className='flex flex-col'>
             <label htmlFor='amount font-bold'>Amount</label>
             <input
-              className='w-1/3 rounded-sm bg-slate-800 text-white px-2 py-1'
+              className='w-1/3 rounded-md bg-slate-800 text-white px-2 py-1'
               type='number'
               id='amount'
               name='amount'

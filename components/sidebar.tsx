@@ -40,13 +40,13 @@ export const Sidebar = ({ className, network, setNetwork }: SidebarProps) => {
   const toggleSideNav = (): void => setHidden(!hidden)
 
   return (
-    <div className={`transition-all ${hidden ? 'w-16 bg-slate-800 delay-100' : 'w-full bg-slate-700'} ${className || ''}`}>
-      <a className={`transition-all block mt-2 mb-4 hover:cursor-pointer ${hidden ? 'rotate-0 delay-100' : 'rotate-180'}`} onClick={toggleSideNav}>
+    <div className={`transition-all ${hidden ? 'w-16 bg-slate-800 delay-100' : 'w-72 bg-slate-700'} ${className || ''}`}>
+      <a className={`transition-transform block mt-2 mb-4 hover:cursor-pointer ${hidden ? 'rotate-0 delay-100' : 'rotate-180'}`} onClick={toggleSideNav}>
         <FaBars className='block text-white w-12 h-12 m-auto' />
       </a>
       <div className={`transition-all px-9 ${hidden ? 'invisibile opacity-0' : 'invisibile opacity-100 delay-100'}`}>
-        <nav className='flex'>
-          <ul className='flex flex-col space-y-2 w-full'>
+        <nav className={`flex ${hidden ? 'w-0 delay-100' : 'w-full'}`}>
+          <ul className='flex flex-col space-y-2'>
             <NavItem label={network} mode='list'>
               <NavListItem label='Whitelist' path='whitelist' />
               <NavListItem label='Manage Authority' path='manage' />
@@ -71,7 +71,7 @@ export const Sidebar = ({ className, network, setNetwork }: SidebarProps) => {
           </ul>
         </nav>
       </div>
-      <div className='flex flex-col xl:hidden m-6 gap-y-6'>
+      <div className={`transition-opacity flex flex-col m-6 gap-y-4 xl:hidden ${hidden ? 'invisibile opacity-0' : 'invisibile opacity-100 delay-100'}`}>
         <NetworkSelect network={network} setNetwork={setNetwork} className='h-12' />
         <WalletMultiButton className='shadow-md transition-colors w-full' />
       </div>

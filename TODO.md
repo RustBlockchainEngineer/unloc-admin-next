@@ -2,6 +2,7 @@
 - [x] Change `Topbar` *Dialogs* to common `Lightbox` component
 - [x] Move `Global State` Page to `Loan` Page
 - [x] Distribute NFTs Page
-- [ ] Favicons on `Wallets Profile` and `Loan` Pages
-- [ ] Loan Page
+- [x] Loan Page
+- [x] Favicons on `Loan` Page
 - [ ] User History Page
+- [ ] Favicons on `Wallets Profile` Page

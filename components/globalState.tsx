@@ -1,24 +1,22 @@
 import React, { FormEvent, useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { PublicKey } from '@solana/web3.js'
-import { BN } from '@project-serum/anchor'
-import { IGlobalState, getGlobalState, initLoanProgram, setGlobalState } from '../integration/unloc'
+import { IGlobalState, getGlobalState, initLoanProgram, programId } from '../integration/unloc'
 import { AdminContext } from '../pages/_app'
-import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react'
+import { useAnchorWallet, useWallet } from '@solana/wallet-adapter-react'
 import { useRouter } from 'next/router'
 import { Button } from './common/Button'
+import { FaCopy, FaEye, FaGlobe } from 'react-icons/fa'
+import { Copyable } from './common/Copyable'
 
 const SetGlobalState: React.FC = () => {
-  const [accIntNum, setAccIntNum] = useState<BN>(new BN(0))
-  const [denomin, setDenomin] = useState<BN>(new BN(0))
-  const [aprNum, setAprNum] = useState<BN>(new BN(0))
-  const [duration, setDuration] = useState<BN>(new BN(0))
   const [treasury, setTreasury] = useState<string>('')
-  const [programAddress, setProgramAddress] = useState<string>('')
+  const [rewardMint, setRewardMint] = useState<string>('')
+  const [superOwner, setSuperOwner] = useState<string>('')
+  const [rewardVault, setRewardVault] = useState<string>('')
   const [currentGlobalState, setCurrentGlobalState] = useState<IGlobalState>()
 
   const { isAdmin } = useContext(AdminContext)
-  const { connection } = useConnection()
+  // const { connection } = useConnection()
   const { connected } = useWallet()
   const wallet = useAnchorWallet()
 
@@ -39,185 +37,200 @@ const SetGlobalState: React.FC = () => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (!programAddress) {
-      toast.error('Enter the program address')
+    if (!wallet) {
+      toast.error('Connect your wallet')
       return
     }
-
-    if (!accIntNum) {
-      toast.error('Enter the Accrued Interest Numerator')
-      return
-    }
-
-    if (!denomin) {
-      toast.error('Enter the Denominator')
-      return
-    }
-
-    if (!aprNum) {
-      toast.error('Enter the Annual Percentage Ratio Numerator')
-      return
-    }
-
-    if (!duration) {
-      toast.error('Enter the Expire Duration For Lender')
-      return
-    }
-
+  
     if (!treasury) {
       toast.error('Enter the treasury')
       return
     }
 
-    if (!wallet) {
-      toast.error('Connect your wallet')
+    if (!rewardMint) {
+      toast.error('Enter the reward mint')
       return
     }
-    try {
-      const pid = new PublicKey(programAddress)
-      const treasuryPubkey = new PublicKey(treasury)
-      const tx = await setGlobalState(accIntNum, denomin, aprNum, duration, treasuryPubkey, wallet, connection, pid)
-      tx.recentBlockhash = (await connection.getLatestBlockhash('confirmed')).blockhash
-      tx.feePayer = wallet.publicKey
 
-      const signed = await wallet.signTransaction(tx)
-      const txid = await connection.sendRawTransaction(signed.serialize())
-      await connection.confirmTransaction(txid, 'confirmed')
-
-      // eslint-disable-next-line no-console
-      console.log(tx)
-      toast.success('Set global state!')
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
-      toast.error((error as Error).message)
+    if (!superOwner) {
+      toast.error('Enter the super owner')
+      return
     }
-  }
 
-  const handleAccIntNumChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAccIntNum(new BN(event.target.value))
-  }
+    if (!rewardVault) {
+      toast.error('Enter the reward vault')
+      return
+    }
 
-  const handleDenominChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDenomin(new BN(event.target.value))
-  }
-
-  const handleAprNumChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAprNum(new BN(event.target.value))
-  }
-
-  const handleDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDuration(new BN(event.target.value))
-  }
-
-  const handleTreasuryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTreasury(event.target.value)
-  }
-
-  const handleProgramAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setProgramAddress(event.target.value)
+    console.info(
+      `Setting global state:\ntreasury=${treasury},\nrewardMint=${rewardMint},\nsuperOwner=${superOwner},\nrewardVault=${rewardVault}`
+    )
   }
 
   if (typeof window !== 'undefined' && !(isAdmin && connected)) router.push('/')
 
   return (
-    <div className=''>
-      <div className='bg-slate-700 p-4 rounded-md'>
-        <h1 className='h1 h1--global-state mb-2 text-slate-400'>Set the UNLOC Program Global State</h1>
+    <div className='inline-flex w-full gap-x-5'>
+      <div className='w-1/2 bg-slate-700 p-4 rounded-md'>
+        <h2 className='inline-flex mb-2 text-slate-400'><FaGlobe className='self-center mr-3' /> Set Global State</h2>
 
-        {currentGlobalState && (
-          <div className='current-global-state'>
-            <h2 className='h2'>Current Program Global State</h2>
-            <p>Accrued Interest Numerator: <span>{currentGlobalState.accruedInterestNumerator.toNumber()}</span></p>
-            <p>Denominator: <span>{currentGlobalState.denominator.toNumber()}</span></p>
-            <p>Annual Percentage Ratio Numerator: <span>{currentGlobalState.aprNumerator.toNumber()}</span></p>
-            <p>Expire Duration For Lender: <span>{currentGlobalState.expireDurationForLender.toNumber()}</span></p>
-            <p>Treasury: <span>{currentGlobalState.treasuryWallet.toBase58()}</span></p>
-          </div>
-        )}
-
-        <form className='flex flex-col space-y-2' onSubmit={handleSubmit}>
-          <label className='label' htmlFor='prog-addr'>
-            Program address
+        <form className='flex flex-col gap-y-2' onSubmit={handleSubmit}>
+          <div>
+            <label className='relative inline-flex w-full mb-2' htmlFor='treasury'>
+              <span className='block absolute bg-slate-700 py-2 pr-2 text-sm font-bold'>Treasury Wallet Address</span>
+              <div className='w-full border-t-[1px] border-slate-600 my-4' />
+            </label>
             <input
-              className='input form-input'
+              className='w-full rounded-md bg-slate-800 text-white px-2 py-1'
               type='text'
-              id='progAddr'
-              value={programAddress}
-              onChange={handleProgramAddressChange}
-              size={50}
-              min={0}
-            />
-          </label>
-          <label className='label' htmlFor='acc-int-num'>
-            Accrued Interest Numerator
-            <input
-              className='input form-input'
-              type='number'
-              id='accIntNum'
-              value={accIntNum.toNumber()}
-              onChange={handleAccIntNumChange}
-              size={50}
-              min={0}
-            />
-          </label>
-          <label className='label' htmlFor='denomin'>
-            Denominator
-            <input
-              className='input form-input'
-              type='number'
-              id='denomin'
-              value={denomin.toNumber()}
-              onChange={handleDenominChange}
-              size={50}
-              min={0}
-            />
-          </label>
-          <label className='label' htmlFor='apr-num'>
-            Annual Percentage Ratio Numerator (%)
-            <input
-              className='input form-input'
-              type='number'
-              id='apr-num'
-              value={aprNum.toNumber()}
-              onChange={handleAprNumChange}
-              size={50}
-              min={0}
-            />
-          </label>
-          <label className='label' htmlFor='duration'>
-            Expire Duration For Lender
-            <input
-              className='input form-input'
-              type='number'
-              id='duration'
-              value={duration.toNumber()}
-              onChange={handleDurationChange}
-              size={50}
-              min={0}
-            />
-          </label>
-          <label className='label' htmlFor='treasury'>
-            Treasury Wallet Address
-            <input
-              className='input form-input'
-              type='text'
-              id='treasury'
+              name='treasury'
               value={treasury}
-              onChange={handleTreasuryChange}
-              size={50}
+              onInput={(e) => setTreasury((e.target as HTMLInputElement).value)}
+              minLength={32}
+              maxLength={44}
             />
-          </label>
-          <div className='form__buttons'>
+          </div>
+
+          <div>
+            <label className='relative inline-flex w-full mb-2' htmlFor='reward-mint'>
+              <span className='block absolute bg-slate-700 py-2 pr-2 text-sm font-bold'>Reward Mint</span>
+              <div className=' w-full border-t-[1px] border-slate-600 my-4' />
+            </label>
+            <input
+              className='w-full rounded-md bg-slate-800 text-white px-2 py-1'
+              type='text'
+              name='reward-mint'
+              value={rewardMint}
+              onChange={(e) => setRewardMint((e.target as HTMLInputElement).value)}
+              minLength={32}
+              maxLength={44}
+            />
+          </div>
+
+          <div>
+            <label className='relative inline-flex w-full mb-2' htmlFor='super-owner'>
+              <span className='block absolute bg-slate-700 py-2 pr-2 text-sm font-bold'>New Super Owner</span>
+              <div className='w-full border-t-[1px] border-slate-600 my-4' />
+            </label>
+            <input
+              className='w-full rounded-md bg-slate-800 text-white px-2 py-1'
+              type='text'
+              name='super-owner'
+              value={superOwner}
+              onChange={(e) => setSuperOwner((e.target as HTMLInputElement).value)}
+              minLength={32}
+              maxLength={44}
+            />
+          </div>
+
+          <div>
+            <label className='relative inline-flex w-full mb-2' htmlFor='reward-vault'>
+              <span className='block absolute bg-slate-700 py-2 pr-2 text-sm font-bold'>Reward Vault</span>
+              <div className='w-full border-t-[1px] border-slate-600 my-4' />
+            </label>
+            <input
+              className='w-full rounded-md bg-slate-800 text-white px-2 py-1'
+              type='text'
+              name='reward-vault'
+              value={rewardVault}
+              onChange={(e) => setRewardVault((e.target as HTMLInputElement).value)}
+              minLength={32}
+              maxLength={44}
+            />
+          </div>
+
+          <div className='inline-flex justify-center gap-x-4 mt-4'>
             <Button
-              color='gray'
+              color='white'
+              ghost={true}
+              type='reset'
+              className='w-2/5'
+            >
+              Fill Current Values
+            </Button>
+            <Button
+              color='white'
               ghost={true}
               type='submit'
+              className='w-2/5'
             >
               Submit
             </Button>
           </div>
         </form>
+      </div>
+
+      <div className='w-1/2 bg-slate-700 p-4 rounded-md'>
+        <h2 className='inline-flex mb-2 text-slate-400'><FaEye className='self-center mr-3' /> Current Global State</h2>
+
+        {currentGlobalState && (
+          <div className='flex flex-col gap-y-2'>
+            <p>
+              <span className='text-sm text-slate-400 font-bold'>PDA</span>
+              <br />
+              <div className='inline-flex bg-slate-400 px-4 py-2 rounded-md font-light'>
+                {`${programId.toBase58().slice(0, 4)}...${programId.toBase58().slice(-4)}`}
+                <Copyable content={programId.toBase58()}>
+                  <FaCopy className='ml-2 mt-1' />
+                </Copyable>
+              </div>
+            </p>
+
+            <p>
+              <span className='text-sm text-slate-400 font-bold'>Treasury:</span>
+              <br />
+              <div className='inline-flex bg-slate-400 px-4 py-2 rounded-md font-light'>
+                {`${currentGlobalState.treasuryWallet.toBase58().slice(0, 4)}...${currentGlobalState.treasuryWallet.toBase58().slice(-4)}`}
+                <Copyable content={currentGlobalState.treasuryWallet.toBase58()}>
+                  <FaCopy className='ml-2 mt-1' />
+                </Copyable>
+              </div>
+            </p>
+
+            <p>
+              <span className='text-sm text-slate-400 font-bold'>Accrued Interest Numerator</span>
+              <br />
+              <div className='inline-flex bg-slate-400 px-4 py-2 rounded-md font-light'>
+                {currentGlobalState.accruedInterestNumerator.toString()}
+                <Copyable content={programId.toBase58()}>
+                  <FaCopy className='ml-2 mt-1' />
+                </Copyable>
+              </div>
+            </p>
+
+            <p>
+              <span className='text-sm text-slate-400 font-bold'>Denominator</span>
+              <br />
+              <div className='inline-flex bg-slate-400 px-4 py-2 rounded-md font-light'>
+                {currentGlobalState.denominator.toString()}
+                <Copyable content={currentGlobalState.denominator.toString()}>
+                  <FaCopy className='ml-2 mt-1' />
+                </Copyable>
+              </div>
+            </p>
+
+            <p>
+              <span className='text-sm text-slate-400 font-bold'>Annual Percentage Ratio Numerator</span>
+              <br />
+              <div className='inline-flex bg-slate-400 px-4 py-2 rounded-md font-light'>
+                {currentGlobalState.aprNumerator.toString()}
+                <Copyable content={currentGlobalState.aprNumerator.toString()}>
+                  <FaCopy className='ml-2 mt-1' />
+                </Copyable>
+              </div>
+            </p>
+
+            <p>
+              <span className='text-sm text-slate-400 font-bold'>Expire Duration For Lender</span><br />
+              <div className='inline-flex bg-slate-400 px-4 py-2 rounded-md font-light'>
+                {currentGlobalState.expireDurationForLender.toString()}
+                <Copyable content={currentGlobalState.expireDurationForLender.toString()}>
+                  <FaCopy className='ml-2 mt-1' />
+                </Copyable>
+              </div>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )
