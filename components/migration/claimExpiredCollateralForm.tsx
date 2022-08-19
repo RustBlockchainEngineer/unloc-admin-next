@@ -20,7 +20,6 @@ export const ClaimExpiredCollateralForm = () => {
   const { loanGlobalState } = programs
 
   const initialValues: Partial<Values> = {
-    unlocStakingPid: loanGlobalState?.unlocStakingPid.toBase58(),
     unlocStakingPoolId: loanGlobalState?.unlocStakingPoolId.toBase58()
   }
 

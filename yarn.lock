@@ -1164,10 +1164,26 @@
     "@typescript-eslint/types" "5.29.0"
     eslint-visitor-keys "^3.3.0"
 
-"@unloc-dev/unloc-loan-solita@^1.0.0":
+"@unloc-dev/unloc-loan-solita@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@unloc-dev/unloc-loan-solita/-/unloc-loan-solita-2.0.0.tgz#af4f26468ca6380d3225e25c3e5e10ee6e66addf"
+  integrity sha512-IT0Ez+CpZm+K0vVbeo6geAIrm2cyxB8YP+6MT90SMh61f8lvQ2Va31gZXz8zreItvKNApuccGPk3ADBFixS7sg==
+  dependencies:
+    "@solana/spl-token" "^0.2.0"
+    "@solana/web3.js" "^1.47.3"
+
+"@unloc-dev/unloc-staking-solita@^1.0.0":
   version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@unloc-dev/unloc-loan-solita/-/unloc-loan-solita-1.0.0.tgz#7dadd8f8649ceeb24dc47e3da93e6daeabea8082"
-  integrity sha512-k5t5o3c0C7hgnezZfWMoAw68n3kX2ctf70s4pzUiEpYwR6ylZsg5Yj4jIjpsVKE56A7d/k8J/NkeL6H8VAJYmw==
+  resolved "https://registry.yarnpkg.com/@unloc-dev/unloc-staking-solita/-/unloc-staking-solita-1.0.0.tgz#2291f02de5110958074846804c6e0acbf1ac3e38"
+  integrity sha512-F+NoBvFuvaZRvewg1i01S2VbvlloA8XvQQLl7PMJD83WlsD/y9Fgflh7BQvazipY7g5Hcr1x/2g0F9voF0+xhQ==
+  dependencies:
+    "@solana/spl-token" "^0.2.0"
+    "@solana/web3.js" "^1.47.3"
+
+"@unloc-dev/unloc-voting-solita@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@unloc-dev/unloc-voting-solita/-/unloc-voting-solita-1.0.1.tgz#471bdb7668464c297a357f975de7bfd6a5f8d507"
+  integrity sha512-u1hj7VnrWohzwO1CLh0t9Av343PIakI29mH8VPsFpcaIYdIB0lMAMoofecu5HFnMX6SBBu/YFqLLqs9h1Zc81w==
   dependencies:
     "@solana/spl-token" "^0.2.0"
     "@solana/web3.js" "^1.47.3"
