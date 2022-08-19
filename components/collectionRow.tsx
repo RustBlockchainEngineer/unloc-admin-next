@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import { FaSave, FaTimes } from 'react-icons/fa'
-import React, { createRef, useEffect, useState } from 'react'
+import React, { createRef, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useStore } from '../stores'
 import { Button } from './common/Button'
