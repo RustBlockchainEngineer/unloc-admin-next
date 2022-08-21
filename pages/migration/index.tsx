@@ -16,20 +16,22 @@ import { ClaimExpiredCollateralForm } from '../../components/migration/claimExpi
 import { VotingGlobalState } from '../../components/migration/forms/votingGlobalState'
 import { VotingAccount } from '../../components/migration/forms/votingAccount'
 import { VotingItem } from '../../components/migration/forms/votingItem'
-import { Vote } from '../../components/migration/forms/vote'
-import { initLoanProgram, initVotingProgram } from '@unloc-dev/unloc-sdk'
+import { initBuybackProgram, initLoanProgram, initStakingProgram, initVotingProgram } from '@unloc-dev/unloc-sdk'
 import { WithdrawRewardsForm } from '../../components/migration/withdrawRewardsForm'
 
 const Migration: NextPage = observer(() => {
   const { connection } = useConnection()
   const { programs } = useStore()
   const { loanGlobalStatePromiseState, loanGlobalState, updateGlobalStateAccount } = programs
-  
   const wallet = useAnchorWallet()
+
   useEffect(() => {
     initLoanProgram(wallet, connection, programs.loanPubkey)
     initVotingProgram(wallet, connection, programs.votePubkey)
-  }, [connection, programs.loanPubkey, programs.votePubkey, wallet])
+    initStakingProgram(connection, wallet, programs.stakePubkey)
+    initBuybackProgram(wallet, connection, programs.buybackPubkey)
+  }, [connection, programs.buybackPubkey, programs.loanPubkey, programs.stakePubkey, programs.votePubkey, wallet])
+  
   useEffect(() => {
     if (!loanGlobalState) {
       updateGlobalStateAccount(connection)

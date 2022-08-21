@@ -1,10 +1,7 @@
-import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { PublicKey, SYSVAR_CLOCK_PUBKEY, Transaction } from '@solana/web3.js'
-import clsx from 'clsx'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { PublicKey } from '@solana/web3.js'
 import { observer } from 'mobx-react-lite'
-import { SyntheticEvent, useState } from 'react'
 import { Form, Field } from 'react-final-form'
-import { createVoteInstruction } from '@unloc-dev/unloc-voting-solita'
 import { pda } from '../../../integration/unloc'
 import { useStore } from '../../../stores'
 import { Button } from '../../common/Button'
@@ -44,7 +41,7 @@ export const Vote = observer(() => {
   return (
     <Form<Values>
       onSubmit={handleSubmit}
-      render={({ handleSubmit, form }) => {
+      render={({ handleSubmit }) => {
         return (
           <form onSubmit={handleSubmit} className='bg-slate-800 p-4'>
             <div className='flex flex-col'>

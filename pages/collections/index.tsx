@@ -41,9 +41,9 @@ const ManageCollections: React.FC = observer(() => {
     setChecked(!checked)
   }
 
-  const handleClearSelection = () => {
-    collections.setSelected([])
-  }
+  // const handleClearSelection = () => {
+  //   collections.setSelected([])
+  // }
 
   const handleCreateCollection = () => {
     lightbox.setShowCreateCollection(true)

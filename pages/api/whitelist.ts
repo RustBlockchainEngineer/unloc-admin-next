@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-import { addUsersToWhitelist, isWalletInWhitelist } from '../../functions/redis-queries'
+import { addUsersToWhitelist } from '../../functions/redis-queries'
 
 const handler = async (
   req: NextApiRequest,

@@ -3,7 +3,6 @@ import { useRef } from 'react'
 import { FaEdit } from 'react-icons/fa'
 import { ProgramName } from '../../stores/Programs.store'
 import { compressAddress } from '../../utils'
-import { Button } from '../common/Button'
 import { Copyable } from '../common/Copyable'
 import { ProgramModal } from './programModal'
 

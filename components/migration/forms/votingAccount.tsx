@@ -29,7 +29,7 @@ export const VotingAccount = observer(() => {
   return (
     <Form<Values>
       onSubmit={handleSubmit}
-      render={({ handleSubmit, form }) => {
+      render={({ handleSubmit }) => {
         return (
           <form onSubmit={handleSubmit} className='bg-slate-800 p-4'>
             <div className='flex flex-col'>

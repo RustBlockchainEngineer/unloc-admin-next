@@ -1,8 +1,7 @@
-import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { PublicKey, Transaction } from '@solana/web3.js'
-import { createSetStakingPoolInstruction } from '@unloc-dev/unloc-loan-solita'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { PublicKey } from '@solana/web3.js'
 import { setLoanStakingPool } from '@unloc-dev/unloc-sdk'
-import { SyntheticEvent, useCallback } from 'react'
+import { SyntheticEvent } from 'react'
 import { Field, Form } from 'react-final-form'
 import { useStore } from '../../stores'
 import { InputAdapter } from './InputAdapter'
@@ -12,9 +11,8 @@ interface Values {
 }
 
 export const StakingPoolForm = () => {
-  const { connection } = useConnection()
   const { programs } = useStore()
-  const { publicKey, sendTransaction } = useWallet()
+  const { publicKey } = useWallet()
   const { loanGlobalState } = programs
 
   const initialValues: Partial<Values> = {

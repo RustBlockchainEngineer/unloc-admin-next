@@ -24,7 +24,7 @@ export const VotingGlobalState = observer(() => {
   return (
     <Form<Values>
       onSubmit={handleSubmit}
-      render={({ handleSubmit, form }) => {
+      render={({ handleSubmit }) => {
         const handleFillCurrent = (e: SyntheticEvent) => {
           e.preventDefault()
           // form.reset(initialValues)

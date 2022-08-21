@@ -2,13 +2,11 @@ import {
   Connection,
   PublicKey,
   SystemProgram,
-  SYSVAR_RENT_PUBKEY,
   Transaction,
   TransactionInstruction
 } from '@solana/web3.js'
 import {
   TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
   MintLayout,
   createAssociatedTokenAccountInstruction,
@@ -166,9 +164,9 @@ export const airdropToMultiple = async (
   recipients: PublicKey[],
   amount: BN
 ) => {
-  const [, program] = initAnchorProgram(wallet, connection)
+  // const [, program] = initAnchorProgram(wallet, connection)
 
-  const manager = await getManagerPDA(mint, program.programId)
+  // const manager = await getManagerPDA(mint, program.programId)
 
   // We will sign and confirm the transactions in chunks of 6
   const chunkSize = 6

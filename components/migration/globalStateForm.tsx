@@ -1,16 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useAnchorWallet, useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { PublicKey, SYSVAR_CLOCK_PUBKEY, Transaction } from '@solana/web3.js'
+import { useWallet } from '@solana/wallet-adapter-react'
 import clsx from 'clsx'
 import { observer } from 'mobx-react-lite'
-import { SyntheticEvent, useEffect, useState } from 'react'
+import { SyntheticEvent, useState } from 'react'
 import { Form, Field } from 'react-final-form'
 import { useTokenAccount } from '../../hooks/useAccount'
 import { useStore } from '../../stores'
 import { Button } from '../common/Button'
 import { InputAdapter } from './InputAdapter'
 import * as anchor from '@project-serum/anchor'
-import { initLoanProgram, loanProgram, loanProvider, setLoanGlobalState } from '@unloc-dev/unloc-sdk'
+import { setLoanGlobalState } from '@unloc-dev/unloc-sdk'
 
 interface AccountInputs {
   treasuryWallet: string
@@ -101,7 +100,6 @@ const Accounts = () => {
 }
 
 export const GlobalStateForm = observer(() => {
-  const { connection } = useConnection()
   const { publicKey } = useWallet()
   const { programs } = useStore()
   const { loanGlobalState } = programs

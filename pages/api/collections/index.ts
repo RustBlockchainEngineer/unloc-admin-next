@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-import { addCollections, deleteCollections, getCollectionsWithCountOfNfts, renameCollection } from '../../../functions/redis-queries'
+import { addCollections, deleteCollections, getCollectionsWithCountOfNfts } from '../../../functions/redis-queries'
 
 interface ICollectionsRequest extends NextApiRequest {
   body: {

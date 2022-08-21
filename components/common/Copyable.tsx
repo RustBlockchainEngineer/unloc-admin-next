@@ -1,6 +1,5 @@
 import clsx from 'clsx'
 import React, { ReactNode, useState } from 'react'
-import { Button } from './Button'
 
 interface CopyableProps {
   content: string
