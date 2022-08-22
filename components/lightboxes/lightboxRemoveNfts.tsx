@@ -33,28 +33,29 @@ export const LightboxRemoveNfts: React.FC<LightboxRemoveNftsProps> = ({
 
   return (
     <>
-      <span className='lightbox__title'>Remove NFT{data.length > 1 ? 's' : ''}</span>
-      <div className='lightbox__content'>
+      <span className='text-2xl font-bold text-slate-400'>Remove NFT{data.length > 1 && 's'}</span>
+      <span className='text-slate-500 mb-3'>
         Are you sure you want to remove{' '}
         {data.length === 1 ? 'this NFT' : data.length < nfts.length ? 'these NFTs' : 'all NFTs'}
         ?
-        <br />
-        <span className='font-bold text-red-600 underline'>
-          WARNING: THIS ACTION IS {data.length === nfts.length ? 'DEFINITELY' : 'POTENTIALLY'}{' '}
-          DESTRUCTIVE!
-        </span>
-      </div>
-      <div className='lightbox__buttons'>
+      </span>
+      <span className='font-bold text-red-600 underline'>
+        WARNING: THIS ACTION IS {data.length === nfts.length ? 'DEFINITELY' : 'POTENTIALLY'}{' '}
+        DESTRUCTIVE!
+      </span>
+      <div className='inline-flex justify-evenly items-center mt-4'>
         <Button
           color='red'
-          className='remove'
+          ghost={true}
+          className='w-1/3 remove'
           onClick={() => handleRemove()}
         >
           OK
         </Button>
         <Button
           color='gray'
-          className='cancel-remove'
+          ghost={true}
+          className='w-1/3 cancel-remove'
           onClick={() => handleCancelRemove()}
         >
           Cancel

@@ -141,6 +141,10 @@ export const addUsersToWhitelist = async (users: string[]): Promise<number> => {
   return client.sadd('users', ...users)
 }
 
+export const addAdminsToWhitelist = async (admins: string[]): Promise<number> => {
+  return client.sadd('admins', ...admins)
+}
+
 export const isWalletInWhitelist = async (whitelist: string, address: string): Promise<boolean> => {
   return Boolean(await client.sismember(whitelist, address))
 }

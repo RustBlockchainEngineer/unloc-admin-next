@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 import { airdrop, airdropToMultiple, getMintDecimals } from '../integration'
 import { NextPage } from 'next'
 import { Button } from '../components/common/Button'
+import { FaArrowAltCircleDown, FaSortAmountDown } from 'react-icons/fa'
 
 const AirdropToMultiple: NextPage = () => {
   const wallet = useAnchorWallet()
@@ -114,40 +115,40 @@ const AirdropToMultiple: NextPage = () => {
   return (
     <main className='main grid-content w-full px-4 space-x-4 inline-flex'>
       <div className='w-1/2 bg-slate-700 p-4 rounded-md h-max'>
-        <h2 className='mb-8 text-slate-400'>Airdrop tokens to a list of recipients</h2>
+      <h2 className='inline-flex mb-8 text-slate-400'><FaSortAmountDown className='self-center mr-3' /> Airdrop tokens to a list of recipients</h2>
         <form className='relative flex flex-col space-y-2 text-sm' onSubmit={handleSubmit}>
           <div className='flex flex-col'>
             <label htmlFor='mint'>Mint</label>
             <input
-              className='rounded-sm bg-slate-800 text-white px-2 py-1'
+              className='rounded-md bg-slate-800 text-white px-2 py-1'
               type='text'
               id='mint'
               value={mint}
               onChange={handleMintChange}
               size={50}
-            ></input>
-          </div>
-          <div className='label label--recipients'>
-            <textarea
-              className='w-full rounded-md bg-slate-800 text-white text-sm px-4 py-2'
-              id='recipients'
-              value={recipients}
-              onChange={handleRecipientsChange}
-              placeholder='Addresses of recipients (every address in a new line)'
-              rows={3}
-              cols={48}
+              minLength={32}
+              maxLength={44}
             />
           </div>
+          <textarea
+            className='w-full rounded-md bg-slate-800 text-white text-sm px-4 py-2'
+            id='recipients'
+            value={recipients}
+            onChange={handleRecipientsChange}
+            placeholder='Addresses of recipients (every address in a new line)'
+            rows={3}
+            cols={48}
+          />
           <div className='flex flex-col'>
             <label htmlFor='amount font-bold'>Amount</label>
             <input
-              className='w-1/3 rounded-sm bg-slate-800 text-white px-2 py-1'
+              className='w-1/3 rounded-md bg-slate-800 text-white px-2 py-1'
               type='number'
               id='amount'
               name='amount'
               value={amount}
               onChange={handleAmountChange}
-            ></input>
+            />
           </div>
           <div className='form__buttons'>
             <Button
@@ -162,29 +163,31 @@ const AirdropToMultiple: NextPage = () => {
         </form>
       </div>
       <div className='w-1/2 bg-slate-700 p-4 rounded-md h-max'>
-        <h2 className='mb-8 text-slate-400'>Airdrop tokens owned by the program to yourself</h2>
+        <h2 className='inline-flex mb-8 text-slate-400'><FaArrowAltCircleDown className='self-center mr-3' /> Airdrop tokens owned by the program to yourself</h2>
         <form className='relative flex flex-col space-y-2 text-sm' onSubmit={handleSelfSubmit}>
           <div className='flex flex-col'>
             <label htmlFor='self-mint'>Mint</label>
             <input
-              className='rounded-sm bg-slate-800 text-white px-2 py-1'
+              className='rounded-md bg-slate-800 text-white px-2 py-1'
               type='text'
               id='mint'
               value={selfMint}
               onChange={handleSelfMintChange}
               size={50}
-            ></input>
+              minLength={32}
+              maxLength={44}
+            />
           </div>
           <div className='flex flex-col'>
             <label htmlFor='self-amount'>Amount</label>
             <input
-              className='w-1/3 rounded-sm bg-slate-800 text-white px-2 py-1'
+              className='w-1/3 rounded-md bg-slate-800 text-white px-2 py-1'
               type='number'
               id='self-amount'
               name='self-amount'
               value={selfAmount}
               onChange={handleSelfAmountChange}
-            ></input>
+            />
           </div>
           <div className='form__buttons'>
             <Button

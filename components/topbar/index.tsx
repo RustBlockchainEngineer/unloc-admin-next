@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import Image from 'next/image'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { observer } from 'mobx-react-lite'
@@ -6,9 +8,13 @@ import { isWalletAdmin } from '../../functions/api-queries'
 import { AdminContext, NetworkName } from '../../pages/_app'
 import { useStore } from '../../stores'
 import { AddressSetter, ProgramName, programs } from '../../stores/Programs.store'
+import { Lightbox } from '../lightboxes/lightbox'
+import { LightboxProgram } from '../lightboxes/lightboxProgram'
 
 import { NetworkSelect } from './networkSelect'
 import { ProgramDisplay } from './programDisplay'
+
+import logoImage from '/public/unlock_logo_dark.svg'
 
 interface NavbarProps {
   network: NetworkName
@@ -27,7 +33,8 @@ function getSetterAccessor(name: ProgramName): keyof AddressSetter {
 export const Topbar = observer(({ network, setNetwork, className }: NavbarProps) => {
   const { connected, publicKey } = useWallet()
   const { setIsAdmin } = useContext(AdminContext)
-  const { programs: programStore } = useStore()
+  const { programs: programStore, lightbox: lightboxStore } = useStore()
+  const { showProgram } = lightboxStore
 
   useEffect(() => {
     const checkIfAdmin = async () => {
@@ -51,6 +58,11 @@ export const Topbar = observer(({ network, setNetwork, className }: NavbarProps)
 
   return (
     <div className={`inline-flex w-full py-4 bg-slate-700 ${className || ''}`}>
+      <div className='inline-flex w-72 items-center justify-center py-4'>
+        <Link href='/'>
+          <Image src={logoImage} width={150} height={38} alt='logo' />
+        </Link>
+      </div>
       <div className='inline-flex w-full'>
         {programs.map((program) => {
           return (
@@ -67,6 +79,12 @@ export const Topbar = observer(({ network, setNetwork, className }: NavbarProps)
         <NetworkSelect network={network} setNetwork={setNetwork} />
         <WalletMultiButton className='shadow-md transition-colors min-w-[160px]' />
       </div>
+
+      {showProgram && (
+        <Lightbox>
+          <LightboxProgram />
+        </Lightbox>
+      )}
     </div>
   )
 })

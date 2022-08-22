@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite'
-import { createRef } from 'react'
+import { createRef, useEffect } from 'react'
 import { useStore } from '../../stores'
 import { Button } from '../common/Button'
 
@@ -22,40 +22,25 @@ export const LightboxCreateCollection: React.FC = observer(() => {
     }
   }
 
-  const handleCancelCreate = () => {
-    lightbox.setShowCreateCollection(false)
-
-    if (!(collectionRef.current && collectionRef.current.value)) return
-
-    collectionRef.current.value = ''
-  }
-
   return (
     <>
-      <span className='lightbox__title'>Create Collection</span>
+      <span className='text-2xl font-bold text-slate-400 mb-3'>Create Collections</span>
       <textarea
-        className='lightbox__input'
+        className='rounded-md bg-slate-800 text-slate-500 placeholder:text-slate-700 px-4 py-3'
         ref={collectionRef}
         required={true}
-        rows={5}
-        cols={50}
+        rows={4}
+        cols={60}
+        placeholder='Enter collection names, one per line'
       />
-      <div className='lightbox__buttons'>
-        <Button
-          color='green'
-          className='create'
-          onClick={() => handleCreate()}
-        >
-          Create
-        </Button>
-        <Button
-          color='red'
-          className='cancel-create'
-          onClick={() => handleCancelCreate()}
-        >
-          Cancel
-        </Button>
-      </div>
+      <Button
+        color='white'
+        ghost={true}
+        className='create w-2/3 self-center mt-4'
+        onClick={() => handleCreate()}
+      >
+        Create
+      </Button>
     </>
   )
 })
