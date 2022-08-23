@@ -6,7 +6,6 @@
 
 @import url('./form.css');
 @import url('./collections.css');
-@import url('./lightboxes.css');
 @import url('./nfts.css');
 @import url('./checkboxes.css');
 
@@ -18,17 +17,13 @@
 
   display: grid;
   grid-template-areas:
-    'logo topbar topbar'
+    'topbar topbar topbar'
     'sidebar content content';
   grid-template-rows: min-content 1fr;
-  grid-template-columns: 18rem 1fr 1fr;
+  grid-template-columns: auto 1fr 1fr;
 }
 
 /* Grid areas */
-.grid-logo {
-  grid-area: logo;
-}
-
 .grid-sidebar {
   grid-area: sidebar;
 }
@@ -55,7 +50,7 @@ h1 {
 }
 
 h2 {
-  @apply mb-4 text-2xl font-bold  text-slate-400;
+  @apply mb-4 text-lg font-bold text-slate-400;
 }
 
 .main {
@@ -100,4 +95,8 @@ h2 {
 
 .wallet-adapter-dropdown-list {
   @apply w-full;
+}
+
+.program-display:hover .edit-address {
+  @apply block;
 }

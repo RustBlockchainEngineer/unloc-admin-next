@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite'
 import React from 'react'
+import { FaTimes } from 'react-icons/fa'
 import { useStore } from '../../stores'
-import { Button } from '../common/Button'
 
 interface LightboxProps {
   className?: string
@@ -25,10 +25,10 @@ export const Lightbox: React.FC<LightboxProps> = observer(
         onClick={(e) => {
           closeWindow(e, true)
         }}
-        className={`lightbox ${className}`}
+        className={`fixed z-50 top-0 left-0 flex flex-col justify-center items-center w-full h-full bg-slate-900/50 ${className}`}
       >
-        <div
-          className='lightbox__container'
+        <dialog
+          className='relative flex flex-col bg-slate-700 rounded-lg px-4 pt-3 pb-3'
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key == 'Escape') {
@@ -36,14 +36,11 @@ export const Lightbox: React.FC<LightboxProps> = observer(
             }
           }}
         >
-          <Button
-            onClick={(e) => closeWindow(e, false)}
-            color='black'
-            ghost={true}
-            className='w-7 h-7 bg-unlocClose lightbox__close'
-          />
+          <a onClick={(e) => closeWindow(e, false)} className='absolute top-3 right-4 cursor-pointer'>
+            <FaTimes className='w-7 h-7 text-white' />
+          </a>
           {children}
-        </div>
+        </dialog>
       </div>
     )
   }

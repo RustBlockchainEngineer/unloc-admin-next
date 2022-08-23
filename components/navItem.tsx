@@ -29,17 +29,17 @@ export const NavItem = ({ className, label, children, mode, path = '' }: NavItem
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <li className='text-left text-white'>
+    <li className='text-left text-white w-full'>
       {mode === 'list' &&
         <>
           <a
-            className='text-lg transition-colors hover:text-gray-300 cursor-pointer'
+            className='block w-full text-lg transition-colors hover:text-gray-300 cursor-pointer'
             onClick={() => setExpanded(!expanded)}
           >
             <FaChevronRight className={'inline transition-transform' + `${expanded ? ' rotate-90' : ''}`} />
             <span className={`ml-2 ${expanded && 'font-black'}`}>{label}</span>
           </a>
-          <ul className={`mt-2 ml-8 border-l-2 border-l-slate-500 gap-y-2 ${expanded ? 'flex flex-col' : 'hidden'}`}>
+          <ul className={`mt-2 ml-8 border-l-2 border-l-slate-500 gap-y-2 ${expanded ? 'flex flex-col' : 'hidden'} w-full`}>
             {children}
           </ul>
         </>
@@ -47,7 +47,7 @@ export const NavItem = ({ className, label, children, mode, path = '' }: NavItem
 
       {mode === 'link' &&
         <Link href={`/${path}`}>
-          <a className={`ml-7 text-lg transition-colors hover:text-gray-300 cursor-pointer ${path === currPath && 'font-black'} ${className}`}>
+          <a className={`block w-full ml-7 text-lg transition-colors hover:text-gray-300 cursor-pointer ${path === currPath && 'font-black'} ${className}`}>
             <span>{label}</span>
           </a>
         </Link>

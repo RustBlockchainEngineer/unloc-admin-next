@@ -1,0 +1,8 @@
+- [x] `Switch Network` custom component
+- [x] Change `Topbar` *Dialogs* to common `Lightbox` component
+- [x] Move `Global State` Page to `Loan` Page
+- [x] Distribute NFTs Page
+- [x] Loan Page
+- [x] Favicons on `Loan` Page
+- [ ] User History Page
+- [ ] Favicons on `Wallets Profile` Page

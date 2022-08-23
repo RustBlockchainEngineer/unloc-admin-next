@@ -10,6 +10,7 @@ import { CollectionRow } from '../../components/collectionRow'
 import { AdminContext } from '../_app'
 import { useStore } from '../../stores'
 import { Button } from '../../components/common/Button'
+import { useRouter } from 'next/router'
 
 const ManageCollections: React.FC = observer(() => {
   const { lightbox, collections } = useStore()
@@ -17,17 +18,19 @@ const ManageCollections: React.FC = observer(() => {
   const { connected } = useContext(WalletContext)
   const { collectionsData, selected } = collections
   const { showCreateCollection, showRemoveCollections, data } = lightbox
-
+  
   const [filter, setFilter] = useState<string>('')
   const [checked, setChecked] = useState<boolean>(false)
+  
+  const router = useRouter()
+  if (typeof window !== 'undefined' && !(isAdmin && connected)) router.push('/')
 
   const mapCollectionRows = () => (
     Object.entries(collectionsData)
       .filter(([collection]) => collection.toLowerCase().includes(filter))
       .map(([collection, count]) => (
-      <CollectionRow key={collection} collection={collection} count={count} />
-    )).sort((a, b) => a.key!.toString()
-    .localeCompare(b.key!.toString()))
+        <CollectionRow key={collection} collection={collection} count={count} />
+      )).sort((a, b) => a.key!.toString().localeCompare(b.key!.toString()))
   )
 
   const handleRemoveCollections = async () => {
@@ -57,10 +60,19 @@ const ManageCollections: React.FC = observer(() => {
     fetchData()
   }, [collections])
 
-  return isAdmin && connected ? (
+  useEffect(() => {
+    setChecked(selected.length === Object.keys(collectionsData).length)
+  }, [collectionsData, selected])
+
+  useEffect(() => {
+    lightbox.hideAllLightboxes()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return (
     <main className='main grid-content w-full px-8'>
       <header className='w-full inline-flex justify-between mb-4'>
-        <h1 className='text-slate-500'>Manage Collections</h1>
+        <h1 className='text-slate-500 align-middle'>Manage Collections</h1>
 
         <div className='inline-flex gap-4'>
           <div className='inline-flex relative'>
@@ -92,9 +104,9 @@ const ManageCollections: React.FC = observer(() => {
                 <div className='control_indicator border-none bg-slate-800'></div>
               </label>
             </div>
-            <div className='w-5/12 flex-wrap text-center inline-flex justify-center items-center'>Collection</div>
+            <div className='w-6/12 flex-wrap text-center inline-flex justify-center items-center'>Collection</div>
             <div className='w-1/12 flex-wrap text-center inline-flex justify-center items-center'>NFT Count</div>
-            <div className='w-5/12 flex-wrap text-center inline-flex justify-center items-center'>Actions</div>
+            <div className='w-4/12 flex-wrap text-center inline-flex justify-center items-center'>Actions</div>
           </div>
         </div>
         <div className='flex flex-col'>{mapCollectionRows()}</div>
@@ -111,24 +123,18 @@ const ManageCollections: React.FC = observer(() => {
         </Button>
       </footer>
 
-      {showCreateCollection ? (
+      {showCreateCollection && (
         <Lightbox className='create-collection'>
           <LightboxCreateCollection />
         </Lightbox>
-      ) : (
-        ''
       )}
 
-      {showRemoveCollections && data.length > 0 ? (
+      {showRemoveCollections && data.length > 0 && (
         <Lightbox className='remove-collections'>
           <LightboxRemoveCollections />
         </Lightbox>
-      ) : (
-        ''
       )}
     </main>
-  ) : (
-    <div className='text-slate-500 not-connected'>Please connect a wallet with administrative permissions!</div>
   )
 })
 

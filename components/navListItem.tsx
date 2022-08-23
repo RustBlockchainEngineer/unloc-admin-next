@@ -15,7 +15,7 @@ export const NavListItem = ({ className, label, path }: NavListItemProps) => {
   return (
     <li className={`text-left text-white pl-2 ${path === currPath ? 'ml-[-3px] border-l-4 font-black' : 'ml-[1px]'} ${className}`}>
       <Link href={`/${path}`}>
-        <a className='transition-colors hover:text-gray-300 cursor-pointer' >
+        <a className='transition-colors hover:text-gray-300 cursor-pointer w-full h-full block' >
           {label}
         </a>
       </Link>

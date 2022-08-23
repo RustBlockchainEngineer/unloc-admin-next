@@ -75,7 +75,7 @@ export const CollectionRow: React.FC<CollectionRowProps> = observer(
             <div className='control_indicator'></div>
           </label>
         </div>
-        <div className={`w-5/12 flex-wrap text-center inline-flex items-center justify-center first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2 ${show && 'pr-0'} ${encodeURIComponent(collection)}`}>
+        <div className={`w-6/12 flex-wrap text-center inline-flex items-center justify-center first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2 ${show && 'pr-0'} ${encodeURIComponent(collection)}`}>
           <input
             className={`${show ? 'w-3/4' : 'w-full'} bg-transparent border-[1px] border-solid border-slate-600 text-sm p-1 input--collection`}
             type='text'
@@ -108,7 +108,7 @@ export const CollectionRow: React.FC<CollectionRowProps> = observer(
           </div>
         </div>
         <div className='w-1/12 flex-wrap text-center inline-flex items-center justify-center first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2'>{count}</div>
-        <div className='w-5/12 flex-wrap text-center inline-flex items-center justify-evenly first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2'>
+        <div className='w-4/12 flex-wrap text-center inline-flex items-center justify-evenly first:border-none border-l-[1px] border-l-solid border-l-slate-600 p-2'>
           <Button
             color='lime'
             ghost={true}
