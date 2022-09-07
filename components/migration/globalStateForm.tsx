@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { observer } from 'mobx-react-lite'
 import { SyntheticEvent, useState } from 'react'
 import { Form, Field } from 'react-final-form'
-import { useTokenAccount } from '../../hooks/useAccount'
+import { useTokenAccount } from '../../hooks'
 import {
   createSetGlobalStateInstruction,
   SetGlobalStateInstructionAccounts,

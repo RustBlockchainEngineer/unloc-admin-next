@@ -22,6 +22,7 @@ import { Sidebar } from '../components/sidebar'
 import '../styles/main.css'
 import rootStore, { StoreContext } from '../stores'
 import { observer } from 'mobx-react-lite'
+import { AccountProvider } from '../hooks/accountContext'
 
 interface IAdminContext {
   isAdmin: boolean
@@ -62,11 +63,11 @@ const App = ({ Component, pageProps }: AppProps): ReactNode => {
     () => [
       new PhantomWalletAdapter(),
       new SlopeWalletAdapter(),
-      new SolflareWalletAdapter({ network }),
+      new SolflareWalletAdapter(),
       new LedgerWalletAdapter(),
-      new SolletWalletAdapter({ network })
+      new SolletWalletAdapter()
     ],
-    [network]
+    []
   )
 
   const onError = useCallback(
@@ -85,16 +86,18 @@ const App = ({ Component, pageProps }: AppProps): ReactNode => {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} onError={onError}>
         <WalletModalProvider>
-          <AdminContext.Provider value={{ isAdmin, setIsAdmin }}>
-            <StoreContext.Provider value={rootStore}>
-              <div className='app'>
-                <Sidebar className='grid-sidebar' network={uiNetwork} setNetwork={setUiNetwork} />
-                <Topbar className='grid-topbar' network={uiNetwork} setNetwork={setUiNetwork} />
-                <Component className='grid-content' {...pageProps} />
-              </div>
-            </StoreContext.Provider>
-            <Toaster />
-          </AdminContext.Provider>
+          <AccountProvider commitment='confirmed'>
+            <AdminContext.Provider value={{ isAdmin, setIsAdmin }}>
+              <StoreContext.Provider value={rootStore}>
+                <div className='app'>
+                  <Sidebar className='grid-sidebar' network={uiNetwork} setNetwork={setUiNetwork} />
+                  <Topbar className='grid-topbar' network={uiNetwork} setNetwork={setUiNetwork} />
+                  <Component className='grid-content' {...pageProps} />
+                </div>
+              </StoreContext.Provider>
+              <Toaster />
+            </AdminContext.Provider>
+          </AccountProvider>
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

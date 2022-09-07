@@ -14,7 +14,7 @@ export const FloatingInput = ({ id, label, ...props }: FloatingInputProps) => {
   )
   const labelClass = clsx(
     'absolute -top-3 block cursor-default text-sm font-medium text-gray-300 transition-all',
-    'peer-placeholder-shown:top-1.5 peer-placeholder-shown:cursor-text peer-placeholder-shown:cursor-text peer-placeholder-shown:text-base',
+    'peer-placeholder-shown:top-1.5 peer-placeholder-shown:cursor-text peer-placeholder-shown:text-base',
     'peer-focus:-top-3 peer-focus:cursor-default peer-focus:text-sm'
   )
 
