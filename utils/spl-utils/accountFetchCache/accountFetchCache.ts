@@ -6,8 +6,7 @@ import {
   SendOptions,
   Signer,
   Transaction,
-  TransactionInstruction,
-  VersionedTransaction
+  TransactionInstruction
 } from '@solana/web3.js'
 import { EventEmitter } from './eventEmitter'
 import { getMultipleAccounts } from './getMultipleAccounts'

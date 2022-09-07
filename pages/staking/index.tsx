@@ -1,12 +1,12 @@
-import { NextPage } from 'next'
-import { useStore } from '../../stores'
-import { getStakingState } from '../../utils/spl-utils/unloc-staking'
-import { useMemo } from 'react'
-import { useAccount } from '../../hooks'
-import { StateAccount } from '@unloc-dev/unloc-staking-solita'
-import { TypedAccountParser } from '../../utils/spl-utils/accountFetchCache'
+import { useAccount } from '@/hooks'
+import { useStore } from '@/stores'
+import { TypedAccountParser } from '@/utils/spl-utils/accountFetchCache'
+import { getStakingState } from '@/utils/spl-utils/unloc-staking'
 import { AccountInfo, PublicKey } from '@solana/web3.js'
+import { StateAccount } from '@unloc-dev/unloc-staking-solita'
+import { NextPage } from 'next'
 import dynamic from 'next/dynamic'
+import { useMemo } from 'react'
 
 const StateParser: TypedAccountParser<StateAccount> = (
   pubkey: PublicKey,
