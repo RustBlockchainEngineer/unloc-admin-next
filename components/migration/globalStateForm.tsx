@@ -14,7 +14,6 @@ import { pda } from '../../integration/unloc'
 import { useStore } from '../../stores'
 import { Button } from '../common/Button'
 import { InputAdapter } from './InputAdapter'
-import { BN } from 'bn.js'
 
 interface AccountInputs {
   treasuryWallet: string
@@ -109,11 +108,11 @@ export const GlobalStateForm = observer(() => {
   const { publicKey, sendTransaction } = useWallet()
   const { programs } = useStore()
   const { loanGlobalState } = programs
-  const [account] = useTokenAccount(loanGlobalState?.rewardVault)
+  const { info } = useTokenAccount(loanGlobalState?.rewardVault)
 
   const initialValues: Partial<Values> = {
     treasuryWallet: loanGlobalState?.treasuryWallet.toBase58(),
-    rewardMint: account?.mint.toBase58(),
+    rewardMint: info?.mint.toBase58(),
     newSuperOwner: loanGlobalState?.superOwner.toBase58(),
     accruedInterestNumerator: loanGlobalState?.accruedInterestNumerator.toString() || '',
     denominator: loanGlobalState?.denominator.toString() || '',

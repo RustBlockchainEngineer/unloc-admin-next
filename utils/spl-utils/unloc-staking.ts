@@ -23,12 +23,13 @@ export const createState = (
   earlyUnlockFee: bignum,
   tokenPerSecond: bignum,
   profileLevels: bignum[],
+  feeVault: PublicKey,
   programId?: PublicKey
 ): TransactionInstruction => {
   const state = getStakingState(programId ?? PROGRAM_ID)
   const rewardMint = UNLOC_MINT
   const rewardVault = getAssociatedTokenAddressSync(rewardMint, state, true)
-  const feeVault = getAssociatedTokenAddressSync(rewardMint, wallet, false)
+  // const feeVault = getAssociatedTokenAddressSync(rewardMint, wallet, false)
   const ix = createCreateStateInstruction(
     {
       authority: wallet,

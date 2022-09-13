@@ -29,7 +29,7 @@ const StakingDebug: NextPage = () => {
             <input
               type='text'
               placeholder='Address'
-              className='border-0 h-12 rounded-md placeholder-gray-400  bg-slate-200 px-2 text-gray-900 ring-1 ring-bl focus:outline-none'
+              className='border-0 h-12 rounded-md placeholder-gray-400  bg-slate-50 px-2 text-gray-900 ring-1 ring-bl focus:outline-none'
             ></input>
           </div>
         </div>
