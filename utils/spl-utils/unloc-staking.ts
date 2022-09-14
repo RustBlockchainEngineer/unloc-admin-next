@@ -1,12 +1,24 @@
 import { bignum } from '@metaplex-foundation/beet'
-import { TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from '@solana/spl-token'
 import {
+  TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddressSync,
+  getAccount,
+  TokenAccountNotFoundError,
+  TokenInvalidAccountOwnerError,
+  createAssociatedTokenAccountInstruction
+} from '@solana/spl-token'
+import {
+  Connection,
   PublicKey,
   SystemProgram,
   SYSVAR_CLOCK_PUBKEY,
   TransactionInstruction
 } from '@solana/web3.js'
-import { createCreateStateInstruction, PROGRAM_ID } from '@unloc-dev/unloc-staking-solita'
+import {
+  createCreateStateInstruction,
+  createFundRewardTokenInstruction,
+  PROGRAM_ID
+} from '@unloc-dev/unloc-staking-solita'
 import { UNLOC_MINT } from './unloc-constants'
 
 // CONSTANTS
@@ -18,18 +30,26 @@ export const getStakingState = (programId: PublicKey) => {
 }
 
 // Instruction helpers
-export const createState = (
+export const createState = async (
+  connection: Connection,
   wallet: PublicKey,
   earlyUnlockFee: bignum,
   tokenPerSecond: bignum,
   profileLevels: bignum[],
   feeVault: PublicKey,
   programId?: PublicKey
-): TransactionInstruction => {
+): Promise<TransactionInstruction[]> => {
+  const instructions: TransactionInstruction[] = []
   const state = getStakingState(programId ?? PROGRAM_ID)
   const rewardMint = UNLOC_MINT
   const rewardVault = getAssociatedTokenAddressSync(rewardMint, state, true)
-  // const feeVault = getAssociatedTokenAddressSync(rewardMint, wallet, false)
+
+  if (!(await isAccountInitialized(connection, rewardVault))) {
+    instructions.push(
+      createAssociatedTokenAccountInstruction(wallet, rewardVault, state, rewardMint)
+    )
+  }
+
   const ix = createCreateStateInstruction(
     {
       authority: wallet,
@@ -47,11 +67,52 @@ export const createState = (
     },
     programId
   )
-  return ix
+  return [...instructions, ix]
+}
+
+export const fundStakeProgram = (
+  wallet: PublicKey,
+  userVault: PublicKey,
+  rewardVault: PublicKey,
+  amount: bignum,
+  programId?: PublicKey
+) => {
+  const state = getStakingState(programId ?? PROGRAM_ID)
+  const ix = createFundRewardTokenInstruction(
+    {
+      state,
+      authority: wallet,
+      userVault,
+      rewardVault,
+      tokenProgram: TOKEN_PROGRAM_ID
+    },
+    { amount },
+    programId
+  )
+  return [ix]
 }
 
 const DEFAULT_PROGRAMS = {
   tokenProgram: TOKEN_PROGRAM_ID,
   systemProgram: SystemProgram.programId,
   clock: SYSVAR_CLOCK_PUBKEY
+}
+
+const isAccountInitialized = async (
+  connection: Connection,
+  account: PublicKey
+): Promise<boolean> => {
+  try {
+    await getAccount(connection, account)
+    return true
+  } catch (error: unknown) {
+    if (
+      error instanceof TokenAccountNotFoundError ||
+      error instanceof TokenInvalidAccountOwnerError
+    ) {
+      return false
+    } else {
+      throw Error()
+    }
+  }
 }

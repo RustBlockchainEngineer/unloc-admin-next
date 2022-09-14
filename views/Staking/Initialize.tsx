@@ -2,14 +2,19 @@ import { Spinner } from '@/components/common'
 import { ClickPopover } from '@/components/common/ClickPopover'
 import { ValidatedInput } from '@/components/common/ValidatedInput'
 import { ProfileLevelsInput } from '@/components/ProfileLevelsInput'
+import { useSendTransaction } from '@/hooks'
+import { useStore } from '@/stores'
 import { createState } from '@/utils/spl-utils/unloc-staking'
-import { InformationCircleIcon } from '@heroicons/react/20/solid'
+import { Transition } from '@headlessui/react'
+// import { InformationCircleIcon } from '@heroicons/react/20/solid'
+import { InformationCircleIcon } from '@heroicons/react/24/outline'
 import { CircleStackIcon, DocumentPlusIcon, NoSymbolIcon } from '@heroicons/react/24/solid'
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { PublicKey, AccountInfo } from '@solana/web3.js'
+import { PublicKey, AccountInfo, Transaction } from '@solana/web3.js'
 import clsx from 'clsx'
-import { ChangeEvent, useCallback, useState } from 'react'
+import { ChangeEvent, SyntheticEvent, useCallback, useState } from 'react'
+import toast from 'react-hot-toast'
 
 type InputEvent = ChangeEvent<HTMLInputElement>
 
@@ -31,6 +36,8 @@ const required = (input: any) => (input ? undefined : 'Required')
 export const StakingInitialize = ({ loading, account }: StakingInitializeProps) => {
   const { connection } = useConnection()
   const { publicKey: wallet } = useWallet()
+  const { programs } = useStore()
+  const sendAndConfirm = useSendTransaction()
   const [tokenPerSecond, setTokenPerSecond] = useState<number | null>()
   const [earlyUnlockFee, setEarlyUnlockFee] = useState<number | null>()
   const [feeVault, setFeeVault] = useState<PublicKey | null>(null)
@@ -43,14 +50,42 @@ export const StakingInitialize = ({ loading, account }: StakingInitializeProps) 
     earlyUnlockFee && // early unlock fee set
     feeVault // fee vault set
 
-  const handleSubmit = useCallback(() => {
-    if (!wallet) throw new WalletNotConnectedError()
-    if (!tokenPerSecond || !earlyUnlockFee || !feeVault) {
-      throw Error('Cannot submit the transaction')
-    }
+  const handleSubmit = useCallback(
+    async (e: SyntheticEvent) => {
+      e.preventDefault()
+      if (!wallet) throw new WalletNotConnectedError()
+      if (!tokenPerSecond || !earlyUnlockFee || !feeVault) {
+        throw Error('Cannot submit the transaction')
+      }
 
-    const ix = createState(wallet, earlyUnlockFee, tokenPerSecond, profileLevels, feeVault)
-  }, [earlyUnlockFee, feeVault, profileLevels, tokenPerSecond, wallet])
+      const ix = await createState(
+        connection,
+        wallet,
+        earlyUnlockFee,
+        tokenPerSecond,
+        profileLevels,
+        feeVault,
+        programs.stakePubkey
+      )
+      const tx = new Transaction().add(...ix)
+      await sendAndConfirm(tx, 'confirmed')
+      toast.promise(sendAndConfirm(tx, 'confirmed'), {
+        error: <div>Error</div>,
+        loading: <div>Loading</div>,
+        success: <div>Done</div>
+      })
+    },
+    [
+      connection,
+      earlyUnlockFee,
+      feeVault,
+      profileLevels,
+      programs.stakePubkey,
+      sendAndConfirm,
+      tokenPerSecond,
+      wallet
+    ]
+  )
 
   return (
     <main className='flex w-full flex-col gap-x-12 gap-y-4 text-white lg:flex-row'>
@@ -61,10 +96,18 @@ export const StakingInitialize = ({ loading, account }: StakingInitializeProps) 
             Initialize state
             <ClickPopover
               panel={
-                <div className='divide-y rounded-lg bg-slate-50 p-4 text-sm leading-4 text-gray-900 shadow ring-1 ring-blue-900/25 md:w-80'>
-                  <p className='pb-4'>Fund the reward vault by transferring UNLOC tokens to it.</p>
+                <div className='divide-y rounded-lg bg-slate-50 p-4 text-sm font-normal leading-4 text-gray-900 shadow ring-1 ring-blue-900/25 md:w-80'>
+                  <p className='pb-4'>
+                    The state account of the staking program must be initialized first to run all
+                    other instructions.
+                  </p>
+                  <p className='py-4'>
+                    The state account holds information about the base reward rate, early unlock fee
+                    and the required scores for determining the users profile level.
+                  </p>
                   <p className='pt-4'>
-                    The user balance is read from the connected wallets Associated token account.
+                    The state account also holds the addresses of the <em>fee vault</em> and{' '}
+                    <em>reward vault</em> token accounts.
                   </p>
                 </div>
               }
@@ -90,10 +133,7 @@ export const StakingInitialize = ({ loading, account }: StakingInitializeProps) 
             </div>
           )}
         </div>
-        <form
-          className='my-6 flex w-full flex-col space-y-4 lg:w-80'
-          onSubmit={(event) => console.log(event.target)}
-        >
+        <form className='my-6 flex w-full flex-col space-y-4 lg:w-80' onSubmit={handleSubmit}>
           <div>
             <label className='mb-2 text-gray-100' htmlFor='token_per_second'>
               Token reward rate
@@ -144,32 +184,33 @@ export const StakingInitialize = ({ loading, account }: StakingInitializeProps) 
             <button
               type='submit'
               disabled={loading || !!account}
-              className='my-4 block w-full rounded-lg bg-pink-700 py-2 px-4 text-base text-white shadow-md hover:bg-pink-800 focus:outline-none focus:ring-4 '
+              className={clsx(
+                'my-4 block w-full rounded-lg bg-pink-700 py-2 px-4 text-base text-white shadow-md',
+                'hover:bg-pink-800 focus:outline-none focus:ring-4',
+                (loading || !!account) && 'bg-gray-500 hover:bg-gray-500'
+              )}
             >
               Submit
             </button>
           </div>
         </form>
       </div>
-      <div className='rounded-lg bg-slate-700 p-8 shadow-sm lg:min-w-[420px]'>
-        <div className='flex items-center'>
-          <p className='flex items-center text-2xl font-semibold text-gray-100'>
-            <CircleStackIcon className='mr-2 h-6 w-6' />
-            Staking state
-          </p>
+
+      <Transition
+        show={!loading && !!account}
+        enter='transform transition-opacity duration-150'
+        enterFrom='opacity-0 scale-75'
+        enterTo='opacity-100 scale-100'
+      >
+        <div className='rounded-lg bg-slate-700 p-8 shadow-sm lg:min-w-[420px]'>
+          <div className='flex items-center'>
+            <p className='flex items-center text-2xl font-semibold text-gray-100'>
+              <CircleStackIcon className='mr-2 h-6 w-6' />
+              Staking state
+            </p>
+          </div>
         </div>
-        {loading && (
-          <div className='flex h-36 w-full items-center justify-center'>
-            <Spinner size={10} className='m-auto' />
-          </div>
-        )}
-        {!loading && !account && (
-          <div className='flex h-36 w-full flex-col items-center justify-center'>
-            <NoSymbolIcon className='mb-4 h-12 w-12' />
-            <p>Account does not exist</p>
-          </div>
-        )}
-      </div>
+      </Transition>
     </main>
   )
 }

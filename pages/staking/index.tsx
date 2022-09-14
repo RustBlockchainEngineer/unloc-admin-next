@@ -1,5 +1,3 @@
-import { Spinner } from '@/components/common'
-import { ValidatedInput } from '@/components/common/ValidatedInput'
 import { useAccount } from '@/hooks'
 import { useStore } from '@/stores'
 import { TypedAccountParser } from '@/utils/spl-utils/accountFetchCache'
@@ -12,8 +10,9 @@ import dynamic from 'next/dynamic'
 import { useMemo, useState } from 'react'
 import { Tab } from '@headlessui/react'
 import { StakingInitialize, StakingInitializeProps } from '@/views/Staking/Initialize'
-import { StakingUpdate } from '@/views/Staking/Update'
+import { StakingUpdate, StakingUpdateProps } from '@/views/Staking/Update'
 import { RewardConfigView } from '@/views/Staking'
+import { NoSymbolIcon } from '@heroicons/react/20/solid'
 
 const StateParser: TypedAccountParser<StateAccount> = (_: PublicKey, data: AccountInfo<Buffer>) => {
   return StateAccount.fromAccountInfo(data)[0]
@@ -23,13 +22,15 @@ const DynamicInitializeView = dynamic<StakingInitializeProps>(
   () => Promise.resolve(StakingInitialize),
   { ssr: false }
 )
-const DynamicUpdateView = dynamic<{}>(() => Promise.resolve(StakingUpdate), { ssr: false })
+const DynamicUpdateView = dynamic<StakingUpdateProps>(() => Promise.resolve(StakingUpdate), {
+  ssr: false
+})
 const DynamicRewardConfigView = dynamic<{}>(() => Promise.resolve(RewardConfigView), { ssr: false })
 
 const Staking: NextPage = () => {
   const { programs } = useStore()
   const stakeState = useMemo(() => getStakingState(programs.stakePubkey), [programs.stakePubkey])
-  const { loading, account } = useAccount<StateAccount>(stakeState, StateParser)
+  const { loading, account, info } = useAccount<StateAccount>(stakeState, StateParser, true)
 
   let [categories] = useState([
     { name: 'Initialize', component: DynamicInitializeView },
@@ -44,17 +45,22 @@ const Staking: NextPage = () => {
           {categories.map(({ name }) => (
             <Tab
               key={name}
+              disabled={name === 'Update' && !info}
               className={({ selected }) =>
                 clsx(
                   'text-md w-full rounded-lg py-2.5 font-medium leading-5 text-blue-700',
                   'ring-white ring-opacity-60 ring-offset-1 ring-offset-blue-400 focus:outline-none focus:ring-2',
                   selected
                     ? 'bg-white shadow'
-                    : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
+                    : 'text-blue-100 hover:bg-white/[0.12] hover:text-white',
+                  name === 'Update' && !info && 'bg-gray-600'
                 )
               }
             >
-              {name}
+              <span className='flex items-center justify-center'>
+                {name === 'Update' && !info && <NoSymbolIcon className='mr-1 h-4 w-4' />}
+                {name}
+              </span>
             </Tab>
           ))}
         </Tab.List>
@@ -62,10 +68,10 @@ const Staking: NextPage = () => {
           <Tab.Panel key={0}>
             <DynamicInitializeView loading={loading} account={account} />
           </Tab.Panel>
-          <Tab.Panel key={1} className={clsx('rounded-xl bg-slate-500 p-3 w-min focus:outline-none')}>
-            <DynamicUpdateView />
+          <Tab.Panel key={1} className={clsx('w-min rounded-xl bg-slate-500 p-3')}>
+            {info && <DynamicUpdateView state={info} />}
           </Tab.Panel>
-          <Tab.Panel key={2} className={clsx('rounded-xl bg-slate-500 p-3 focus:outline-none')}>
+          <Tab.Panel key={2} className={clsx('rounded-xl bg-slate-500 p-3')}>
             <DynamicRewardConfigView />
           </Tab.Panel>
         </Tab.Panels>

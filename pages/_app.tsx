@@ -84,6 +84,7 @@ const App = ({ Component, pageProps }: AppProps): ReactNode => {
 
   return (
     <ConnectionProvider endpoint={endpoint}>
+      <Toaster />
       <WalletProvider wallets={wallets} onError={onError}>
         <WalletModalProvider>
           <AccountProvider commitment='confirmed'>
@@ -95,7 +96,6 @@ const App = ({ Component, pageProps }: AppProps): ReactNode => {
                   <Component className='grid-content' {...pageProps} />
                 </div>
               </StoreContext.Provider>
-              <Toaster />
             </AdminContext.Provider>
           </AccountProvider>
         </WalletModalProvider>

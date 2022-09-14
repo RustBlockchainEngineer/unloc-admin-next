@@ -1,7 +1,6 @@
 import { Tab } from '@headlessui/react'
 import clsx from 'clsx'
 import {
-  GiftIcon,
   InformationCircleIcon,
   ClipboardDocumentIcon,
   MagnifyingGlassIcon
@@ -10,8 +9,86 @@ import tokenLogo from '/public/unloc_token.png'
 import Image from 'next/image'
 import { ClickPopover } from '@/components/common/ClickPopover'
 import { Copyable } from '@/components/common'
+import { useWallet } from '@solana/wallet-adapter-react'
+import { useSendTransaction, useTokenAccount } from '@/hooks'
+import { getAssociatedTokenAddressSync } from '@solana/spl-token'
+import { UNLOC_MINT } from '@/utils/spl-utils/unloc-constants'
+import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'react'
+import { amountToUiAmount } from '@/utils/spl-utils'
+import { StateAccount } from '@unloc-dev/unloc-staking-solita'
+import { compressAddress } from '@/utils'
+import { fundStakeProgram } from '@/utils/spl-utils/unloc-staking'
+import { WalletNotConnectedError } from '@solana/wallet-adapter-base'
+import { useStore } from '@/stores'
+import { Transaction } from '@solana/web3.js'
+import toast from 'react-hot-toast'
+import { uiAmountToAmount } from '@/utils/spl-utils/common'
 
-const FundRewardsInfo = () => {
+const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
+  const { publicKey } = useWallet()
+  const { programs } = useStore()
+  const sendAndConfirm = useSendTransaction()
+  const [uiFundAmount, setFundAmount] = useState<string>('')
+  const ata = publicKey ? getAssociatedTokenAddressSync(UNLOC_MINT, publicKey) : undefined
+
+  const { loading, info } = useTokenAccount(ata)
+  const { loading: loading2, info: info2 } = useTokenAccount(state.rewardVault)
+  const rewardVaultBase58 = useMemo(() => state.rewardVault.toBase58(), [state])
+  const balance = info ? amountToUiAmount(info.amount, 6) : 0
+  const stateBalance = info2 ? amountToUiAmount(info2.amount, 6) : 0
+  const submittable = publicKey && ata
+
+  const handleFundAmount = (e: ChangeEvent<HTMLInputElement>) => {
+    const amount = e.target.value
+    if (!amount || amount.match(/^\d{1,}(\.\d{0,6})?$/)) {
+      setFundAmount(amount)
+    }
+  }
+
+  const handleFundPercent = (pct: number) => () => {
+    setFundAmount(
+      ((balance * pct) / 100).toFixed(6).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1')
+    )
+  }
+
+  const handleSubmit = useCallback(
+    async (e: SyntheticEvent) => {
+      e.preventDefault()
+
+      if (!publicKey || !ata) throw new WalletNotConnectedError()
+      if (!uiFundAmount) return
+
+      const fundAmount = uiAmountToAmount(uiFundAmount, 6)
+      const ix = fundStakeProgram(
+        publicKey,
+        ata,
+        state.rewardVault,
+        fundAmount,
+        programs.stakePubkey
+      )
+      const tx = new Transaction().add(...ix)
+
+      toast.promise(
+        sendAndConfirm(tx, 'confirmed'),
+        {
+          loading: 'Confirming...',
+          error: (e) => (
+            <div>
+              <p>There was an error confirming your transaction</p>
+              <p>{e.message}</p>
+            </div>
+          ),
+          success: (e) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
+        },
+        {
+          style: { minWidth: '250px', backgroundColor: '#334155', color: '#fff' },
+          position: 'bottom-left'
+        }
+      )
+    },
+    [publicKey, ata, uiFundAmount, state.rewardVault, programs.stakePubkey, sendAndConfirm]
+  )
+
   return (
     <div className='flex flex-1 flex-col gap-x-2 gap-y-4 md:flex-row'>
       <div className='flex w-full flex-col space-y-8 rounded-xl bg-slate-700 p-6 md:w-80'>
@@ -46,7 +123,7 @@ const FundRewardsInfo = () => {
           </ClickPopover>
         </div>
         <div className='flex items-center text-4xl font-bold'>
-          <span className='mr-2'>200,000.531</span>
+          <span className='mr-2'>{stateBalance}</span>
           <Image
             className='rounded-full grayscale-[25%]'
             height={36}
@@ -58,14 +135,14 @@ const FundRewardsInfo = () => {
         <div>
           <div className='text-sm text-gray-300'>Address</div>
           <span className='flex items-center gap-x-2 text-lg font-semibold'>
-            GMdN...6Xvr
-            <Copyable content='GMdNWaWuQQAMTFr1gWd5VeT6CLbwn6QwiTy3Ek8F6Xvr'>
+            {compressAddress(4, rewardVaultBase58)}
+            <Copyable content={rewardVaultBase58}>
               <ClipboardDocumentIcon className='h-5 w-5 hover:cursor-pointer hover:text-gray-200' />
             </Copyable>
             <a
               rel='noreferrer'
               target='_blank'
-              href='https://explorer.solana.com/address/GMdNWaWuQQAMTFr1gWd5VeT6CLbwn6QwiTy3Ek8F6Xvr?cluster=devnet'
+              href={`https://explorer.solana.com/address/${rewardVaultBase58}?cluster=devnet`}
             >
               <MagnifyingGlassIcon className='h-5 w-5 hover:cursor-pointer hover:text-gray-200' />
             </a>
@@ -90,26 +167,46 @@ const FundRewardsInfo = () => {
             )}
           </ClickPopover>
         </p>
-        <form onSubmit={(e) => e.preventDefault()} className='space-y-8'>
+        <form onSubmit={handleSubmit} className='space-y-8'>
           <label className='flex flex-col'>
-            <small className='self-end'>Available: 23,061</small>
+            {!info && (
+              <span className='h-4 w-28 animate-pulse self-end rounded-md bg-slate-500/50'></span>
+            )}
+            {!loading && info && <small className='h-4 self-end'>Available: {balance}</small>}
             <input
               type='text'
               placeholder='Amount'
-              className='mb-4 mt-1 h-9 w-full rounded-md bg-slate-50 px-2 text-gray-900 placeholder:text-gray-600'
+              lang='en'
+              min='0'
+              value={uiFundAmount}
+              onChange={handleFundAmount}
+              className='mb-4 mt-2 h-9 w-full rounded-md bg-slate-50 px-2 text-gray-900 placeholder:text-gray-600'
             />
             <div className='flex w-full justify-around gap-x-1 text-sm text-gray-900'>
               {[25, 50, 75, 100].map((pct) => (
                 <button
                   key={pct}
-                  className='flex-1 rounded-full bg-slate-400 p-1 shadow hover:cursor-pointer hover:bg-slate-300'
+                  type='button'
+                  disabled={!info}
+                  onClick={handleFundPercent(pct)}
+                  className={clsx(
+                    'flex-1 rounded-full bg-slate-400 p-1 shadow ',
+                    info && 'hover:cursor-pointer hover:bg-slate-300'
+                  )}
                 >
                   {pct}%
                 </button>
               ))}
             </div>
           </label>
-          <button type='submit' className='block h-9 w-full rounded-lg bg-pink-600 px-4 text-lg'>
+          <button
+            disabled={!submittable}
+            type='submit'
+            className={clsx(
+              'block h-9 w-full rounded-lg px-4 text-lg',
+              submittable ? 'bg-pink-600 hover:bg-pink-700' : 'bg-gray-500'
+            )}
+          >
             Transfer
           </button>
         </form>
@@ -128,7 +225,11 @@ const EditRewardRate = () => {
   )
 }
 
-export const StakingUpdate = () => {
+export type StakingUpdateProps = {
+  state: StateAccount
+}
+
+export const StakingUpdate = ({ state }: StakingUpdateProps) => {
   const options = ['Fund rewards', 'Reward rate', 'Early unlock', 'Profile levels', 'Fee vault']
 
   return (
@@ -154,7 +255,7 @@ export const StakingUpdate = () => {
         </Tab.List>
         <Tab.Panels className='h-full'>
           <Tab.Panel>
-            <FundRewardsInfo />
+            <FundRewardsInfo state={state} />
           </Tab.Panel>
           <Tab.Panel>
             <EditRewardRate />
