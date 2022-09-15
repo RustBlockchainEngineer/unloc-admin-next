@@ -6,9 +6,7 @@ import { useSendTransaction } from '@/hooks'
 import { useStore } from '@/stores'
 import { createState } from '@/utils/spl-utils/unloc-staking'
 import { Transition } from '@headlessui/react'
-// import { InformationCircleIcon } from '@heroicons/react/20/solid'
-import { InformationCircleIcon } from '@heroicons/react/24/outline'
-import { CircleStackIcon, DocumentPlusIcon, NoSymbolIcon } from '@heroicons/react/24/solid'
+import { CircleStackIcon, DocumentPlusIcon, NoSymbolIcon, InformationCircleIcon } from '@heroicons/react/24/solid'
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, AccountInfo, Transaction } from '@solana/web3.js'
@@ -20,6 +18,7 @@ type InputEvent = ChangeEvent<HTMLInputElement>
 
 export type StakingInitializeProps = {
   loading: boolean
+  statePubkey: PublicKey
   account?: AccountInfo<Buffer>
 }
 
@@ -33,7 +32,7 @@ const validatePublicKey = (input: any) => {
 }
 const required = (input: any) => (input ? undefined : 'Required')
 
-export const StakingInitialize = ({ loading, account }: StakingInitializeProps) => {
+export const StakingInitialize = ({ loading, account, statePubkey }: StakingInitializeProps) => {
   const { connection } = useConnection()
   const { publicKey: wallet } = useWallet()
   const { programs } = useStore()
@@ -142,8 +141,8 @@ export const StakingInitialize = ({ loading, account }: StakingInitializeProps) 
               id='token_per_second'
               type='number'
               placeholder='100'
-              error='Invalid rate'
-              validator={(input) => input > 0}
+              helperText='Invalid rate'
+              validator={(input) => Number(input) > 0}
               onChange={(e: InputEvent) => setTokenPerSecond(Number(e.target.value))}
               className='block h-8 w-full rounded-md px-2 text-gray-900 shadow-lg placeholder:text-sm placeholder:text-gray-500'
             ></ValidatedInput>
@@ -157,9 +156,9 @@ export const StakingInitialize = ({ loading, account }: StakingInitializeProps) 
               type='number'
               placeholder='50%'
               className='block h-8 w-full rounded-md px-2 text-gray-900 shadow-lg placeholder:text-sm placeholder:text-gray-500'
-              error='Invalid percentage'
+              helperText='Invalid percentage'
               onChange={(e: InputEvent) => setEarlyUnlockFee(Number(e.target.value))}
-              validator={(input) => input > 0}
+              validator={(input) => Number(input) > 0}
             />
           </div>
           <div>
@@ -171,7 +170,7 @@ export const StakingInitialize = ({ loading, account }: StakingInitializeProps) 
               type='text'
               placeholder='Public key'
               className='block h-8 w-full rounded-md px-2 text-gray-900 shadow-lg placeholder:text-sm placeholder:text-gray-500'
-              error='Invalid public key'
+              helperText='Invalid public key'
               onChange={(e: InputEvent) => setFeeVault(new PublicKey(e.target.value))}
               validator={validatePublicKey}
             />
@@ -203,10 +202,13 @@ export const StakingInitialize = ({ loading, account }: StakingInitializeProps) 
         enterTo='opacity-100 scale-100'
       >
         <div className='rounded-lg bg-slate-700 p-8 shadow-sm lg:min-w-[420px]'>
-          <div className='flex items-center'>
+          <div className=''>
             <p className='flex items-center text-2xl font-semibold text-gray-100'>
               <CircleStackIcon className='mr-2 h-6 w-6' />
               Staking state
+            </p>
+            <p>
+              {statePubkey.toBase58()}
             </p>
           </div>
         </div>

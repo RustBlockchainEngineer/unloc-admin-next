@@ -4,9 +4,9 @@
   @apply text-xl;
 }
 
-label {
+/* label {
   @apply inline-flex justify-between text-slate-400;
-}
+} */
 
 .input {
   @apply px-1 border-solid border-2 border-gray-200 rounded;

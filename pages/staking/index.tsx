@@ -9,9 +9,9 @@ import { NextPage } from 'next'
 import dynamic from 'next/dynamic'
 import { useMemo, useState } from 'react'
 import { Tab } from '@headlessui/react'
-import { StakingInitialize, StakingInitializeProps } from '@/views/Staking/Initialize'
-import { StakingUpdate, StakingUpdateProps } from '@/views/Staking/Update'
-import { RewardConfigView } from '@/views/Staking'
+import { StakingInitialize, StakingInitializeProps } from '@/views/staking/Initialize'
+import { StakingUpdate, StakingUpdateProps } from '@/views/staking/Update'
+import { RewardConfigView } from '@/views/staking'
 import { NoSymbolIcon } from '@heroicons/react/20/solid'
 
 const StateParser: TypedAccountParser<StateAccount> = (_: PublicKey, data: AccountInfo<Buffer>) => {
@@ -66,7 +66,7 @@ const Staking: NextPage = () => {
         </Tab.List>
         <Tab.Panels className='mt-6'>
           <Tab.Panel key={0}>
-            <DynamicInitializeView loading={loading} account={account} />
+            <DynamicInitializeView loading={loading} account={account} statePubkey={stakeState} />
           </Tab.Panel>
           <Tab.Panel key={1} className={clsx('w-min rounded-xl bg-slate-500 p-3')}>
             {info && <DynamicUpdateView state={info} />}

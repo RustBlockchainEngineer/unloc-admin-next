@@ -81,12 +81,14 @@ const DistributeNFTs: React.FC = () => {
 
   return (
     <main className='main grid-content px-4'>
-      <div className='w-1/2 mx-auto bg-slate-700 p-4 rounded-md'>
-        <h2 className='inline-flex mb-8 text-slate-400'><FaExpandArrowsAlt className='mr-3 self-center' /> Distribute NFTs to a list of recipients</h2>
+      <div className='mx-auto w-1/2 rounded-md bg-slate-700 p-4'>
+        <h2 className='mb-8 inline-flex text-slate-400'>
+          <FaExpandArrowsAlt className='mr-3 self-center' /> Distribute NFTs to a list of recipients
+        </h2>
         <form className='relative flex flex-col space-y-2 text-sm' onSubmit={handleSubmit}>
           <label className='label label--recipients' htmlFor='recipients'>
             <textarea
-              className='w-full rounded-md bg-slate-800 text-white text-sm px-4 py-2'
+              className='w-full rounded-md bg-slate-800 px-4 py-2 text-sm text-white'
               id='textarea-admin'
               value={recipients}
               onChange={handleRecipientsChange}
@@ -96,9 +98,9 @@ const DistributeNFTs: React.FC = () => {
             />
           </label>
           <div className='flex flex-col'>
-            <label htmlFor='amount font-bold'>Amount</label>
+            <label className='text-slate-400' htmlFor='amount'>Amount</label>
             <input
-              className='w-1/3 rounded-md bg-slate-800 text-white px-2 py-1'
+              className='w-1/3 rounded-md bg-slate-800 px-2 py-1 text-white'
               type='number'
               id='amount'
               name='amount'

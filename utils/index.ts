@@ -1,2 +1,2 @@
-export { chunks } from './chunks'
+export { chunks, promiseWithTimeout } from './common'
 export { compressAddress } from './compress'
