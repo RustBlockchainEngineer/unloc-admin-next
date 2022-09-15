@@ -27,8 +27,6 @@ const SearchPanelView = () => {
   const { programs } = useStore()
   const [selectedAccount, setSelectedAccount] = useState<string>()
   const [data, setData] = useState<any>()
-  const [address, setAddress] = useState<string>('')
-  const [isLoading, setIsLoading] = useState(false)
   const selectedProvider = useMemo(
     () =>
       selectedAccount ? accountProviders[selectedAccount as keyof typeof accountProviders] : null,
