@@ -123,7 +123,7 @@ const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
           </ClickPopover>
         </div>
         <div className='flex items-center text-4xl font-bold'>
-          <span className='mr-2'>{stateBalance}</span>
+          <span className='mr-2'>{stateBalance.toLocaleString('en-us')}</span>
           <Image
             className='rounded-full grayscale-[25%]'
             height={36}
@@ -155,7 +155,10 @@ const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
           <ClickPopover
             panel={
               <div className='divide-y rounded-lg bg-slate-50 p-4 text-sm leading-4 text-gray-900 shadow ring-1 ring-blue-900/25 md:w-80'>
-                <p className='pb-4'>Fund the reward vault by transferring UNLOC tokens to it.</p>
+                <p className='pb-4'>
+                  Fund the reward vault by transferring UNLOC tokens to it. This can be done by any
+                  user, not just the stake authority.
+                </p>
                 <p className='pt-4'>
                   The user balance is read from the connected wallets Associated token account.
                 </p>

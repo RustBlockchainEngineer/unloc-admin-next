@@ -66,7 +66,12 @@ const Staking: NextPage = () => {
         </Tab.List>
         <Tab.Panels className='mt-6'>
           <Tab.Panel key={0}>
-            <DynamicInitializeView loading={loading} account={account} statePubkey={stakeState} />
+            <DynamicInitializeView
+              loading={loading}
+              account={account}
+              statePubkey={stakeState}
+              state={info}
+            />
           </Tab.Panel>
           <Tab.Panel key={1} className={clsx('w-min rounded-xl bg-slate-500 p-3')}>
             {info && <DynamicUpdateView state={info} />}
