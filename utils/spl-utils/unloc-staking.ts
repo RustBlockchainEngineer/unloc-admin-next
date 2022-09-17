@@ -15,18 +15,25 @@ import {
   TransactionInstruction
 } from '@solana/web3.js'
 import {
+  createCreateExtraRewardConfigsInstruction,
   createCreateStateInstruction,
   createFundRewardTokenInstruction,
+  DurationExtraRewardConfig,
   PROGRAM_ID
 } from '@unloc-dev/unloc-staking-solita'
 import { UNLOC_MINT } from './unloc-constants'
 
 // CONSTANTS
 export const STATE_SEED = Buffer.from('state')
+export const EXTRA_SEED = Buffer.from('extra')
 
 // PDAs
 export const getStakingState = (programId: PublicKey) => {
   return PublicKey.findProgramAddressSync([STATE_SEED], programId)[0]
+}
+
+export const getExtraConfig = (programId: PublicKey) => {
+  return PublicKey.findProgramAddressSync([EXTRA_SEED], programId)[0]
 }
 
 // Instruction helpers
@@ -68,6 +75,28 @@ export const createState = async (
     programId
   )
   return [...instructions, ix]
+}
+
+export const createRewardConfig = (
+  wallet: PublicKey,
+  configs: DurationExtraRewardConfig[],
+  programId?: PublicKey
+) => {
+  const state = getStakingState(programId ?? PROGRAM_ID)
+  const extraRewardAccount = getExtraConfig(programId ?? PROGRAM_ID)
+  const ix = createCreateExtraRewardConfigsInstruction(
+    {
+      authority: wallet,
+      state,
+      extraRewardAccount,
+      systemProgram: SystemProgram.programId
+    },
+    {
+      configs
+    },
+    programId
+  )
+  return [ix]
 }
 
 export const fundStakeProgram = (

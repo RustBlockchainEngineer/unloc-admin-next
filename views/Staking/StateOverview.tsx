@@ -11,7 +11,7 @@ import { StateAccount } from '@unloc-dev/unloc-staking-solita'
 import tokenLogo from '/public/unloc_token.png'
 import Image from 'next/image'
 import { AddressActions } from '@/components/common/AddressActions'
-import { amountToUiAmount } from '@/utils/spl-utils'
+import { amountToUiAmount, numVal } from '@/utils/spl-utils'
 
 export const StateOverview = ({
   statePubkey,
@@ -29,7 +29,7 @@ export const StateOverview = ({
     <div className='mx-auto'>
       <ul
         role='list'
-        className='mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+        className='mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
       >
         <li className='col-span-1 divide-gray-600 rounded-md bg-slate-700 pb-4 shadow'>
           <div className='flex justify-between border-b border-gray-600 px-4 py-5 sm:px-6'>
@@ -188,7 +188,7 @@ export const StateOverview = ({
                 <div className='py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6'>
                   <dt className='text-sm font-medium text-gray-200'>Initialization time</dt>
                   <dd className='mt-1 text-sm text-gray-50 sm:col-span-2 sm:mt-0'>
-                    {state.startTime.toString()}
+                    {new Date(numVal(state.startTime) * 1000).toLocaleString()}
                   </dd>
                 </div>
                 <div className='py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6'>
@@ -200,7 +200,7 @@ export const StateOverview = ({
                 <div className='py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6'>
                   <dt className='text-sm font-medium text-gray-200'>Early unlock fee</dt>
                   <dd className='mt-1 text-sm text-gray-50 sm:col-span-2 sm:mt-0'>
-                    {state.earlyUnlockFee.toString()}
+                    {numVal(state.earlyUnlockFee) / 10 ** 7}%
                   </dd>
                 </div>
               </dl>

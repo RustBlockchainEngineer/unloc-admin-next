@@ -1,4 +1,6 @@
+import { bignum } from '@metaplex-foundation/beet'
 import { BN } from 'bn.js'
+import { sha256 } from 'js-sha256'
 
 export const amountToUiAmount = (amount: BigInt | typeof BN, mintDecimals: number) => {
   amount = typeof amount === 'bigint' ? amount : BigInt(amount.toString())
@@ -19,4 +21,25 @@ export const uiAmountToAmount = (amount: number | string, mintDecimals: number) 
   // switching to BN or BigInt ASAP is preferred so there's less chance of overflow errors
   const converted = Number(amount) * 10 ** fraction.length
   return new BN(converted).muln(10 ** (mintDecimals - fraction.length))
+}
+
+// Bignum helpers
+export function val(num: any) {
+  if (BN.isBN(num)) {
+    return num
+  }
+  return new BN(num)
+}
+
+export function numVal(num: bignum) {
+  if (BN.isBN(num)) {
+    return num.toNumber()
+  }
+  return num
+}
+
+const ACCOUNT_DISCRIMINATOR_SIZE = 8
+// Fucking anchor
+export function accountDiscriminator(name: string): Buffer {
+  return Buffer.from(sha256.digest(`account:${name}`)).subarray(0, ACCOUNT_DISCRIMINATOR_SIZE)
 }
