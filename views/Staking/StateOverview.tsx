@@ -1,11 +1,5 @@
-import { Copyable } from '@/components/common'
-import { useAccount, useTokenAccount } from '@/hooks'
-import { compressAddress } from '@/utils'
-import {
-  ClipboardDocumentIcon,
-  InformationCircleIcon,
-  MagnifyingGlassIcon
-} from '@heroicons/react/20/solid'
+import { useTokenAccount } from '@/hooks'
+import { InformationCircleIcon } from '@heroicons/react/20/solid'
 import { PublicKey } from '@solana/web3.js'
 import { StateAccount } from '@unloc-dev/unloc-staking-solita'
 import tokenLogo from '/public/unloc_token.png'
@@ -29,7 +23,7 @@ export const StateOverview = ({
     <div className='mx-auto'>
       <ul
         role='list'
-        className='mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+        className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
       >
         <li className='col-span-1 divide-gray-600 rounded-md bg-slate-700 pb-4 shadow'>
           <div className='flex justify-between border-b border-gray-600 px-4 py-5 sm:px-6'>

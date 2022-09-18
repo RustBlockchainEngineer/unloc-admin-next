@@ -35,17 +35,18 @@ const Staking: NextPage = () => {
   let [categories] = useState([
     { name: 'Initialize', component: DynamicInitializeView },
     { name: 'Update', component: DynamicUpdateView },
-    { name: 'Reward Config', component: DynamicUpdateView }
+    { name: 'Reward Config', component: DynamicUpdateView },
+    { name: 'Pool', component: DynamicUpdateView }
   ])
 
   return (
     <main className='grid-content w-full p-7 text-white'>
       <Tab.Group>
-        <Tab.List className='flex max-w-md space-x-1 rounded-xl bg-slate-700 p-1'>
+        <Tab.List className='flex max-w-lg space-x-1 rounded-xl bg-slate-700 p-1'>
           {categories.map(({ name }) => (
             <Tab
               key={name}
-              disabled={name === 'Update' && !info}
+              disabled={name !== 'Initialize' && !info}
               className={({ selected }) =>
                 clsx(
                   'text-md w-full rounded-lg py-2.5 font-medium leading-5 text-blue-700',
@@ -53,7 +54,7 @@ const Staking: NextPage = () => {
                   selected
                     ? 'bg-white shadow'
                     : 'text-blue-100 hover:bg-white/[0.12] hover:text-white',
-                  name === 'Update' && !info && 'bg-gray-600'
+                  name !== 'Initialize' && !info && 'bg-gray-600'
                 )
               }
             >
@@ -76,8 +77,11 @@ const Staking: NextPage = () => {
           <Tab.Panel key={1} className={clsx('w-min rounded-xl bg-slate-500 p-3')}>
             {info && <DynamicUpdateView state={info} />}
           </Tab.Panel>
-          <Tab.Panel key={2} className={clsx('rounded-xl bg-slate-500 p-3')}>
+          <Tab.Panel key={2}>
             <DynamicRewardConfigView />
+          </Tab.Panel>
+          <Tab.Panel key={3}>
+
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>

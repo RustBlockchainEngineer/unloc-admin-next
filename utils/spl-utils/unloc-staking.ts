@@ -36,6 +36,10 @@ export const getExtraConfig = (programId: PublicKey) => {
   return PublicKey.findProgramAddressSync([EXTRA_SEED], programId)[0]
 }
 
+export const getPool = (programId: PublicKey, mint: PublicKey) => {
+  return PublicKey.findProgramAddressSync([mint.toBuffer()], programId)[0]
+}
+
 // Instruction helpers
 export const createState = async (
   connection: Connection,

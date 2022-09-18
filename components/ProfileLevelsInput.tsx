@@ -71,7 +71,7 @@ export const ProfileLevelsInput = () => {
 
   const levelButton = ({ option }: { option: 'add' | 'remove' }) => {
     return (
-      <div className='flex h-8 rounded-sm'>
+      <div>
         <button
           type='button'
           className='flex h-10 w-14 items-center justify-center rounded-md bg-sky-800 px-3 shadow-md hover:bg-sky-900'
@@ -91,12 +91,16 @@ export const ProfileLevelsInput = () => {
 
   const levelInput = ({ index }: { index: number }) => {
     return (
-      <div className='relative flex h-10 w-28 rounded-md'>
-        <p className='absolute z-10 top-2 left-0 pl-1 text-md text-gray-400'>{index + 1}</p>
+      <div className='flex rounded-md bg-gray-50 shadow-sm'>
+        <span className='inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-300 px-3 text-gray-600 sm:text-sm'>
+          {index + 1}
+        </span>
         <input
-          type='number'
-          className='relative pl-4 h-full w-full bg-slate-600 p-1 text-gray-50'
-        ></input>
+          type='text'
+          name='breakpoint'
+          id='breakpoint'
+          className='block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-pink-500 sm:text-sm'
+        />
       </div>
     )
   }

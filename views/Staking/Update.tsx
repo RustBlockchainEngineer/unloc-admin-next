@@ -80,10 +80,6 @@ const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
           ),
           success: (e) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
         },
-        {
-          style: { minWidth: '250px', backgroundColor: '#334155', color: '#fff' },
-          position: 'bottom-left'
-        }
       )
     },
     [publicKey, ata, uiFundAmount, state.rewardVault, programs.stakePubkey, sendAndConfirm]

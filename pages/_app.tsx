@@ -12,6 +12,7 @@ import { clusterApiUrl } from '@solana/web3.js'
 import { extend } from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import utc from 'dayjs/plugin/utc'
+import duration from 'dayjs/plugin/duration'
 import { AppProps } from 'next/app'
 import React, { Dispatch, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
@@ -21,8 +22,8 @@ import '@solana/wallet-adapter-react-ui/styles.css'
 import { Sidebar } from '../components/sidebar'
 import '../styles/main.css'
 import rootStore, { StoreContext } from '../stores'
-import { observer } from 'mobx-react-lite'
 import { AccountProvider } from '../hooks/accountContext'
+import { observer } from 'mobx-react-lite'
 
 interface IAdminContext {
   isAdmin: boolean
@@ -33,6 +34,7 @@ export const AdminContext = React.createContext<IAdminContext>({} as IAdminConte
 
 extend(relativeTime)
 extend(utc)
+extend(duration)
 
 export type NetworkName = 'Devnet' | 'Mainnet' | 'Localnet'
 
@@ -84,7 +86,16 @@ const App = ({ Component, pageProps }: AppProps): ReactNode => {
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <Toaster />
+      <Toaster
+        position='bottom-left'
+        toastOptions={{
+          style: {
+            backgroundColor: '#334155',
+            color: '#f9fafb',
+            minWidth: '250px'
+          }
+        }}
+      />
       <WalletProvider wallets={wallets} onError={onError}>
         <WalletModalProvider>
           <AccountProvider commitment='confirmed'>
