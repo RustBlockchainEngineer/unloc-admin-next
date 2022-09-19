@@ -40,7 +40,7 @@ export const Sidebar = ({ className, network, setNetwork }: SidebarProps) => {
   const toggleSideNav = (): void => setHidden(!hidden)
 
   return (
-    <div className={`transition-all ${hidden ? 'w-16 bg-slate-800 delay-100' : 'w-72 bg-slate-700'} ${className || ''}`}>
+    <div className={`transition-all bg-slate-800 ${hidden ? 'w-16 delay-100' : 'w-72'} ${className || ''}`}>
       <a className={`transition-transform block mt-2 mb-4 hover:cursor-pointer ${hidden ? 'rotate-0 delay-100' : 'rotate-180'}`} onClick={toggleSideNav}>
         <FaBars className='block text-white w-12 h-12 m-auto' />
       </a>
@@ -59,6 +59,8 @@ export const Sidebar = ({ className, network, setNetwork }: SidebarProps) => {
             </NavItem>
 
             <NavItem label='Staking' mode='list'>
+              <NavListItem label='Settings' path='staking' />
+              <NavListItem label='Debug' path='staking/debug' />
             </NavItem>
 
             <NavItem label='Users' mode='list'>

@@ -4,13 +4,9 @@ import clsx from 'clsx'
 import { observer } from 'mobx-react-lite'
 import { SyntheticEvent, useState } from 'react'
 import { Form, Field } from 'react-final-form'
-import { useTokenAccount } from '../../../hooks/useAccount'
 import {
   createSetGlobalStateInstruction,
-  SetGlobalStateInstructionAccounts,
-  SetGlobalStateInstructionArgs
 } from '@unloc-dev/unloc-voting-solita'
-import { pda } from '../../../integration/unloc'
 import { useStore } from '../../../stores'
 import { Button } from '../../common/Button'
 import { InputAdapter } from '../InputAdapter'

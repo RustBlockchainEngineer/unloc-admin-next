@@ -1,0 +1,11 @@
+import dayjs from 'dayjs'
+
+export function* chunks<T>(arr: T[], size = 100) {
+  for (let i = 0; i < arr.length; i += size) {
+    yield arr.slice(i, i + size)
+  }
+}
+
+export function durationToSeconds(duration: number, unit: 'days' | 'weeks' | 'months' | 'years') {
+  return dayjs.duration({ [unit]: duration }).asSeconds()
+}

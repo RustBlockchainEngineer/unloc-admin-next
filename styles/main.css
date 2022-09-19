@@ -9,6 +9,16 @@
 @import url('./nfts.css');
 @import url('./checkboxes.css');
 
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance:textfield;
+}
+
 .app {
   @apply min-h-screen;
   @apply bg-white;
@@ -57,21 +67,12 @@ h2 {
   @apply mt-8 mr-auto mb-8 ml-auto;
 }
 
-.container {
-  @apply bg-slate-700 p-2;
-}
-
 
 @screen md {
   .main {
     @apply w-full;
     @apply pr-8 pl-8;
   }
-}
-
-.header {
-  @apply w-full;
-  @apply mb-4;
 }
 
 .header__buttons {
@@ -91,12 +92,4 @@ h2 {
 
 .current-global-state p span {
   @apply font-bold;
-}
-
-.wallet-adapter-dropdown-list {
-  @apply w-full;
-}
-
-.program-display:hover .edit-address {
-  @apply block;
 }

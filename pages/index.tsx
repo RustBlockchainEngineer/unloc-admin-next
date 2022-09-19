@@ -57,7 +57,10 @@ const AirdropToMultiple: NextPage = () => {
     }
 
     try {
-      const recips = recipients.split('\n').filter(r => r.trim().length).map((r) => new PublicKey(r.trim()))
+      const recips = recipients
+        .split('\n')
+        .filter((r) => r.trim().length)
+        .map((r) => new PublicKey(r.trim()))
       const mintPubkey = new PublicKey(mint)
       const decimals = await getMintDecimals(connection, mintPubkey)
       await airdropToMultiple(
@@ -113,14 +116,16 @@ const AirdropToMultiple: NextPage = () => {
   }
 
   return (
-    <main className='main grid-content w-full px-4 space-x-4 inline-flex'>
-      <div className='w-1/2 bg-slate-700 p-4 rounded-md h-max'>
-      <h2 className='inline-flex mb-8 text-slate-400'><FaSortAmountDown className='self-center mr-3' /> Airdrop tokens to a list of recipients</h2>
+    <main className='main grid-content inline-flex w-full space-x-4 px-4'>
+      <div className='h-max w-1/2 rounded-md bg-slate-700 p-4'>
+        <h2 className='mb-8 inline-flex text-slate-400'>
+          <FaSortAmountDown className='mr-3 self-center' /> Airdrop tokens to a list of recipients
+        </h2>
         <form className='relative flex flex-col space-y-2 text-sm' onSubmit={handleSubmit}>
           <div className='flex flex-col'>
             <label htmlFor='mint'>Mint</label>
             <input
-              className='rounded-md bg-slate-800 text-white px-2 py-1'
+              className='rounded-md bg-slate-800 px-2 py-1 text-white'
               type='text'
               id='mint'
               value={mint}
@@ -131,7 +136,7 @@ const AirdropToMultiple: NextPage = () => {
             />
           </div>
           <textarea
-            className='w-full rounded-md bg-slate-800 text-white text-sm px-4 py-2'
+            className='w-full rounded-md bg-slate-800 px-4 py-2 text-sm text-white'
             id='recipients'
             value={recipients}
             onChange={handleRecipientsChange}
@@ -142,7 +147,7 @@ const AirdropToMultiple: NextPage = () => {
           <div className='flex flex-col'>
             <label htmlFor='amount font-bold'>Amount</label>
             <input
-              className='w-1/3 rounded-md bg-slate-800 text-white px-2 py-1'
+              className='w-1/3 rounded-md bg-slate-800 px-2 py-1 text-white'
               type='number'
               id='amount'
               name='amount'
@@ -162,13 +167,16 @@ const AirdropToMultiple: NextPage = () => {
           </div>
         </form>
       </div>
-      <div className='w-1/2 bg-slate-700 p-4 rounded-md h-max'>
-        <h2 className='inline-flex mb-8 text-slate-400'><FaArrowAltCircleDown className='self-center mr-3' /> Airdrop tokens owned by the program to yourself</h2>
+      <div className='h-max w-1/2 rounded-md bg-slate-700 p-4'>
+        <h2 className='mb-8 inline-flex text-slate-400'>
+          <FaArrowAltCircleDown className='mr-3 self-center' /> Airdrop tokens owned by the program
+          to yourself
+        </h2>
         <form className='relative flex flex-col space-y-2 text-sm' onSubmit={handleSelfSubmit}>
           <div className='flex flex-col'>
             <label htmlFor='self-mint'>Mint</label>
             <input
-              className='rounded-md bg-slate-800 text-white px-2 py-1'
+              className='rounded-md bg-slate-800 px-2 py-1 text-white'
               type='text'
               id='mint'
               value={selfMint}
@@ -181,7 +189,7 @@ const AirdropToMultiple: NextPage = () => {
           <div className='flex flex-col'>
             <label htmlFor='self-amount'>Amount</label>
             <input
-              className='w-1/3 rounded-md bg-slate-800 text-white px-2 py-1'
+              className='w-1/3 rounded-md bg-slate-800 px-2 py-1 text-white'
               type='number'
               id='self-amount'
               name='self-amount'
