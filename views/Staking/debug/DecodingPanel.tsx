@@ -9,7 +9,7 @@ import toast from "react-hot-toast"
 import SyntaxHighlighter from "react-syntax-highlighter"
 import { AccountSelector } from "./AccountSelector"
 
-import { dracula } from "react-syntax-highlighter/dist/esm/styles/hljs"
+import { dracula } from "react-syntax-highlighter/dist/cjs/styles/hljs"
 
 export const DecodingPanelView = () => {
   const { connection } = useConnection()

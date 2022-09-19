@@ -58,7 +58,6 @@ const uiNetworkToWalletAdapter = (network: NetworkName) => {
 const App = ({ Component, pageProps }: AppProps): ReactNode => {
   const [isAdmin, setIsAdmin] = useState(false)
   const [uiNetwork, setUiNetwork] = useState<NetworkName>('Devnet')
-  const network = useMemo(() => uiNetworkToWalletAdapter(uiNetwork), [uiNetwork])
   const endpoint = useMemo(() => wrappedClusterApiUrl(uiNetwork), [uiNetwork])
 
   const wallets = useMemo(
@@ -115,4 +114,4 @@ const App = ({ Component, pageProps }: AppProps): ReactNode => {
   )
 }
 
-export default observer(App)
+export default App
