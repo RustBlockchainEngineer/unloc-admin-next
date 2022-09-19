@@ -264,16 +264,6 @@ export const RewardConfigView = () => {
           </button>
         </div>
       </form>
-      <Transition
-        as={'div'}
-        show={!loading && !!info}
-        enter='transform duration-[200ms]'
-        enterFrom='opacity-0'
-        enterTo='opacity-100'
-      >
-        {info && <div>{JSON.stringify(info.pretty(), null, 2)}</div>}
-        {info?.configs[0].extraPercentage.toString()}
-      </Transition>
     </div>
   )
 }

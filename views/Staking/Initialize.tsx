@@ -4,12 +4,12 @@ import { ValidatedInput } from '@/components/common/ValidatedInput'
 import { ProfileLevelsInput } from '@/components/ProfileLevelsInput'
 import { useSendTransaction } from '@/hooks'
 import { useStore } from '@/stores'
+import { compressAddress } from '@/utils'
+import { uiAmountToAmount } from '@/utils/spl-utils'
 import { createState } from '@/utils/spl-utils/unloc-staking'
 import { Transition } from '@headlessui/react'
 import {
-  CircleStackIcon,
   DocumentPlusIcon,
-  NoSymbolIcon,
   InformationCircleIcon
 } from '@heroicons/react/24/solid'
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base'
@@ -69,22 +69,28 @@ export const StakingInitialize = ({
       if (!tokenPerSecond || !earlyUnlockFee || !feeVault) {
         throw Error('Cannot submit the transaction')
       }
+      const ACC_PRECISION = 11
+      const earlyUnlockFeePrecision = uiAmountToAmount(earlyUnlockFee, ACC_PRECISION)
 
       const ix = await createState(
         connection,
         wallet,
-        earlyUnlockFee,
+        earlyUnlockFeePrecision,
         tokenPerSecond,
         profileLevels,
         feeVault,
         programs.stakePubkey
       )
       const tx = new Transaction().add(...ix)
-      await sendAndConfirm(tx, 'confirmed')
       toast.promise(sendAndConfirm(tx, 'confirmed'), {
-        error: <div>Error</div>,
-        loading: <div>Loading</div>,
-        success: <div>Done</div>
+        loading: 'Confirming...',
+        error: (e) => (
+          <div>
+            <p>There was an error confirming your transaction</p>
+            <p>{e.message}</p>
+          </div>
+        ),
+        success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
       })
     },
     [

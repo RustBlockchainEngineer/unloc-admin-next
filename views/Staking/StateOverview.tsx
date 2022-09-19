@@ -194,7 +194,7 @@ export const StateOverview = ({
                 <div className='py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6'>
                   <dt className='text-sm font-medium text-gray-200'>Early unlock fee</dt>
                   <dd className='mt-1 text-sm text-gray-50 sm:col-span-2 sm:mt-0'>
-                    {numVal(state.earlyUnlockFee) / 10 ** 7}%
+                    {numVal(state.earlyUnlockFee) / 10 ** 11}%
                   </dd>
                 </div>
               </dl>
