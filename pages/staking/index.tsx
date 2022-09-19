@@ -9,9 +9,9 @@ import { NextPage } from 'next'
 import dynamic from 'next/dynamic'
 import { useMemo, useState } from 'react'
 import { Tab } from '@headlessui/react'
-import { StakingInitialize, StakingInitializeProps } from '@/views/staking/Initialize'
-import { StakingUpdate, StakingUpdateProps } from '@/views/staking/Update'
-import { FarmPoolView, RewardConfigView } from '@/views/staking'
+import { StakingInitialize, StakingInitializeProps } from '@/views/stakeasdkb/Initialize'
+import { StakingUpdate, StakingUpdateProps } from '@/views/stakeasdkb/Update'
+import { FarmPoolView, RewardConfigView } from '@/views/stakeasdkb'
 import { NoSymbolIcon } from '@heroicons/react/20/solid'
 
 const StateParser: TypedAccountParser<StateAccount> = (_: PublicKey, data: AccountInfo<Buffer>) => {
