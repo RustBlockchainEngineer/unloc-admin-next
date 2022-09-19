@@ -1,7 +1,7 @@
 import { Tab } from '@headlessui/react'
 import { NextPage } from 'next'
 import clsx from 'clsx'
-import { DecodingPanelView, SearchPanelView } from '@/views/stakeasdkb/debug/index'
+import { DecodingPanelView, SearchPanelView } from '@/views/staking/debug/index'
 
 import dynamic from 'next/dynamic'
 
