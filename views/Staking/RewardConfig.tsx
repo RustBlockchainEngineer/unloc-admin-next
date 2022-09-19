@@ -2,11 +2,10 @@ import { useAccount, useSendTransaction } from '@/hooks'
 import { useStore } from '@/stores'
 import { compressAddress, durationToSeconds } from '@/utils'
 import { uiAmountToAmount } from '@/utils/spl-utils'
-import { createRewardConfig, getExtraConfig } from '@/utils/spl-utils/unloc-staking'
+import { createRewardConfig, extraRewardParser, getExtraConfig } from '@/utils/spl-utils/unloc-staking'
+import { Transition } from '@headlessui/react'
 import {
   ChevronDoubleRightIcon,
-  CubeTransparentIcon,
-  EnvelopeIcon,
   InformationCircleIcon,
   MinusCircleIcon,
   PlusCircleIcon
@@ -29,11 +28,11 @@ const ExtraRewardConfigItem = ({
   hasError,
   handleRemove,
   handleEdit,
-  initialValues,
+  initialValues
 }: {
   isLast?: boolean
   hasError?: boolean
-  initialValues?: { initDuration: number, initPercentage: number }
+  initialValues?: { initDuration: number; initPercentage: number }
   handleRemove: () => void
   handleEdit: (value: RewardConfig) => void
 }) => {
@@ -135,7 +134,7 @@ export const RewardConfigView = () => {
 
   const { programs } = useStore()
   const extraRewardConfigPubkey = getExtraConfig(programs.stakePubkey)
-  const { loading, account } = useAccount(extraRewardConfigPubkey)
+  const { loading, account, info } = useAccount(extraRewardConfigPubkey, extraRewardParser)
 
   const handleRemoveConfig = () => {
     if (errorIndex === lol.length) {
@@ -265,6 +264,16 @@ export const RewardConfigView = () => {
           </button>
         </div>
       </form>
+      <Transition
+        as={'div'}
+        show={!loading && !!info}
+        enter='transform duration-[200ms]'
+        enterFrom='opacity-0'
+        enterTo='opacity-100'
+      >
+        {info && <div>{JSON.stringify(info.pretty(), null, 2)}</div>}
+        {info?.configs[0].extraPercentage.toString()}
+      </Transition>
     </div>
   )
 }

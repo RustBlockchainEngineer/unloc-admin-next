@@ -8,6 +8,7 @@ import {
   createAssociatedTokenAccountInstruction
 } from '@solana/spl-token'
 import {
+  AccountInfo,
   Connection,
   PublicKey,
   SystemProgram,
@@ -18,8 +19,12 @@ import {
   createCreateExtraRewardConfigsInstruction,
   createCreateStateInstruction,
   createFundRewardTokenInstruction,
+  createCreatePoolInstruction,
   DurationExtraRewardConfig,
-  PROGRAM_ID
+  PROGRAM_ID,
+  StateAccount,
+  ExtraRewardsAccount,
+  FarmPoolAccount
 } from '@unloc-dev/unloc-staking-solita'
 import { UNLOC_MINT } from './unloc-constants'
 
@@ -36,8 +41,20 @@ export const getExtraConfig = (programId: PublicKey) => {
   return PublicKey.findProgramAddressSync([EXTRA_SEED], programId)[0]
 }
 
-export const getPool = (programId: PublicKey, mint: PublicKey) => {
+export const getPool = (mint: PublicKey, programId: PublicKey) => {
   return PublicKey.findProgramAddressSync([mint.toBuffer()], programId)[0]
+}
+
+export const stateParser = (pubkey: PublicKey, data: AccountInfo<Buffer>) => {
+  return StateAccount.fromAccountInfo(data)[0]
+}
+
+export const extraRewardParser = (pubkey: PublicKey, data: AccountInfo<Buffer>) => {
+  return ExtraRewardsAccount.fromAccountInfo(data)[0]
+}
+
+export const farmPoolParser = (pubkey: PublicKey, data: AccountInfo<Buffer>) => {
+  return FarmPoolAccount.fromAccountInfo(data)[0]
 }
 
 // Instruction helpers
@@ -101,6 +118,39 @@ export const createRewardConfig = (
     programId
   )
   return [ix]
+}
+
+export const createPool = async (
+  connection: Connection,
+  wallet: PublicKey,
+  mint: PublicKey,
+  programId?: PublicKey
+) => {
+  const instructions: TransactionInstruction[] = []
+  const state = getStakingState(programId ?? PROGRAM_ID)
+  const pool = getPool(mint, programId ?? PROGRAM_ID)
+  const vault = getAssociatedTokenAddressSync(mint, pool, true)
+
+  if (!(await isAccountInitialized(connection, vault))) {
+    instructions.push(createAssociatedTokenAccountInstruction(wallet, vault, pool, mint))
+  }
+  const ix = createCreatePoolInstruction(
+    {
+      authority: wallet,
+      payer: wallet,
+      mint,
+      state,
+      pool,
+      vault,
+      ...DEFAULT_PROGRAMS
+    },
+    {
+      amountMultipler: 0,
+      point: 0
+    },
+    programId
+  )
+  return [...instructions, ix]
 }
 
 export const fundStakeProgram = (

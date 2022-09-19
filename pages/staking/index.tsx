@@ -11,7 +11,7 @@ import { useMemo, useState } from 'react'
 import { Tab } from '@headlessui/react'
 import { StakingInitialize, StakingInitializeProps } from '@/views/staking/Initialize'
 import { StakingUpdate, StakingUpdateProps } from '@/views/staking/Update'
-import { RewardConfigView } from '@/views/staking'
+import { FarmPoolView, RewardConfigView } from '@/views/staking'
 import { NoSymbolIcon } from '@heroicons/react/20/solid'
 
 const StateParser: TypedAccountParser<StateAccount> = (_: PublicKey, data: AccountInfo<Buffer>) => {
@@ -26,6 +26,7 @@ const DynamicUpdateView = dynamic<StakingUpdateProps>(() => Promise.resolve(Stak
   ssr: false
 })
 const DynamicRewardConfigView = dynamic<{}>(() => Promise.resolve(RewardConfigView), { ssr: false })
+const DynamicFarmPoolView = dynamic<{}>(() => Promise.resolve(FarmPoolView), { ssr: false })
 
 const Staking: NextPage = () => {
   const { programs } = useStore()
@@ -58,8 +59,8 @@ const Staking: NextPage = () => {
                 )
               }
             >
-              <span className='flex items-center justify-center'>
-                {name === 'Update' && !info && <NoSymbolIcon className='mr-1 h-4 w-4' />}
+              <span className='flex items-center justify-center truncate'>
+                {name !== 'Initialize' && !info && <NoSymbolIcon className='mr-1 h-4 w-4' />}
                 {name}
               </span>
             </Tab>
@@ -81,7 +82,7 @@ const Staking: NextPage = () => {
             <DynamicRewardConfigView />
           </Tab.Panel>
           <Tab.Panel key={3}>
-
+            <DynamicFarmPoolView />
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>
