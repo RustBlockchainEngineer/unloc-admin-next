@@ -24,7 +24,8 @@ import {
   PROGRAM_ID,
   StateAccount,
   ExtraRewardsAccount,
-  FarmPoolAccount
+  FarmPoolAccount,
+  createClosePoolInstruction
 } from '@unloc-dev/unloc-staking-solita'
 import { UNLOC_MINT } from './unloc-constants'
 
@@ -151,6 +152,26 @@ export const createPool = async (
     programId
   )
   return [...instructions, ix]
+}
+
+export const closePool = (
+  wallet: PublicKey,
+  mint: PublicKey,
+  programId?: PublicKey
+) => {
+  const state = getStakingState(programId ?? PROGRAM_ID)
+  const pool = getPool(mint, programId ?? PROGRAM_ID)
+
+  const ix = createClosePoolInstruction(
+    {
+      authority: wallet,
+      state,
+      pool,
+      ...DEFAULT_PROGRAMS
+    },
+    programId
+  )
+  return [ix]
 }
 
 export const fundStakeProgram = (
