@@ -1,3 +1,4 @@
+import { InformationIcon } from '@/components/common'
 import { useAccount, useSendTransaction } from '@/hooks'
 import { useStore } from '@/stores'
 import { compressAddress } from '@/utils'
@@ -9,6 +10,11 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { Transaction } from '@solana/web3.js'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
+
+const poolDetails = [
+  'A pool account is initialized using the mint address of the token that is being staked. In our case, that is always the UNLOC token.',
+  'It is initialized after the staking state account.'
+]
 
 export const FarmPoolView = () => {
   const { connection } = useConnection()
@@ -41,7 +47,7 @@ export const FarmPoolView = () => {
         <div className='flex flex-wrap justify-between border-b border-gray-600 px-4 py-5 sm:px-6'>
           <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
             Farm Pool
-            <InformationCircleIcon className='ml-2 inline h-5 w-5 text-gray-200' />
+            <InformationIcon info={poolDetails} />
           </h3>
           <span
             className={clsx(

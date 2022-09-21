@@ -1,9 +1,13 @@
+import { InformationIcon } from '@/components/common'
 import { useAccount, useSendTransaction } from '@/hooks'
 import { useStore } from '@/stores'
 import { compressAddress, durationToSeconds } from '@/utils'
 import { uiAmountToAmount } from '@/utils/spl-utils'
-import { createRewardConfig, extraRewardParser, getExtraConfig } from '@/utils/spl-utils/unloc-staking'
-import { Transition } from '@headlessui/react'
+import {
+  createRewardConfig,
+  extraRewardParser,
+  getExtraConfig
+} from '@/utils/spl-utils/unloc-staking'
 import {
   ChevronDoubleRightIcon,
   InformationCircleIcon,
@@ -17,6 +21,13 @@ import clsx from 'clsx'
 import { FormEvent, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
+const rewardConfigDetails = [
+  'Extra reward config increases the base reward rate for staking accounts that have staked for longer durations.',
+  'The configuration is initialized after the staking state account and can be updated by the authority.',
+  'Each configuration item has a duration and the extra earn rate expressed as a percentage. A staking account will earn the base rate and the additional rate in this configuration.',
+  'If there are multiple configuration items, only the highest applicable earn rate will be selected. Each following configuration item must have both a longer staking duration and a higher bonus earn rate to be valid.'
+]
+
 type Unit = 'days' | 'weeks' | 'months' | 'years'
 type RewardConfig = {
   extraPercentage: number
@@ -28,11 +39,9 @@ const ExtraRewardConfigItem = ({
   hasError,
   handleRemove,
   handleEdit,
-  initialValues
 }: {
   isLast?: boolean
   hasError?: boolean
-  initialValues?: { initDuration: number; initPercentage: number }
   handleRemove: () => void
   handleEdit: (value: RewardConfig) => void
 }) => {
@@ -188,22 +197,16 @@ export const RewardConfigView = () => {
     }
     const ix = createRewardConfig(publicKey, lol, programs.stakePubkey)
     const tx = new Transaction().add(...ix)
-    toast.promise(
-      sendAndConfirm(tx, 'confirmed'),
-      {
-        loading: 'Confirming...',
-        error: (e) => (
-          <div>
-            <p>There was an error confirming your transaction</p>
-            <p>{e.message}</p>
-          </div>
-        ),
-        success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
-      },
-      {
-        style: { minWidth: '250px', backgroundColor: '#334155', color: '#fff' }
-      }
-    )
+    toast.promise(sendAndConfirm(tx, 'confirmed'), {
+      loading: 'Confirming...',
+      error: (e) => (
+        <div>
+          <p>There was an error confirming your transaction</p>
+          <p>{e.message}</p>
+        </div>
+      ),
+      success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
+    })
   }
 
   return (
@@ -212,7 +215,7 @@ export const RewardConfigView = () => {
         <div className='flex flex-wrap justify-between border-b border-gray-600 px-4 py-5 sm:px-6'>
           <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
             Extra Reward Configuration
-            <InformationCircleIcon className='ml-2 inline h-5 w-5 text-gray-200' />
+            <InformationIcon info={rewardConfigDetails} />
           </h3>
           <span
             className={clsx(
@@ -234,7 +237,6 @@ export const RewardConfigView = () => {
                   key={i}
                   hasError={hasError}
                   isLast={isLast}
-                  // initialValues={{ initDuration: lol[i - 1].duration + 1, initPercentage: lol[i-1].extraPercentage + 1}}
                   handleRemove={handleRemoveConfig}
                   handleEdit={handleEditWrapper(i)}
                 />

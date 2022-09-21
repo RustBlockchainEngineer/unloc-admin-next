@@ -1,5 +1,4 @@
-import { Spinner } from '@/components/common'
-import { ClickPopover } from '@/components/common/ClickPopover'
+import { InformationIcon, Spinner } from '@/components/common'
 import { ValidatedInput } from '@/components/common/ValidatedInput'
 import { ProfileLevelsInput } from '@/components/ProfileLevelsInput'
 import { useSendTransaction } from '@/hooks'
@@ -8,10 +7,7 @@ import { compressAddress } from '@/utils'
 import { uiAmountToAmount } from '@/utils/spl-utils'
 import { createState } from '@/utils/spl-utils/unloc-staking'
 import { Transition } from '@headlessui/react'
-import {
-  DocumentPlusIcon,
-  InformationCircleIcon
-} from '@heroicons/react/24/solid'
+import { DocumentPlusIcon, InformationCircleIcon } from '@heroicons/react/24/solid'
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, AccountInfo, Transaction } from '@solana/web3.js'
@@ -39,6 +35,12 @@ const validatePublicKey = (input: any) => {
   }
 }
 const required = (input: any) => (input ? undefined : 'Required')
+
+const initializeInfo = [
+  'The state account of the staking program must be initialized first to run allother instructions.',
+  'The state account holds information about the base reward rate, early unlockfee and the required scores for determining the users profile level.',
+  'The state account also holds the addresses of the fee vault and reward vault token accounts.'
+]
 
 export const StakingInitialize = ({
   loading,
@@ -113,28 +115,7 @@ export const StakingInitialize = ({
             <p className='flex items-center text-2xl font-semibold text-gray-100'>
               <DocumentPlusIcon className='mr-2 h-6 w-6' />
               Initialize state
-              <ClickPopover
-                panel={
-                  <div className='divide-y rounded-lg bg-slate-50 p-4 text-sm font-normal leading-4 text-gray-900 shadow ring-1 ring-blue-900/25 md:w-80'>
-                    <p className='pb-4'>
-                      The state account of the staking program must be initialized first to run all
-                      other instructions.
-                    </p>
-                    <p className='py-4'>
-                      The state account holds information about the base reward rate, early unlock
-                      fee and the required scores for determining the users profile level.
-                    </p>
-                    <p className='pt-4'>
-                      The state account also holds the addresses of the <em>fee vault</em> and{' '}
-                      <em>reward vault</em> token accounts.
-                    </p>
-                  </div>
-                }
-              >
-                {() => (
-                  <InformationCircleIcon className='ml-2 h-6 w-6 hover:cursor-pointer hover:text-slate-300' />
-                )}
-              </ClickPopover>
+              <InformationIcon info={initializeInfo}/>
             </p>
           </div>
           <form className='my-6 flex w-full flex-col space-y-4 lg:w-80' onSubmit={handleSubmit}>

@@ -28,7 +28,7 @@ export const ProgramDisplay = observer(
 
     return (
       <div
-        className={`program-display relative flex flex-1 flex-col items-center justify-center border-l-[1px] border-l-slate-400 text-white transition-colors hover:bg-slate-500 hover:font-bold md:min-w-fit md:flex-row md:px-4 ${
+        className={`program-display relative flex flex-1 flex-col items-center justify-center border-l-[1px] border-l-slate-400 text-white transition-colors hover:bg-slate-500 md:min-w-fit md:flex-row md:px-4 ${
           className || ''
         }`}
       >

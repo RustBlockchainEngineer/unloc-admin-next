@@ -8,7 +8,7 @@ import {
 import tokenLogo from '/public/unloc_token.png'
 import Image from 'next/image'
 import { ClickPopover } from '@/components/common/ClickPopover'
-import { Copyable } from '@/components/common'
+import { Copyable, InformationIcon } from '@/components/common'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useSendTransaction, useTokenAccount } from '@/hooks'
 import { getAssociatedTokenAddressSync } from '@solana/spl-token'
@@ -23,6 +23,17 @@ import { useStore } from '@/stores'
 import { Transaction } from '@solana/web3.js'
 import toast from 'react-hot-toast'
 import { uiAmountToAmount } from '@/utils/spl-utils/common'
+
+const rewardVaultInfo = [
+  'This token account is distributing rewards to users that are staking the UNLOC token.',
+  'The address is set during the initialization of the state and must be owned by the state PDA.',
+  'This balance must be topped up so that the staking contract can distribute rewards.'
+]
+
+const fundInfo = [
+  'Fund the reward vault by transferring UNLOC tokens to it. This can be done by any user, not just the stake authority.',
+  'The user balance is read from the connected wallet\'s associated token account.'
+]
 
 const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
   const { publicKey } = useWallet()
@@ -68,55 +79,26 @@ const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
       )
       const tx = new Transaction().add(...ix)
 
-      toast.promise(
-        sendAndConfirm(tx, 'confirmed'),
-        {
-          loading: 'Confirming...',
-          error: (e) => (
-            <div>
-              <p>There was an error confirming your transaction</p>
-              <p>{e.message}</p>
-            </div>
-          ),
-          success: (e) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
-        },
-      )
+      toast.promise(sendAndConfirm(tx, 'confirmed'), {
+        loading: 'Confirming...',
+        error: (e) => (
+          <div>
+            <p>There was an error confirming your transaction</p>
+            <p>{e.message}</p>
+          </div>
+        ),
+        success: (e) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
+      })
     },
     [publicKey, ata, uiFundAmount, state.rewardVault, programs.stakePubkey, sendAndConfirm]
   )
 
   return (
     <div className='flex flex-1 flex-col gap-x-2 gap-y-4 md:flex-row'>
-      <div className='flex w-full flex-col space-y-8 rounded-xl bg-slate-700 p-6 md:w-80'>
+      <div className='flex w-full flex-col space-y-8 rounded-md bg-slate-700 p-6 md:w-80'>
         <div className='flex items-center text-xl'>
           <span>Reward vault balance</span>
-          <ClickPopover
-            panel={
-              <div className='divide-y rounded-lg bg-slate-50 p-4 text-sm leading-4 text-gray-900 shadow ring-1 ring-blue-900/25 md:w-80'>
-                <p className='pb-4'>
-                  This token account is distributing rewards to users that are staking the UNLOC
-                  token.
-                </p>
-                <p className='py-4'>
-                  The address is set during the initialization of the state and must be owned by the
-                  state PDA.
-                </p>
-                <p className='pt-4'>
-                  This balance must be topped up so that the staking contract can distribute
-                  rewards.
-                </p>
-              </div>
-            }
-          >
-            {(open) => (
-              <InformationCircleIcon
-                className={clsx(
-                  'ml-2 h-6 w-6 hover:cursor-pointer hover:text-slate-300',
-                  Boolean(open) ? 'text-pink-600 hover:text-pink-600' : 'text-inherit'
-                )}
-              />
-            )}
-          </ClickPopover>
+          <InformationIcon info={fundInfo} />
         </div>
         <div className='flex items-center text-4xl font-bold'>
           <span className='mr-2'>{stateBalance.toLocaleString('en-us')}</span>
@@ -145,26 +127,10 @@ const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
           </span>
         </div>
       </div>
-      <div className='flex w-full flex-col justify-between rounded-xl bg-slate-700 p-6 md:w-80'>
+      <div className='flex w-full flex-col justify-between rounded-md bg-slate-700 p-6 md:w-80'>
         <p className='flex items-center text-xl'>
           Fund
-          <ClickPopover
-            panel={
-              <div className='divide-y rounded-lg bg-slate-50 p-4 text-sm leading-4 text-gray-900 shadow ring-1 ring-blue-900/25 md:w-80'>
-                <p className='pb-4'>
-                  Fund the reward vault by transferring UNLOC tokens to it. This can be done by any
-                  user, not just the stake authority.
-                </p>
-                <p className='pt-4'>
-                  The user balance is read from the connected wallets Associated token account.
-                </p>
-              </div>
-            }
-          >
-            {() => (
-              <InformationCircleIcon className='ml-2 h-6 w-6 hover:cursor-pointer hover:text-slate-300' />
-            )}
-          </ClickPopover>
+          <InformationIcon info={fundInfo} />
         </p>
         <form onSubmit={handleSubmit} className='space-y-8'>
           <label className='flex flex-col'>
@@ -234,7 +200,7 @@ export const StakingUpdate = ({ state }: StakingUpdateProps) => {
   return (
     <div className='flex gap-x-2 gap-y-4 lg:flex-row lg:space-y-0'>
       <Tab.Group vertical>
-        <Tab.List className='flex w-full flex-col space-y-2 rounded-xl bg-slate-700 p-1 lg:w-60'>
+        <Tab.List className='flex w-full flex-col space-y-2 rounded-md bg-slate-700 p-1 lg:w-60'>
           {options.map((option, idx) => (
             <Tab
               key={idx}

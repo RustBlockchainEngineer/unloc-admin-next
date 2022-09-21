@@ -6,6 +6,35 @@ import tokenLogo from '/public/unloc_token.png'
 import Image from 'next/image'
 import { AddressActions } from '@/components/common/AddressActions'
 import { amountToUiAmount, numVal } from '@/utils/spl-utils'
+import { InformationIcon } from '@/components/common'
+
+const stateDetails = [
+  'Once the state account is initialized, other instructions related to managing the staking contract can be called.',
+  'Parameters on the staking contract are set during initialization, but can be updated by the authority account.',
+  'The reward token for the staking contract is hard-coded to be the UNLOC token.'
+]
+
+const rewardVaultDetails = [
+  'This is the token account that stores the reward tokens which will be distributed to users that are staking.',
+  'It is enforced that this token account is owned by the state account PDA. Funds can be deposited to it by anyone, but not withdrawn.',
+  "In this app, the token account is created as an ATA of the state account. This isn't enforced."
+]
+
+const feeVaultDetails = [
+  'This token account is where any fees paid by the users of the staking program are paid to.',
+  'Administrators should have control over this account so that funds can be withdrawn when needed.'
+]
+
+const parametersDetails = [
+  'Initialization time is the exact timestamp of when the state account was initialized. It is not used for any calculations.',
+  'Base reward rate (token_per_second) is the base emission rate reward tokens per second of staking for every staking account. The rate for different staking durations is adjusted with Extra Reward Config settings.',
+  'Early unlock fee is the percentage of staked tokens that is paid when a user decides to unlock the staked funds before the set release date.'
+]
+
+const profileLevelsDetails = [
+  'Indicates the UNLOC score thresholds required to reach certain profile levels.',
+  'They are set during initialization and can be adjusted at any time by the authority account.'
+]
 
 export const StateOverview = ({
   statePubkey,
@@ -16,20 +45,21 @@ export const StateOverview = ({
 }) => {
   const authority58 = state.authority.toBase58()
   const statePubkey58 = statePubkey.toBase58()
-  const { loading: loading1, info: rewardVaultInfo } = useTokenAccount(state.rewardVault)
-  const { loading: loading2, info: feeVaultInfo } = useTokenAccount(state.feeVault)
+  const { info: rewardVaultInfo } = useTokenAccount(state.rewardVault)
+  const { info: feeVaultInfo } = useTokenAccount(state.feeVault)
 
   return (
     <div className='mx-auto'>
       <ul
         role='list'
-        className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+        // className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+        className='flex flex-wrap gap-2 sm:gap-5'
       >
-        <li className='col-span-1 divide-gray-600 rounded-md bg-slate-700 pb-4 shadow'>
+        <li className='max-w-md divide-gray-600 rounded-md bg-slate-700 pb-4 shadow sm:min-w-[320px]'>
           <div className='flex justify-between border-b border-gray-600 px-4 py-5 sm:px-6'>
             <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
               State Info
-              <InformationCircleIcon className='ml-2 inline h-5 w-5 text-gray-200' />
+              <InformationIcon info={stateDetails} />
             </h3>
             <span className='inline-flex items-center rounded-full bg-green-100 px-3 py-0.5 text-sm font-medium text-green-800'>
               Initialized
@@ -69,11 +99,11 @@ export const StateOverview = ({
             </div>
           </dl>
         </li>
-        <li className='min-w-[250px] max-w-md rounded-md bg-slate-700 shadow '>
+        <li className='max-w-md rounded-md bg-slate-700 shadow sm:min-w-[320px] '>
           <div className='px-4 py-5 sm:px-6'>
             <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
               Reward Vault
-              <InformationCircleIcon className='ml-2 inline h-5 w-5 text-gray-200' />
+              <InformationIcon info={rewardVaultDetails} />
             </h3>
           </div>
           <dl className='flex flex-col gap-y-3 divide-y divide-gray-600 border-b border-gray-600 pb-4'>
@@ -95,7 +125,7 @@ export const StateOverview = ({
                   ></Image>
                 </p>
               </dd>
-              <div className='grid grid-cols-2 overflow-hidden pt-4'>
+              <div className='grid overflow-hidden pt-4 sm:grid-cols-2'>
                 <div>
                   <dt className='truncate text-sm font-medium text-gray-300'>Address</dt>
                   <dd className='mt-1'>
@@ -121,7 +151,7 @@ export const StateOverview = ({
             <div className='px-4 py-5 sm:px-6'>
               <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
                 Fee Vault
-                <InformationCircleIcon className='ml-2 inline h-5 w-5 text-gray-200' />
+                <InformationIcon info={feeVaultDetails} />
               </h3>
             </div>
             <dl className='px-4 sm:px-6'>
@@ -163,11 +193,11 @@ export const StateOverview = ({
             </dl>
           </div>
         </li>
-        <li className='min-w-[250px] max-w-md rounded-md bg-slate-700 shadow'>
+        <li className='min-w-[320px] max-w-md rounded-md bg-slate-700 shadow'>
           <div className='border-b border-gray-600 px-4 py-5 sm:px-6'>
             <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
               Parameters
-              <InformationCircleIcon className='ml-2 inline h-5 w-5 text-gray-200' />
+              <InformationIcon info={parametersDetails} />
             </h3>
           </div>
           <div className='overflow-hidden'>
@@ -201,11 +231,11 @@ export const StateOverview = ({
             </div>
           </div>
         </li>
-        <li className='min-w-[250px] max-w-md rounded-md bg-slate-700 shadow'>
+        <li className='min-w-[320px] max-w-md rounded-md bg-slate-700 shadow'>
           <div className='border-b border-gray-600 px-4 py-5 sm:px-6'>
             <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
               Profile level breakpoints
-              <InformationCircleIcon className='ml-2 inline h-5 w-5 text-gray-200' />
+              <InformationIcon info={profileLevelsDetails} />
             </h3>
           </div>
         </li>
