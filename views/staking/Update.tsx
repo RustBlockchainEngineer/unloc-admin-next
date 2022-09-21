@@ -32,7 +32,7 @@ const rewardVaultInfo = [
 
 const fundInfo = [
   'Fund the reward vault by transferring UNLOC tokens to it. This can be done by any user, not just the stake authority.',
-  'The user balance is read from the connected wallet\'s associated token account.'
+  "The user balance is read from the connected wallet's associated token account."
 ]
 
 const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
@@ -155,7 +155,7 @@ const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
                   disabled={!info}
                   onClick={handleFundPercent(pct)}
                   className={clsx(
-                    'flex-1 rounded-full bg-slate-400 p-1 shadow ',
+                    'flex-1 rounded-full bg-slate-400 p-1 shadow',
                     info && 'hover:cursor-pointer hover:bg-slate-300'
                   )}
                 >
@@ -169,7 +169,8 @@ const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
             type='submit'
             className={clsx(
               'block h-9 w-full rounded-lg px-4 text-lg',
-              submittable ? 'bg-pink-600 hover:bg-pink-700' : 'bg-gray-500'
+              'enabled:bg-pink-600 enabled:hover:bg-pink-700',
+              'disabled:bg-gray-500'
             )}
           >
             Transfer

@@ -9,3 +9,7 @@ export function* chunks<T>(arr: T[], size = 100) {
 export function durationToSeconds(duration: number, unit: 'days' | 'weeks' | 'months' | 'years') {
   return dayjs.duration({ [unit]: duration }).asSeconds()
 }
+
+export function secondsToDays(duration: number) {
+  return dayjs.duration({ seconds: duration }).asDays()
+}

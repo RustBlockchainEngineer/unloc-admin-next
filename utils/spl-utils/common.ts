@@ -2,7 +2,7 @@ import { bignum } from '@metaplex-foundation/beet'
 import { BN } from 'bn.js'
 import { sha256 } from 'js-sha256'
 
-export const amountToUiAmount = (amount: BigInt | typeof BN, mintDecimals: number) => {
+export const amountToUiAmount = (amount: BigInt | bignum, mintDecimals: number) => {
   amount = typeof amount === 'bigint' ? amount : BigInt(amount.toString())
   const decimals = BigInt(10 ** mintDecimals)
   const fractional = Number(amount.valueOf() % decimals) / Number(decimals)

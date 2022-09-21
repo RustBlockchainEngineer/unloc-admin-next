@@ -25,7 +25,8 @@ import {
   StateAccount,
   ExtraRewardsAccount,
   FarmPoolAccount,
-  createClosePoolInstruction
+  createClosePoolInstruction,
+  createSetExtraRewardConfigsInstruction
 } from '@unloc-dev/unloc-staking-solita'
 import { UNLOC_MINT } from './unloc-constants'
 
@@ -121,6 +122,26 @@ export const createRewardConfig = (
   return [ix]
 }
 
+export const editRewardConfig = (
+  wallet: PublicKey,
+  configs: DurationExtraRewardConfig[],
+  programId?: PublicKey
+) => {
+  const extraRewardAccount = getExtraConfig(programId ?? PROGRAM_ID)
+  const ix = createSetExtraRewardConfigsInstruction(
+    {
+      authority: wallet,
+      extraRewardAccount,
+      systemProgram: SystemProgram.programId
+    },
+    {
+      configs
+    },
+    programId
+  )
+  return [ix]
+}
+
 export const createPool = async (
   connection: Connection,
   wallet: PublicKey,
@@ -154,11 +175,7 @@ export const createPool = async (
   return [...instructions, ix]
 }
 
-export const closePool = (
-  wallet: PublicKey,
-  mint: PublicKey,
-  programId?: PublicKey
-) => {
+export const closePool = (wallet: PublicKey, mint: PublicKey, programId?: PublicKey) => {
   const state = getStakingState(programId ?? PROGRAM_ID)
   const pool = getPool(mint, programId ?? PROGRAM_ID)
 

@@ -36,7 +36,7 @@ export const ProgramDisplay = observer(
           <a
             aria-label='Edit address'
             onClick={handleEditClick}
-            className='text-md block absolute hidden hover:cursor-pointer md:relative md:left-[-1rem]'
+            className='text-md block absolute hover:cursor-pointer md:relative md:left-[-1rem]'
           >
             <FaEdit />
           </a>

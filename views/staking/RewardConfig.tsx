@@ -1,25 +1,26 @@
 import { InformationIcon } from '@/components/common'
-import { useAccount, useSendTransaction } from '@/hooks'
+import { useAccount, useAccountFetchCache, useSendTransaction } from '@/hooks'
 import { useStore } from '@/stores'
 import { compressAddress, durationToSeconds } from '@/utils'
-import { uiAmountToAmount } from '@/utils/spl-utils'
+import { secondsToDays } from '@/utils/common'
+import { amountToUiAmount, numVal, uiAmountToAmount, val } from '@/utils/spl-utils'
 import {
   createRewardConfig,
+  editRewardConfig,
   extraRewardParser,
   getExtraConfig
 } from '@/utils/spl-utils/unloc-staking'
-import {
-  ChevronDoubleRightIcon,
-  InformationCircleIcon,
-  MinusCircleIcon,
-  PlusCircleIcon
-} from '@heroicons/react/20/solid'
+import { Transition } from '@headlessui/react'
+import { ChevronDoubleRightIcon, PencilIcon } from '@heroicons/react/20/solid'
+import { unit } from '@metaplex-foundation/beet'
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { Transaction } from '@solana/web3.js'
+import BN from 'bn.js'
 import clsx from 'clsx'
 import { FormEvent, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { Table, Form } from './reward-config'
 
 const rewardConfigDetails = [
   'Extra reward config increases the base reward rate for staking accounts that have staked for longer durations.',
@@ -27,123 +28,36 @@ const rewardConfigDetails = [
   'Each configuration item has a duration and the extra earn rate expressed as a percentage. A staking account will earn the base rate and the additional rate in this configuration.',
   'If there are multiple configuration items, only the highest applicable earn rate will be selected. Each following configuration item must have both a longer staking duration and a higher bonus earn rate to be valid.'
 ]
+export const MAX_CONFIG_ITEMS = 5
 
-type Unit = 'days' | 'weeks' | 'months' | 'years'
-type RewardConfig = {
-  extraPercentage: number
-  duration: number
-}
-
-const ExtraRewardConfigItem = ({
-  isLast,
-  hasError,
-  handleRemove,
-  handleEdit,
-}: {
-  isLast?: boolean
-  hasError?: boolean
-  handleRemove: () => void
-  handleEdit: (value: RewardConfig) => void
-}) => {
-  const [unit, setUnit] = useState<Unit>('days')
-  const [duration, setDuration] = useState<string>('')
-  const [percentage, setPercentage] = useState<string>('')
-  const handleDurationChange = (e: any) => {
-    setDuration(e.target.value)
-    const normalizedDuration = durationToSeconds(Number(e.target.value) || 0, unit)
-    const normalizedPercentage = uiAmountToAmount(Number(percentage) || 0, 11).toNumber()
-    handleEdit({ duration: normalizedDuration, extraPercentage: normalizedPercentage })
-  }
-  const handlePercentChange = (e: any) => {
-    setPercentage(e.target.value)
-    const normalizedDuration = durationToSeconds(Number(duration) || 0, unit)
-    const normalizedPercentage = uiAmountToAmount(Number(e.target.value) || 0, 11).toNumber()
-    handleEdit({ duration: normalizedDuration, extraPercentage: normalizedPercentage })
-  }
-
-  return (
-    <div
-      className={clsx(
-        'relative mb-4 flex w-full flex-col gap-3 rounded-lg border-2 border-gray-300 p-4 focus:outline-none sm:flex-row',
-        hasError ? 'border-red-600' : 'border-gray-300'
-      )}
-    >
-      <div>
-        <label htmlFor='duration' className='block text-sm font-medium text-gray-50'>
-          Duration
-        </label>
-        <div className='relative mt-1 rounded-md shadow-sm'>
-          <input
-            type='text'
-            name='duration'
-            id='duration'
-            className='block w-full rounded-md border-gray-300 pl-3 pr-12 text-gray-900 focus:border-sky-500 focus:ring-sky-500 sm:text-sm'
-            value={duration}
-            onChange={handleDurationChange}
-            placeholder='0'
-          />
-          <div className='absolute inset-y-0 right-0 flex items-center'>
-            <label htmlFor='unit' className='sr-only'>
-              Duration unit
-            </label>
-            <select
-              id='duration'
-              name='duration'
-              onChange={(e) => setUnit(e.target.value as Unit)}
-              value={unit}
-              className='h-full rounded-md border-transparent bg-transparent py-0 pl-2 pr-7 text-gray-500 focus:border-sky-500 focus:ring-sky-500 sm:text-sm'
-            >
-              <option value='days'>Days</option>
-              <option value='weeks'>Weeks</option>
-              <option value='months'>Months</option>
-              <option value='years'>Years</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      <div>
-        <label htmlFor='bonus_percentage' className='block text-sm font-medium text-gray-50'>
-          Bonus percentage
-        </label>
-        <div className='relative mt-1 rounded-md text-gray-900 shadow-sm'>
-          <input
-            type='text'
-            name='bonus_percentage'
-            id='bonus_percentage'
-            className='focus:border-ocean-500 focus:ring-ocean-500 block w-full rounded-md border-gray-300 pl-4 pr-12 sm:text-sm'
-            value={percentage}
-            onChange={handlePercentChange}
-            placeholder='0.00'
-            aria-describedby='percentage'
-          />
-          <div className='pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3'>
-            <span className='text-gray-500 sm:text-sm' id='percentage'>
-              %
-            </span>
-          </div>
-        </div>
-      </div>
-      {isLast && (
-        <div className='flex justify-center sm:items-end'>
-          <button onClick={handleRemove}>
-            <MinusCircleIcon className='h-10 w-10 text-gray-200 group-hover:text-gray-300' />
-          </button>
-        </div>
-      )}
-    </div>
-  )
+export type Unit = 'days' | 'weeks' | 'months' | 'years'
+export type RewardConfig = {
+  extraPercentage: string
+  duration: string
+  unit: Unit
 }
 
 export const RewardConfigView = () => {
   const { publicKey } = useWallet()
   const sendAndConfirm = useSendTransaction()
-  const [lol, setLol] = useState<RewardConfig[]>([])
-  const [count, setCount] = useState<number>(0)
-  const [errorIndex, setErrorIndex] = useState<number>(-1)
-
   const { programs } = useStore()
   const extraRewardConfigPubkey = getExtraConfig(programs.stakePubkey)
   const { loading, account, info } = useAccount(extraRewardConfigPubkey, extraRewardParser)
+
+  const [lol, setLol] = useState<RewardConfig[]>([])
+  const [errorIndex, setErrorIndex] = useState<number>(-1)
+  const [isEditing, setIsEditing] = useState(false)
+
+  useEffect(() => {
+    if (!info) return
+    setLol(
+      info.configs.map(({ duration, extraPercentage }) => ({
+        duration: secondsToDays(numVal(duration)).toString(),
+        extraPercentage: amountToUiAmount(val(extraPercentage), 11).toString(),
+        unit: 'days'
+      }))
+    )
+  }, [info])
 
   const handleRemoveConfig = () => {
     if (errorIndex === lol.length) {
@@ -153,11 +67,14 @@ export const RewardConfigView = () => {
       const copy = current.slice(0, current.length - 1)
       return copy
     })
-    setCount((prev) => prev - 1)
   }
 
   const handleAddConfig = () => {
-    setCount((prev) => prev + 1)
+    setLol((current) => {
+      const copy = [...current]
+      copy.push({ duration: '', extraPercentage: '', unit: 'days' })
+      return copy
+    })
   }
 
   const handleEditWrapper = (id: number) => (value: RewardConfig) => {
@@ -174,7 +91,11 @@ export const RewardConfigView = () => {
     for (let i = 1; i < lol.length; i++) {
       const prev = lol[i - 1]
       const current = lol[i]
-      if (prev.duration >= current.duration || prev.extraPercentage >= current.extraPercentage) {
+      if (
+        durationToSeconds(Number(prev.duration), prev.unit) >=
+          durationToSeconds(Number(current.duration), current.unit) ||
+        Number(prev.extraPercentage) >= Number(current.extraPercentage)
+      ) {
         setErrorIndex(i)
         toast.error(
           <div>
@@ -189,13 +110,42 @@ export const RewardConfigView = () => {
     return true
   }
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleInitialize = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!publicKey) throw new WalletNotConnectedError()
     if (!validate()) {
       return
     }
-    const ix = createRewardConfig(publicKey, lol, programs.stakePubkey)
+    const normalizedConfigs = lol.map(({ duration, extraPercentage, unit }) => ({
+      duration: durationToSeconds(Number(duration), unit),
+      extraPercentage: uiAmountToAmount(extraPercentage || 0, 11)
+    }))
+    const ix = createRewardConfig(publicKey, normalizedConfigs, programs.stakePubkey)
+    const tx = new Transaction().add(...ix)
+    toast.promise(sendAndConfirm(tx, 'confirmed'), {
+      loading: 'Confirming...',
+      error: (e) => (
+        <div>
+          <p>There was an error confirming your transaction</p>
+          <p>{e.message}</p>
+        </div>
+      ),
+      success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
+    })
+  }
+
+  const handleEdit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!publicKey) throw new WalletNotConnectedError()
+    if (!validate()) {
+      return
+    }
+
+    const normalizedConfigs = lol.map(({ duration, extraPercentage, unit }) => ({
+      duration: durationToSeconds(Number(duration), unit),
+      extraPercentage: uiAmountToAmount(extraPercentage || 0, 11)
+    }))
+    const ix = editRewardConfig(publicKey, normalizedConfigs, programs.stakePubkey)
     const tx = new Transaction().add(...ix)
     toast.promise(sendAndConfirm(tx, 'confirmed'), {
       loading: 'Confirming...',
@@ -210,62 +160,65 @@ export const RewardConfigView = () => {
   }
 
   return (
-    <div className='mx-auto'>
-      <form onSubmit={handleSubmit} className='max-w-lg rounded-md bg-slate-700 pb-4 shadow'>
-        <div className='flex flex-wrap justify-between border-b border-gray-600 px-4 py-5 sm:px-6'>
-          <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
-            Extra Reward Configuration
-            <InformationIcon info={rewardConfigDetails} />
-          </h3>
-          <span
-            className={clsx(
-              'inline-flex items-center rounded-full bg-red-100 px-3 py-0.5 text-sm font-medium',
-              !loading && !account && 'bg-red-100 text-red-800',
-              !loading && account && 'bg-green-100 text-green-800'
-            )}
-          >
-            {!loading && !account ? 'Not Initialized' : 'Initialized'}
-          </span>
-        </div>
-        <div className='px-4 py-5 sm:px-6'>
-          <div>
-            {[...Array(count)].map((_, i) => {
-              const isLast = count - 1 === i
-              const hasError = i === errorIndex
-              return (
-                <ExtraRewardConfigItem
-                  key={i}
-                  hasError={hasError}
-                  isLast={isLast}
-                  handleRemove={handleRemoveConfig}
-                  handleEdit={handleEditWrapper(i)}
-                />
-              )
-            })}
-          </div>
-          {count <= 4 && (
-            <button
-              type='button'
-              onClick={handleAddConfig}
-              className='group relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-3 text-center hover:border-gray-400 focus:outline-none'
-            >
-              <PlusCircleIcon className='mx-auto h-10 w-10 text-gray-200 group-hover:text-gray-300' />
-              <span className='mt-1 block text-sm font-medium'>
-                Add a reward/duration configuration{' '}
-              </span>
-            </button>
+    <div className='max-w-lg rounded-md bg-slate-700 pb-4 shadow'>
+      <div className='flex flex-wrap justify-between border-b border-gray-600 px-4 py-5 sm:px-6'>
+        <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
+          Extra Reward Configuration
+          <InformationIcon info={rewardConfigDetails} />
+        </h3>
+        <span
+          className={clsx(
+            'inline-flex items-center rounded-full bg-red-100 px-3 py-0.5 text-sm font-medium',
+            !loading && !account && 'bg-red-100 text-red-800',
+            !loading && account && 'bg-green-100 text-green-800'
           )}
-        </div>
-        <div className='px-4 py-5 sm:flex sm:justify-end sm:px-6'>
-          <button
-            type='submit'
-            className='inline-flex items-center rounded-md border border-transparent bg-pink-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-pink-700'
-          >
-            Initialize configuration
-            <ChevronDoubleRightIcon className='ml-3 -mr-1 h-5 w-5' aria-hidden='true' />
-          </button>
-        </div>
-      </form>
+        >
+          {!loading && !account ? 'Not Initialized' : 'Initialized'}
+        </span>
+      </div>
+      {!info && (
+        <Form
+          onSubmit={handleInitialize}
+          handleAddItem={handleAddConfig}
+          handleEditItem={handleEditWrapper}
+          handleRemoveItem={handleRemoveConfig}
+          values={lol}
+          errorIndex={errorIndex}
+        />
+      )}
+      <Transition
+        show={!!info}
+        enter='transition-opacity duration-100'
+        enterFrom='opacity-0'
+        enterTo='opacity-100'
+      >
+        {!isEditing && (
+          <>
+            <Table extraRewardConfig={info} />
+            <div className='px-4 py-5 sm:flex sm:justify-end sm:px-6'>
+              <button
+                type='button'
+                onClick={() => setIsEditing(true)}
+                className='inline-flex items-center rounded-md border border-transparent bg-pink-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-pink-700'
+              >
+                Edit configuration
+                <PencilIcon className='ml-3 -mr-1 h-5 w-5' aria-hidden='true' />
+              </button>
+            </div>
+          </>
+        )}
+        {isEditing && (
+          <Form
+            onSubmit={handleEdit}
+            handleAddItem={handleAddConfig}
+            handleEditItem={handleEditWrapper}
+            handleRemoveItem={handleRemoveConfig}
+            values={lol}
+            errorIndex={errorIndex}
+            setIsEditing={setIsEditing}
+          />
+        )}
+      </Transition>
     </div>
   )
 }
