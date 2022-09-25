@@ -28,6 +28,8 @@ import {
   createClosePoolInstruction,
   createSetExtraRewardConfigsInstruction
 } from '@unloc-dev/unloc-staking-solita'
+import { BN } from 'bn.js'
+import { val } from './common'
 import { UNLOC_MINT } from './unloc-constants'
 
 // CONSTANTS
@@ -45,6 +47,18 @@ export const getExtraConfig = (programId: PublicKey) => {
 
 export const getPool = (mint: PublicKey, programId: PublicKey) => {
   return PublicKey.findProgramAddressSync([mint.toBuffer()], programId)[0]
+}
+
+export const getPoolUser = (
+  pool: PublicKey,
+  authority: PublicKey,
+  stakeSeed: number,
+  programId: PublicKey
+) => {
+  return PublicKey.findProgramAddressSync(
+    [pool.toBuffer(), authority.toBuffer(), new BN(stakeSeed).toArrayLike(Buffer, 'le', 1)],
+    programId
+  )[0]
 }
 
 export const stateParser = (pubkey: PublicKey, data: AccountInfo<Buffer>) => {

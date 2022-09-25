@@ -23,7 +23,7 @@ export const FarmPoolView = () => {
   const { programs } = useStore()
   const farmPool = getPool(UNLOC_MINT, programs.stakePubkey)
   const { loading, account } = useAccount(farmPool, farmPoolParser)
-
+  
   const handleCreatePool = async () => {
     if (!publicKey) throw new WalletNotConnectedError()
 

@@ -1,47 +1,76 @@
-import { useState, useMemo } from "react"
-import { Spinner } from "@/components/common"
-import { ArchiveBoxIcon, ArrowPathIcon } from "@heroicons/react/24/solid"
-import { useConnection } from "@solana/wallet-adapter-react"
-import { PublicKey } from "@solana/web3.js"
-import { accountProviders } from "@unloc-dev/unloc-staking-solita"
-import clsx from "clsx"
-import toast from "react-hot-toast"
-import SyntaxHighlighter from "react-syntax-highlighter"
-import { AccountSelector } from "./AccountSelector"
+import { useState, useMemo } from 'react'
+import { Spinner } from '@/components/common'
+import { ArrowPathIcon, CircleStackIcon } from '@heroicons/react/24/solid'
+import { useConnection } from '@solana/wallet-adapter-react'
+import { PublicKey } from '@solana/web3.js'
+import { accountProviders } from '@unloc-dev/unloc-staking-solita'
+import clsx from 'clsx'
+import toast from 'react-hot-toast'
+import SyntaxHighlighter from 'react-syntax-highlighter'
+import { AccountSelector } from './AccountSelector'
+import { accountDiscriminator } from '@/utils/spl-utils'
 
-import { dracula } from "react-syntax-highlighter/dist/cjs/styles/hljs"
+import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
+import { FilterOption } from './Filter'
+import { useStore } from '@/stores'
 
 export const DecodingPanelView = () => {
+  const { programs } = useStore()
   const { connection } = useConnection()
   const [selectedAccount, setSelectedAccount] = useState<string>()
+  const [option, setOption] = useState<'address' | 'memcmp'>()
+  const [filter, setFilter] = useState<any>({})
   const [data, setData] = useState<any>()
-  const [address, setAddress] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
 
   const selectedProvider = useMemo(
     () => selectedAccount && accountProviders[selectedAccount as keyof typeof accountProviders],
     [selectedAccount]
   )
-  const isQueryable = address && selectedProvider
+  const isQueryable = !!selectedProvider && !!selectedAccount
 
   const handleQuery = async () => {
     if (!isQueryable) return
-    let pubkey: PublicKey
-    try {
-      pubkey = new PublicKey(address)
-    } catch {
-      return
-    }
 
-    // If it takes too long, it probably means we're using the wrong account type.
-    // Decoding a wrong account type can slow down the browser.
+    // Fetch only one account
     try {
-      setIsLoading(true)
-      const info = await connection.getAccountInfo(pubkey)
-      if (!info) throw Error('Account not found')
+      if (filter.address) {
+        // If it takes too long, it probably means we're using the wrong account type.
+        // Decoding a wrong account type can slow down the browser.
+        setIsLoading(true)
+        const pubkey = new PublicKey(filter.address)
+        const info = await connection.getAccountInfo(pubkey)
+        if (!info) throw Error('Account not found')
 
-      const data = selectedProvider.fromAccountInfo(info, 0)[0].pretty()
-      setData(data)
+        const data = selectedProvider.fromAccountInfo(info, 0)[0].pretty()
+        setData(data)
+      } else if (filter.offset && filter.bytes) {
+        const discriminator = accountDiscriminator(selectedAccount)
+        const query = selectedProvider
+          .gpaBuilder(programs.stakePubkey)
+          .addFilter('accountDiscriminator', discriminator)
+        query.config.filters = [
+          {
+            memcmp: {
+              bytes: filter.bytes,
+              offset: filter.offset
+            }
+          }
+        ]
+        const data = (await query.run(connection)).map(
+          ({ account }) => selectedProvider.fromAccountInfo(account)[0]
+        )
+        setData(data)
+      } else {
+        const discriminator = accountDiscriminator(selectedAccount)
+        const query = selectedProvider
+          .gpaBuilder(programs.stakePubkey)
+          .addFilter('accountDiscriminator', discriminator)
+        const data = (await query.run(connection)).map(
+          ({ account }) => selectedProvider.fromAccountInfo(account)[0]
+        )
+        setData(data)
+      }
     } catch (e: any) {
       console.log(e)
       // throw Error('Error parsing account. Did you select the correct account type?')
@@ -73,14 +102,13 @@ export const DecodingPanelView = () => {
         </div>
         <div className='w-56 space-y-4'>
           <label htmlFor='address_input' className='px-1 text-xl'>
-            Address
+            Filter using:
           </label>
-          <input
-            id='address_input'
-            placeholder='Account address'
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className='block w-full rounded-md border-none py-2 px-3 text-sm leading-5 text-gray-900 focus:ring-0'
+          <FilterOption
+            option={option}
+            setOption={setOption}
+            filter={filter}
+            setFilter={setFilter}
           />
         </div>
         <div className='flex w-56 md:flex-col md:justify-end'>
@@ -103,7 +131,7 @@ export const DecodingPanelView = () => {
         <div className='grid grid-cols-3 bg-slate-700 py-2 px-4 text-slate-50'>
           {/* Account name */}
           <div className='flex min-w-[220px] items-center gap-2'>
-            <ArchiveBoxIcon className='h-6 w-6 text-slate-300' />
+            <CircleStackIcon className='h-6 w-6 text-slate-300' />
             <h5 className='tracking-wide'>
               {selectedAccount ? selectedAccount : 'Select an Account'}
             </h5>

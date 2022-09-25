@@ -1206,10 +1206,10 @@
     "@solana/spl-token" "^0.2.0"
     "@solana/web3.js" "^1.47.3"
 
-"@unloc-dev/unloc-staking-solita@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@unloc-dev/unloc-staking-solita/-/unloc-staking-solita-2.0.0.tgz#9b63e0074ebb77477066c5155c239f78cc4ddf2a"
-  integrity sha512-EiYCrAGFx6qYY7i1CssdmHbwE91lwopTxksIr4OTH2FbqAvX95pFVL+e5aAULz30U6CUeRPTUwq3FTyW6hHXkQ==
+"@unloc-dev/unloc-staking-solita@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@unloc-dev/unloc-staking-solita/-/unloc-staking-solita-2.1.0.tgz#34e32e40b050574e99524754bd9f498c9d76a70e"
+  integrity sha512-e0Y7kDyIHZw+1BAa5jM+UOKccIMbxHNhUhCh1oSfmB72SrVvLV3EObf7XO846sn43GEJ5aeh/nv8Dn2PaIjGeQ==
   dependencies:
     "@solana/spl-token" "^0.2.0"
     "@solana/web3.js" "^1.47.3"

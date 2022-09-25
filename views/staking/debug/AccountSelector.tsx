@@ -1,6 +1,5 @@
 import { Combobox, Transition } from '@headlessui/react'
 import { useState, Fragment } from 'react'
-import clsx from 'clsx'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 
 type AccountSelectorProps = {
