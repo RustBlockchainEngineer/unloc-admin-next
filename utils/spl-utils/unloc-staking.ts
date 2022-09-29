@@ -160,6 +160,7 @@ export const createPool = async (
   connection: Connection,
   wallet: PublicKey,
   mint: PublicKey,
+  point: bignum,
   programId?: PublicKey
 ) => {
   const instructions: TransactionInstruction[] = []
@@ -182,7 +183,7 @@ export const createPool = async (
     },
     {
       amountMultipler: 0,
-      point: 0
+      point
     },
     programId
   )
