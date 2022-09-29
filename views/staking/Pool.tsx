@@ -9,6 +9,7 @@ import { WalletNotConnectedError } from '@solana/wallet-adapter-base'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { Transaction } from '@solana/web3.js'
 import clsx from 'clsx'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 
 const poolDetails = [
@@ -23,11 +24,25 @@ export const FarmPoolView = () => {
   const { programs } = useStore()
   const farmPool = getPool(UNLOC_MINT, programs.stakePubkey)
   const { loading, account } = useAccount(farmPool, farmPoolParser)
-  
-  const handleCreatePool = async () => {
-    if (!publicKey) throw new WalletNotConnectedError()
+  const [poolPoint, setPoolPoint] = useState('')
 
-    const ix = await createPool(connection, publicKey, UNLOC_MINT, programs.stakePubkey)
+  const handleCreatePool = async () => {
+    if (!publicKey) {
+      toast.error('Connect your wallet')
+      return
+    }
+    if (!poolPoint) {
+      toast.error('Enter pool point')
+      return
+    }
+
+    const ix = await createPool(
+      connection,
+      publicKey,
+      UNLOC_MINT,
+      Number(poolPoint),
+      programs.stakePubkey
+    )
     const tx = new Transaction().add(...ix)
     toast.promise(sendAndConfirm(tx, 'confirmed'), {
       loading: 'Confirming...',
@@ -76,6 +91,23 @@ export const FarmPoolView = () => {
             {!loading && !account ? 'Not Initialized' : 'Initialized'}
           </span>
         </div>
+        {!account && (
+          <div className='px-4 py-4 sm:px-6'>
+            <label htmlFor='pool_point' className='block text-sm font-medium text-gray-200'>
+              Pool point
+            </label>
+            <div className='mt-1'>
+              <input
+                type='number'
+                name='pool_point'
+                id='pool_point'
+                className='focus:border-ocean-500 focus:ring-ocean-500 block w-24 rounded-md border-gray-300 text-gray-900 shadow-sm sm:text-sm'
+                value={poolPoint}
+                onChange={(e) => setPoolPoint(e.target.value)}
+              />
+            </div>
+          </div>
+        )}
         <div className='flex flex-wrap justify-center gap-2 px-4 py-4 sm:px-6'>
           {account && (
             <button
@@ -84,7 +116,7 @@ export const FarmPoolView = () => {
               onClick={handleClosePool}
               className={clsx(
                 'inline-flex items-center rounded-md border border-transparent bg-pink-100 px-4 py-2 text-base font-medium text-pink-700 shadow-sm',
-                'enabled:hover:bg-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-1'
+                'focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-1 enabled:hover:bg-pink-200'
               )}
             >
               Close pool
@@ -97,7 +129,7 @@ export const FarmPoolView = () => {
             onClick={handleCreatePool}
             className={clsx(
               'inline-flex items-center rounded-md border border-transparent bg-pink-600 px-4 py-2 text-base font-medium text-white shadow-sm',
-              'enabled:hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-1',
+              'focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-1 enabled:hover:bg-pink-700'
             )}
           >
             Initialize Pool
