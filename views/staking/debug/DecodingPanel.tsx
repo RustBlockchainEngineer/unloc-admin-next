@@ -3,7 +3,8 @@ import { Spinner } from '@/components/common'
 import { ArrowPathIcon, CircleStackIcon } from '@heroicons/react/24/solid'
 import { useConnection } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
-import { accountProviders } from '@unloc-dev/unloc-staking-solita'
+// import { accountProviders } from '@unloc-dev/unloc-staking-solita'
+import { accountProviders } from '@/lib'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import SyntaxHighlighter from 'react-syntax-highlighter'
@@ -48,7 +49,7 @@ export const DecodingPanelView = () => {
         const discriminator = accountDiscriminator(selectedAccount)
         const query = selectedProvider
           .gpaBuilder(programs.stakePubkey)
-          .addFilter('accountDiscriminator', discriminator)
+          .addFilter('accountDiscriminator', [...discriminator])
         query.config.filters = [
           {
             memcmp: {
@@ -65,7 +66,7 @@ export const DecodingPanelView = () => {
         const discriminator = accountDiscriminator(selectedAccount)
         const query = selectedProvider
           .gpaBuilder(programs.stakePubkey)
-          .addFilter('accountDiscriminator', discriminator)
+          .addFilter('accountDiscriminator', [...discriminator])
         const data = (await query.run(connection)).map(
           ({ account }) => selectedProvider.fromAccountInfo(account)[0]
         )

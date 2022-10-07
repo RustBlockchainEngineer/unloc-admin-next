@@ -8,7 +8,7 @@ export const InformationIcon = ({ info }: { info: string | string[] }) => {
     <ClickPopover
       panel={
         <div className='flex flex-col gap-y-4 rounded-lg bg-slate-50 px-4 py-2 text-sm font-normal leading-4 text-gray-900 shadow ring-1 ring-blue-900/25 sm:px-6 md:w-80'>
-          <ul role='list' className='divide-y divide-gray-200'>
+          <ul role='list' className='divide-y divide-gray-200 text-left'>
             {info.map((item, idx) => (
               <li key={idx} className='py-3'>
                 {item}

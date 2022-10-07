@@ -1,14 +1,12 @@
-import { InformationIcon, Spinner } from '@/components/common'
+import { InformationIcon } from '@/components/common'
 import { ValidatedInput } from '@/components/common/ValidatedInput'
 import { ProfileLevelsInput } from '@/components/ProfileLevelsInput'
 import { useSendTransaction } from '@/hooks'
 import { useStore } from '@/stores'
 import { compressAddress } from '@/utils'
 import { uiAmountToAmount } from '@/utils/spl-utils'
-import { createState } from '@/utils/spl-utils/unloc-staking'
 import { Transition } from '@headlessui/react'
-import { DocumentPlusIcon, InformationCircleIcon } from '@heroicons/react/24/solid'
-import { WalletNotConnectedError } from '@solana/wallet-adapter-base'
+import { DocumentPlusIcon } from '@heroicons/react/24/solid'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, AccountInfo, Transaction } from '@solana/web3.js'
 import { StateAccount } from '@unloc-dev/unloc-staking-solita'
@@ -16,8 +14,8 @@ import clsx from 'clsx'
 import { ChangeEvent, SyntheticEvent, useCallback, useState } from 'react'
 import toast from 'react-hot-toast'
 import { StateOverview } from './StateOverview'
-
-type InputEvent = ChangeEvent<HTMLInputElement>
+import { CompoundingFrequency, createInitializePoolInstruction } from '@/lib'
+import { useFieldArray, useForm } from 'react-hook-form'
 
 export type StakingInitializeProps = {
   loading: boolean
@@ -26,86 +24,102 @@ export type StakingInitializeProps = {
   state?: StateAccount
 }
 
-const validatePublicKey = (input: any) => {
-  try {
-    new PublicKey(input)
-    return true
-  } catch {
-    return false
-  }
-}
-const required = (input: any) => (input ? undefined : 'Required')
-
 const initializeInfo = [
-  'The state account of the staking program must be initialized first to run allother instructions.',
-  'The state account holds information about the base reward rate, early unlockfee and the required scores for determining the users profile level.',
-  'The state account also holds the addresses of the fee vault and reward vault token accounts.'
+  'This instruction is ran to initialize the pool to its initial state.',
+  'We set the compounding frequency, interest rates, score multipliers for all staking account types, the profile level requirements and the fee reduction percentages (per-level).',
+  'The initialized account will also control the token accounts that issue rewards and receive fees.'
 ]
 
-export const StakingInitialize = ({
-  loading,
-  account,
-  statePubkey,
-  state
-}: StakingInitializeProps) => {
+type FormValues = {
+  compoundingFrequency: CompoundingFrequency | null
+  interestRatesAndScoreMultipliers: {
+    accountName: string
+    accountType: 'rldm2412' | 'rldm126' | 'rldm63' | 'rldm31' | 'rldm10' | 'flexi' | 'liqMin'
+    interestRateMultiplier: number
+    scoreMultiplier: number
+  }[]
+}
+
+// createInitializePoolInstruction({
+
+// }, {
+//   args: {
+//     interestRateFraction: {
+
+//     },
+//     scoreMultiplier: {
+
+//     },
+//     profileLevelMultiplier: {
+
+//     }
+//   }
+// })
+
+export const StakingInitialize = ({ loading, account, statePubkey, state }: StakingInitializeProps) => {
   const { connection } = useConnection()
   const { publicKey: wallet } = useWallet()
   const { programs } = useStore()
   const sendAndConfirm = useSendTransaction()
-  const [tokenPerSecond, setTokenPerSecond] = useState<number | null>()
-  const [earlyUnlockFee, setEarlyUnlockFee] = useState<number | null>()
-  const [feeVault, setFeeVault] = useState<PublicKey | null>(null)
-  const [profileLevels, setProfileLevels] = useState<number[]>([])
 
-  const canSubmit =
-    !loading && // not loading
-    !account && // state doesn't exist yet
-    tokenPerSecond && // tps set
-    earlyUnlockFee && // early unlock fee set
-    feeVault // fee vault set
+  const { register, handleSubmit, control } = useForm<FormValues>({
+    defaultValues: {
+      compoundingFrequency: CompoundingFrequency.Daily,
+      interestRatesAndScoreMultipliers: [
+        {
+          accountName: 'Flexi account',
+          accountType: 'flexi'
+        },
+        {
+          accountName: 'Liq. mining account',
+          accountType: 'liqMin',
+          interestRateMultiplier: 0,
+          scoreMultiplier: 0
+        },
+        {
+          accountType: 'rldm10',
+          interestRateMultiplier: 0,
+          scoreMultiplier: 0,
+          accountName: '1-0 months'
+        },
+        {
+          accountType: 'rldm31',
+          interestRateMultiplier: 0,
+          scoreMultiplier: 0,
+          accountName: '3-1 months'
+        },
+        {
+          accountType: 'rldm63',
+          interestRateMultiplier: 0,
+          scoreMultiplier: 0,
+          accountName: '6-3 months'
+        },
+        {
+          accountType: 'rldm126',
+          interestRateMultiplier: 0,
+          scoreMultiplier: 0,
+          accountName: '12-6 months'
+        },
+        {
+          accountType: 'rldm2412',
+          interestRateMultiplier: 0,
+          scoreMultiplier: 0,
+          accountName: '24-12 months'
+        }
+      ]
+    }
+  })
+  const { fields } = useFieldArray({
+    name: 'interestRatesAndScoreMultipliers',
+    control,
+    rules: {
+      required: true
+    }
+  })
 
-  const handleSubmit = useCallback(
-    async (e: SyntheticEvent) => {
-      e.preventDefault()
-      if (!wallet) throw new WalletNotConnectedError()
-      if (!tokenPerSecond || !earlyUnlockFee || !feeVault) {
-        throw Error('Cannot submit the transaction')
-      }
-      const ACC_PRECISION = 11
-      const earlyUnlockFeePrecision = uiAmountToAmount(earlyUnlockFee, ACC_PRECISION)
-
-      const ix = await createState(
-        connection,
-        wallet,
-        earlyUnlockFeePrecision,
-        tokenPerSecond,
-        profileLevels,
-        feeVault,
-        programs.stakePubkey
-      )
-      const tx = new Transaction().add(...ix)
-      toast.promise(sendAndConfirm(tx, 'confirmed'), {
-        loading: 'Confirming...',
-        error: (e) => (
-          <div>
-            <p>There was an error confirming your transaction</p>
-            <p>{e.message}</p>
-          </div>
-        ),
-        success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
-      })
-    },
-    [
-      connection,
-      earlyUnlockFee,
-      feeVault,
-      profileLevels,
-      programs.stakePubkey,
-      sendAndConfirm,
-      tokenPerSecond,
-      wallet
-    ]
-  )
+  const onSubmit = (data: FormValues) => {
+    console.log(data)
+  }
 
   return (
     <main className='flex w-full flex-col gap-x-12 gap-y-4 text-white lg:flex-row'>
@@ -114,63 +128,88 @@ export const StakingInitialize = ({
           <div className='flex flex-wrap items-center justify-between'>
             <p className='flex items-center text-2xl font-semibold text-gray-100'>
               <DocumentPlusIcon className='mr-2 h-6 w-6' />
-              Initialize state
-              <InformationIcon info={initializeInfo}/>
+              Initialize pool
+              <InformationIcon info={initializeInfo} />
             </p>
           </div>
-          <form className='my-6 flex w-full flex-col space-y-4 lg:w-80' onSubmit={handleSubmit}>
-            <div>
-              <label className='mb-2 text-gray-100' htmlFor='token_per_second'>
-                Token reward rate
-              </label>
-              <ValidatedInput
-                id='token_per_second'
-                type='number'
-                placeholder='100'
-                helperText='Invalid rate'
-                validator={(input) => Number(input) > 0}
-                onChange={(e: InputEvent) => setTokenPerSecond(Number(e.target.value))}
-                className='block h-8 w-full rounded-md px-2 text-gray-900 shadow-lg placeholder:text-sm placeholder:text-gray-500'
-              ></ValidatedInput>
+          <form className='my-6 flex w-full flex-col space-y-4' onSubmit={handleSubmit(onSubmit)}>
+            <div className='grid grid-cols-1 sm:grid-cols-6'>
+              <div className='sm:col-span-3'>
+                <label className='mb-2 text-sm text-gray-200'>Compounding frequency</label>
+                <select
+                  id='compoundingFrequency'
+                  {...register('compoundingFrequency', { required: true })}
+                  className='mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm'
+                  defaultValue='Daily'
+                >
+                  <option value={CompoundingFrequency.Secondly}>Secondly</option>
+                  <option value={CompoundingFrequency.Minutely}>Minutely</option>
+                  <option value={CompoundingFrequency.Hourly}>Hourly</option>
+                  <option value={CompoundingFrequency.Daily}>Daily</option>
+                  <option value={CompoundingFrequency.Monthly}>Monthly</option>
+                </select>
+              </div>
             </div>
             <div>
-              <label className='mb-2 text-gray-100' htmlFor='early_unlock_fee'>
-                {'Early unlock fee (%)'}
-              </label>
-              <ValidatedInput
-                id='early_unlock_fee'
-                type='number'
-                placeholder='50%'
-                className='block h-8 w-full rounded-md px-2 text-gray-900 shadow-lg placeholder:text-sm placeholder:text-gray-500'
-                helperText='Invalid percentage'
-                onChange={(e: InputEvent) => setEarlyUnlockFee(Number(e.target.value))}
-                validator={(input) => Number(input) > 0}
-              />
+              <div className='mb-2'>
+                <label className='font-semibold text-gray-50' htmlFor='early_unlock_fee'>
+                  Account interest rates and score multipliers
+                </label>
+              </div>
+              <div className='flex flex-col space-y-4'>
+                {fields.map((field, index) => (
+                  <div key={field.id}>
+                    <fieldset>
+                      <legend className='block text-sm text-gray-200'>{field.accountName}</legend>
+                      <div className='mt-1 rounded-md bg-white shadow-sm'>
+                        <div className='grid w-full grid-cols-5'>
+                          <div className='col-span-1 bg-gray-50 px-1.5 py-2.5'>
+                            <legend className='inline-flex items-center justify-center truncate  bg-gray-50 text-left text-sm text-gray-500'>
+                              {field.accountName}
+                            </legend>
+                          </div>
+                          <div className='col-span-2'>
+                            <input
+                              type='number'
+                              step={0.01}
+                              {...register(`interestRatesAndScoreMultipliers.${index}.interestRateMultiplier`, {
+                                required: true,
+                                min: 0,
+                                max: 10000
+                              })}
+                              className='relative block w-full rounded-none rounded-bl-md rounded-tl-md border-gray-300 bg-transparent text-gray-900 focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                              placeholder='Interest rate multiplier'
+                            />
+                          </div>
+                          <div className='col-span-2'>
+                            <input
+                              type='number'
+                              step={0.01}
+                              {...register(`interestRatesAndScoreMultipliers.${index}.scoreMultiplier`, {
+                                required: true,
+                                min: 0,
+                                max: 10000
+                              })}
+                              className='relative block w-full rounded-none rounded-br-md rounded-tr-md border-gray-300 bg-transparent text-gray-900 focus:z-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                              placeholder='Profile score multiplier'
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </fieldset>
+                  </div>
+                ))}
+              </div>
             </div>
             <div>
-              <label className='mb-2 text-gray-100' htmlFor='fee_vault'>
-                Fee vault token account
-              </label>
-              <ValidatedInput
-                id='fee_vault'
-                type='text'
-                placeholder='Public key'
-                className='block h-8 w-full rounded-md px-2 text-gray-900 shadow-lg placeholder:text-sm placeholder:text-gray-500'
-                helperText='Invalid public key'
-                onChange={(e: InputEvent) => setFeeVault(new PublicKey(e.target.value))}
-                validator={validatePublicKey}
-              />
-            </div>
-            <div>
-              <label className='mb-4 text-gray-100'>Profile level breakpoints</label>
-              <ProfileLevelsInput />
+              <label className='mb-4 text-gray-50'>Profile level breakpoints</label>
             </div>
             <div>
               <button
                 type='submit'
                 disabled={loading || !!account}
                 className={clsx(
-                  'my-4 block w-full rounded-lg bg-pink-700 py-2 px-4 text-base text-white shadow-md',
+                  'my-4 block w-full rounded-lg bg-pink-700 py-2 px-4 text-base text-gray-50 shadow-md',
                   'hover:bg-pink-800 focus:outline-none focus:ring-4',
                   (loading || !!account) && 'bg-gray-500 hover:bg-gray-500'
                 )}
