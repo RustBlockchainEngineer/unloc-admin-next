@@ -3,8 +3,6 @@ import { Spinner } from '@/components/common'
 import { ArrowPathIcon, CircleStackIcon } from '@heroicons/react/24/solid'
 import { useConnection } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
-// import { accountProviders } from '@unloc-dev/unloc-staking-solita'
-import { accountProviders } from '@/lib'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import SyntaxHighlighter from 'react-syntax-highlighter'
@@ -14,6 +12,7 @@ import { accountDiscriminator } from '@/utils/spl-utils'
 import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 import { FilterOption } from './Filter'
 import { useStore } from '@/stores'
+import { accountProviders } from '@unloc-dev/unloc-sdk-staking'
 
 export const DecodingPanelView = () => {
   const { programs } = useStore()

@@ -1,21 +1,15 @@
 import { InformationIcon } from '@/components/common'
-import { ValidatedInput } from '@/components/common/ValidatedInput'
-import { ProfileLevelsInput } from '@/components/ProfileLevelsInput'
 import { useSendTransaction } from '@/hooks'
 import { useStore } from '@/stores'
-import { compressAddress } from '@/utils'
-import { uiAmountToAmount } from '@/utils/spl-utils'
 import { Transition } from '@headlessui/react'
 import { DocumentPlusIcon } from '@heroicons/react/24/solid'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { PublicKey, AccountInfo, Transaction } from '@solana/web3.js'
+import { PublicKey, AccountInfo } from '@solana/web3.js'
 import { StateAccount } from '@unloc-dev/unloc-staking-solita'
 import clsx from 'clsx'
-import { ChangeEvent, SyntheticEvent, useCallback, useState } from 'react'
-import toast from 'react-hot-toast'
 import { StateOverview } from './StateOverview'
-import { CompoundingFrequency, createInitializePoolInstruction } from '@/lib'
 import { useFieldArray, useForm } from 'react-hook-form'
+import { CompoundingFrequency } from '@unloc-dev/unloc-sdk-staking'
 
 export type StakingInitializeProps = {
   loading: boolean
