@@ -1,4 +1,6 @@
 import { bignum } from '@metaplex-foundation/beet'
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import { Connection, PublicKey } from '@solana/web3.js'
 import { BN } from 'bn.js'
 import { sha256 } from 'js-sha256'
 
@@ -52,4 +54,31 @@ const ACCOUNT_DISCRIMINATOR_SIZE = 8
 // Fucking anchor
 export function accountDiscriminator(name: string): Buffer {
   return Buffer.from(sha256.digest(`account:${name}`)).subarray(0, ACCOUNT_DISCRIMINATOR_SIZE)
+}
+export const getWalletTokenAccount = async (
+  connection: Connection,
+  walletPubkey: PublicKey,
+  mint: PublicKey,
+) => {
+  const parsedTokenAccounts = await connection.getParsedTokenAccountsByOwner(
+    walletPubkey,
+    {
+      programId: TOKEN_PROGRAM_ID
+    },
+    'confirmed'
+  )
+  let result: any = null
+  let maxAmount = 0
+  parsedTokenAccounts.value.forEach(async (tokenAccountInfo) => {
+    const tokenAccountPubkey = tokenAccountInfo.pubkey
+    const parsedInfo = tokenAccountInfo.account.data.parsed.info
+    const mintAddress = parsedInfo.mint
+    const amount = parsedInfo.tokenAmount.uiAmount
+    if (mintAddress === mint.toBase58() && amount >= maxAmount) {
+      result = tokenAccountPubkey
+      maxAmount = amount
+    }
+  })
+
+  return result
 }
