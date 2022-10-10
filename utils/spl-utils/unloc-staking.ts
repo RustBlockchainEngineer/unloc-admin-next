@@ -47,6 +47,17 @@ export const getStakingPoolKey = (programId: PublicKey = STAKING_PID) => {
     programId,
   )[0];
 };
+export const getUserStakingsKey = (
+  userWallet: PublicKey,
+  poolKey: PublicKey = getStakingPoolKey(),
+  programId: PublicKey = STAKING_PID,
+) => {
+  return PublicKey.findProgramAddressSync(
+    [UNLOC_STAKING, USER_STAKE_INFO, userWallet.toBuffer(), poolKey.toBuffer(), DATA_ACCOUNT],
+    programId,
+  )[0];
+};
+
 export const getStakingVaultKey = (programId: PublicKey = STAKING_PID) => {
   return PublicKey.findProgramAddressSync(
     [UNLOC_STAKING, STAKING_POOL, STAKING_VAULT, TOKEN_ACCOUNT],

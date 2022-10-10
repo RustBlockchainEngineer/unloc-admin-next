@@ -1,17 +1,12 @@
 import { useStore } from '@/stores'
-import {
-  getExtraConfig,
-  getPool,
-  getPoolUser,
-  getStakingState
-} from '@/utils/spl-utils/unloc-staking'
+import { getStakingPoolKey, getUserStakingsKey } from '@/utils/spl-utils/unloc-staking'
 import { PublicKey } from '@solana/web3.js'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useState } from 'react'
 
 export const StatePdaForm = observer(() => {
   const { programs } = useStore()
-  const state = getStakingState(programs.stakePubkey)
+  const state = getStakingPoolKey()
 
   return (
     <div className='mt-8'>
@@ -25,13 +20,13 @@ export const StatePdaForm = observer(() => {
 
 export const ExtraRewardPdaForm = observer(() => {
   const { programs } = useStore()
-  const extraReward = getExtraConfig(programs.stakePubkey)
+  // const extraReward = getExtraConfig(programs.stakePubkey)
 
   return (
     <div className='mt-8'>
       <h2 className='block pl-1 text-gray-50'>ExtraRewardsAccount PDA</h2>
       <pre className='max-w-fit rounded-md bg-slate-700 px-2 py-2'>
-        <code className='language-json '>{extraReward.toBase58()}</code>
+        <code className='language-json '></code>
       </pre>
     </div>
   )
@@ -50,7 +45,7 @@ export const FarmPoolPdaForm = observer(() => {
       } catch {
         return
       }
-      const pool = getPool(pubkey, programs.stakePubkey)
+      const pool = getStakingPoolKey()
       setFarmPool(pool.toBase58())
     }
   }, [mint, programs.stakePubkey])
@@ -100,7 +95,7 @@ export const FarmPoolUserPdaForm = observer(() => {
         return
       }
 
-      const poolUser = getPoolUser(poolPubkey, authorityPubkey, stakeSeedNum, programs.stakePubkey)
+      const poolUser = getUserStakingsKey(authorityPubkey)
       setFarmPoolUser(poolUser.toBase58())
     }
   }, [authority, pool, programs.stakePubkey, stakeSeed])

@@ -1,9 +1,8 @@
 import { useAccount } from '@/hooks'
 import { useStore } from '@/stores'
 import { TypedAccountParser } from '@/utils/spl-utils/accountFetchCache'
-import { getStakingState } from '@/utils/spl-utils/unloc-staking'
+import { getStakingPoolKey } from '@/utils/spl-utils/unloc-staking'
 import { AccountInfo, PublicKey } from '@solana/web3.js'
-import { StateAccount } from '@unloc-dev/unloc-staking-solita'
 import clsx from 'clsx'
 import { NextPage } from 'next'
 import dynamic from 'next/dynamic'
@@ -13,9 +12,10 @@ import { StakingInitialize, StakingInitializeProps } from '@/views/staking/Initi
 import { StakingUpdate, StakingUpdateProps } from '@/views/staking/Update'
 import { FarmPoolView, RewardConfigView } from '@/views/staking'
 import { NoSymbolIcon } from '@heroicons/react/20/solid'
+import { PoolInfo } from '@unloc-dev/unloc-sdk-staking'
 
-const StateParser: TypedAccountParser<StateAccount> = (_: PublicKey, data: AccountInfo<Buffer>) => {
-  return StateAccount.fromAccountInfo(data)[0]
+const StateParser: TypedAccountParser<PoolInfo> = (_: PublicKey, data: AccountInfo<Buffer>) => {
+  return PoolInfo.fromAccountInfo(data)[0]
 }
 
 const DynamicInitializeView = dynamic<StakingInitializeProps>(
@@ -29,9 +29,8 @@ const DynamicRewardConfigView = dynamic<{}>(() => Promise.resolve(RewardConfigVi
 const DynamicFarmPoolView = dynamic<{}>(() => Promise.resolve(FarmPoolView), { ssr: false })
 
 const Staking: NextPage = () => {
-  const { programs } = useStore()
-  const stakeState = useMemo(() => getStakingState(programs.stakePubkey), [programs.stakePubkey])
-  const { loading, account, info } = useAccount<StateAccount>(stakeState, StateParser, true)
+  const stakeState = getStakingPoolKey();
+  const { loading, account, info } = useAccount<PoolInfo>(stakeState, StateParser, true)
 
   let [categories] = useState([
     { name: 'Initialize', component: DynamicInitializeView },
@@ -76,7 +75,7 @@ const Staking: NextPage = () => {
             />
           </Tab.Panel>
           <Tab.Panel key={1} className={clsx('w-min rounded-md bg-slate-500 p-3')}>
-            {info && <DynamicUpdateView state={info} />}
+            {/* {info && <DynamicUpdateView state={info} />} */}
           </Tab.Panel>
           <Tab.Panel key={2}>
             <DynamicRewardConfigView />

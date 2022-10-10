@@ -5,17 +5,20 @@ import { Transition } from '@headlessui/react'
 import { DocumentPlusIcon } from '@heroicons/react/24/solid'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, AccountInfo } from '@solana/web3.js'
-import { StateAccount } from '@unloc-dev/unloc-staking-solita'
 import clsx from 'clsx'
 import { StateOverview } from './StateOverview'
 import { useFieldArray, useForm } from 'react-hook-form'
-import { CompoundingFrequency } from '@unloc-dev/unloc-sdk-staking'
+import { CompoundingFrequency, PoolInfo } from '@unloc-dev/unloc-sdk-staking'
+import { initializeStakingPool } from '@/utils/spl-utils/unloc-staking'
+import { UNLOC_MINT } from '@/utils/spl-utils/unloc-constants'
+import { BN } from 'bn.js'
+import { bs58 } from '@project-serum/anchor/dist/cjs/utils/bytes'
 
 export type StakingInitializeProps = {
   loading: boolean
   statePubkey: PublicKey
   account?: AccountInfo<Buffer>
-  state?: StateAccount
+  state?: PoolInfo
 }
 
 const initializeInfo = [
@@ -111,8 +114,53 @@ export const StakingInitialize = ({ loading, account, statePubkey, state }: Stak
     }
   })
 
-  const onSubmit = (data: FormValues) => {
-    console.log(data)
+  const onSubmit = async (data: FormValues) => {
+    // console.log("onSubmit()", data)
+    const numAuthorities: number = 1;
+    const authorityWallets: PublicKey[] = [wallet!];
+    const numApprovalsNeededForUpdate: number = 1;
+    const defaultNumDenPair = {numerator: new BN(1), denominator: new BN(10 ** 9)};
+    const interestRateFraction = {
+      compoundingFrequency: CompoundingFrequency.Secondly,
+      rldm2412: defaultNumDenPair,
+      rldm126: defaultNumDenPair,
+      rldm63: defaultNumDenPair,
+      rldm31: defaultNumDenPair,
+      rldm10: defaultNumDenPair,
+      flexi: defaultNumDenPair,
+      liqMin: defaultNumDenPair
+    };
+    const scoreMultiplier = {
+      rldm2412: defaultNumDenPair,
+      rldm126: defaultNumDenPair,
+      rldm63: defaultNumDenPair,
+      rldm31: defaultNumDenPair,
+      rldm10: defaultNumDenPair,
+      flexi: defaultNumDenPair,
+      liqMin: defaultNumDenPair
+    }
+    const profileLevelMultiplier = {
+      level0: {minUnlocScore: new BN(10), feeReductionBasisPoints: new BN(10)},
+      level1: {minUnlocScore: new BN(20), feeReductionBasisPoints: new BN(9)},
+      level2: {minUnlocScore: new BN(30), feeReductionBasisPoints: new BN(8)},
+      level3: {minUnlocScore: new BN(40), feeReductionBasisPoints: new BN(7)},
+      level4: {minUnlocScore: new BN(50), feeReductionBasisPoints: new BN(6)},
+      level5: {minUnlocScore: new BN(60), feeReductionBasisPoints: new BN(5)},
+    }
+    const unstakePenalityBasisPoints = new BN(50);
+    const tx = await initializeStakingPool(
+      wallet!,
+      UNLOC_MINT,
+      undefined,
+      numAuthorities,
+      authorityWallets,
+      numApprovalsNeededForUpdate,
+      interestRateFraction,
+      scoreMultiplier,
+      profileLevelMultiplier,
+      unstakePenalityBasisPoints
+    );
+    await sendAndConfirm(tx, 'confirmed', true);
   }
 
   return (
@@ -127,7 +175,7 @@ export const StakingInitialize = ({ loading, account, statePubkey, state }: Stak
             </p>
           </div>
           <form className='my-6 flex w-full flex-col space-y-4' onSubmit={handleSubmit(onSubmit)}>
-            <div className='grid grid-cols-1 sm:grid-cols-6'>
+            {/* <div className='grid grid-cols-1 sm:grid-cols-6'>
               <div className='sm:col-span-3'>
                 <label className='mb-2 text-sm text-gray-200'>Compounding frequency</label>
                 <select
@@ -197,7 +245,7 @@ export const StakingInitialize = ({ loading, account, statePubkey, state }: Stak
             </div>
             <div>
               <label className='mb-4 text-gray-50'>Profile level breakpoints</label>
-            </div>
+            </div> */}
             <div>
               <button
                 type='submit'
@@ -208,7 +256,7 @@ export const StakingInitialize = ({ loading, account, statePubkey, state }: Stak
                   (loading || !!account) && 'bg-gray-500 hover:bg-gray-500'
                 )}
               >
-                Submit
+                Submit 
               </button>
             </div>
           </form>
@@ -221,7 +269,7 @@ export const StakingInitialize = ({ loading, account, statePubkey, state }: Stak
         enterFrom='opacity-0 scale-75'
         enterTo='opacity-100 scale-100'
       >
-        {state && <StateOverview statePubkey={statePubkey} state={state} />}
+        {/* {state && <StateOverview statePubkey={statePubkey} state={state} />} */}
       </Transition>
     </main>
   )

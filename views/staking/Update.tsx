@@ -9,7 +9,7 @@ import tokenLogo from '/public/unloc_token.png'
 import Image from 'next/image'
 import { ClickPopover } from '@/components/common/ClickPopover'
 import { Copyable, InformationIcon } from '@/components/common'
-import { useWallet } from '@solana/wallet-adapter-react'
+import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { useSendTransaction, useTokenAccount } from '@/hooks'
 import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { UNLOC_MINT } from '@/utils/spl-utils/unloc-constants'
@@ -17,12 +17,12 @@ import { ChangeEvent, SyntheticEvent, useCallback, useMemo, useState } from 'rea
 import { amountToUiAmount } from '@/utils/spl-utils'
 import { StateAccount } from '@unloc-dev/unloc-staking-solita'
 import { compressAddress } from '@/utils'
-import { fundStakeProgram } from '@/utils/spl-utils/unloc-staking'
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base'
 import { useStore } from '@/stores'
 import { Transaction } from '@solana/web3.js'
 import toast from 'react-hot-toast'
 import { uiAmountToAmount } from '@/utils/spl-utils/common'
+import { fundRewardTokens } from '@/utils/spl-utils/unloc-staking'
 
 const rewardVaultInfo = [
   'This token account is distributing rewards to users that are staking the UNLOC token.',
@@ -37,6 +37,7 @@ const fundInfo = [
 
 const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
   const { publicKey } = useWallet()
+  const { connection } = useConnection()
   const { programs } = useStore()
   const sendAndConfirm = useSendTransaction()
   const [uiFundAmount, setFundAmount] = useState<string>('')
@@ -70,14 +71,11 @@ const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
       if (!uiFundAmount) return
 
       const fundAmount = uiAmountToAmount(uiFundAmount, 6)
-      const ix = fundStakeProgram(
+      const tx = await fundRewardTokens(
+        connection,
         publicKey,
-        ata,
-        state.rewardVault,
         fundAmount,
-        programs.stakePubkey
       )
-      const tx = new Transaction().add(...ix)
 
       toast.promise(sendAndConfirm(tx, 'confirmed'), {
         loading: 'Confirming...',
@@ -90,7 +88,7 @@ const FundRewardsInfo = ({ state }: { state: StateAccount }) => {
         success: (e) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
       })
     },
-    [publicKey, ata, uiFundAmount, state.rewardVault, programs.stakePubkey, sendAndConfirm]
+    [publicKey, ata, uiFundAmount, connection, sendAndConfirm]
   )
 
   return (
