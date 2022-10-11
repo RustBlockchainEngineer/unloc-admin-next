@@ -3,7 +3,7 @@ import { useAccount, useSendTransaction } from '@/hooks'
 import { useStore } from '@/stores'
 import { compressAddress } from '@/utils'
 import { UNLOC_MINT } from '@/utils/spl-utils/unloc-constants'
-import { closePool, createPool, farmPoolParser, getPool } from '@/utils/spl-utils/unloc-staking'
+import { getStakingPoolKey } from '@/utils/spl-utils/unloc-staking'
 import { ChevronDoubleRightIcon, InformationCircleIcon } from '@heroicons/react/20/solid'
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
@@ -22,8 +22,8 @@ export const FarmPoolView = () => {
   const { publicKey } = useWallet()
   const sendAndConfirm = useSendTransaction()
   const { programs } = useStore()
-  const farmPool = getPool(UNLOC_MINT, programs.stakePubkey)
-  const { loading, account } = useAccount(farmPool, farmPoolParser)
+  const farmPool = getStakingPoolKey()
+  const { loading, account } = useAccount(farmPool) // add parser
   const [poolPoint, setPoolPoint] = useState('')
 
   const handleCreatePool = async () => {
@@ -31,46 +31,46 @@ export const FarmPoolView = () => {
       toast.error('Connect your wallet')
       return
     }
-    if (!poolPoint) {
-      toast.error('Enter pool point')
-      return
-    }
+    // if (!poolPoint) {
+    //   toast.error('Enter pool point')
+    //   return
+    // }
 
-    const ix = await createPool(
-      connection,
-      publicKey,
-      UNLOC_MINT,
-      Number(poolPoint),
-      programs.stakePubkey
-    )
-    const tx = new Transaction().add(...ix)
-    toast.promise(sendAndConfirm(tx, 'confirmed'), {
-      loading: 'Confirming...',
-      error: (e) => (
-        <div>
-          <p>There was an error confirming your transaction</p>
-          <p>{e.message}</p>
-        </div>
-      ),
-      success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
-    })
+    // const ix = await createPool(
+    //   connection,
+    //   publicKey,
+    //   UNLOC_MINT,
+    //   Number(poolPoint),
+    //   programs.stakePubkey
+    // )
+    // const tx = new Transaction().add(...ix)
+    // toast.promise(sendAndConfirm(tx, 'confirmed'), {
+    //   loading: 'Confirming...',
+    //   error: (e) => (
+    //     <div>
+    //       <p>There was an error confirming your transaction</p>
+    //       <p>{e.message}</p>
+    //     </div>
+    //   ),
+    //   success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
+    // })
   }
 
   const handleClosePool = async () => {
     if (!publicKey) throw new WalletNotConnectedError()
 
-    const ix = closePool(publicKey, UNLOC_MINT, programs.stakePubkey)
-    const tx = new Transaction().add(...ix)
-    toast.promise(sendAndConfirm(tx, 'confirmed'), {
-      loading: 'Confirming...',
-      error: (e) => (
-        <div>
-          <p>There was an error confirming your transaction</p>
-          <p>{e.message}</p>
-        </div>
-      ),
-      success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
-    })
+    // const ix = closePool(publicKey, UNLOC_MINT, programs.stakePubkey)
+    // const tx = new Transaction().add(...ix)
+    // toast.promise(sendAndConfirm(tx, 'confirmed'), {
+    //   loading: 'Confirming...',
+    //   error: (e) => (
+    //     <div>
+    //       <p>There was an error confirming your transaction</p>
+    //       <p>{e.message}</p>
+    //     </div>
+    //   ),
+    //   success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
+    // })
   }
 
   return (

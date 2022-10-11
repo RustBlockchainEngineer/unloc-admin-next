@@ -1,6 +1,6 @@
+import { accountProviders } from '@unloc-dev/unloc-sdk-staking'
 import { useState } from 'react'
 import { AccountSelector } from './AccountSelector'
-import { accountProviders } from '@unloc-dev/unloc-staking-solita'
 import { ExtraRewardPdaForm, FarmPoolPdaForm, FarmPoolUserPdaForm, StatePdaForm } from './PdaForms'
 
 const Badge = ({ value }: { value: string }) => {
@@ -16,65 +16,118 @@ export const PdaPanel = () => {
 
   const renderPdaSeeds = () => {
     if (!selectedAccount) return null
-
     let seeds = []
     switch (selectedAccount) {
-      case 'StateAccount':
+      case 'PoolInfo':
         seeds = [
           {
-            name: 'State',
+            name: 'UNLOC_STAKING',
             type: (
               <p>
-                literal: <Badge value={'state'} />
+                literal: <Badge value={'unloc-staking'} />
               </p>
             ),
-            description: 'The prefix "state".'
-          }
-        ]
-        break
-      case 'ExtraRewardsAccount':
-        seeds = [
-          {
-            name: 'Extra',
-            type: (
-              <p>
-                literal: <Badge value={'extra'} />
-              </p>
-            ),
-            description: 'The prefix "extra".'
-          }
-        ]
-        break
-      case 'FarmPoolAccount':
-        seeds = [
-          {
-            name: 'Mint',
-            type: 'Variable',
-            description: 'The public key of the mint that is staked in this pool (UNLOC mint).'
-          }
-        ]
-        break
-      case 'FarmPoolUserAccount':
-        seeds = [
-          {
-            name: 'Pool',
-            type: 'Variable',
-            description: 'The public key of the pool this user is staking in.'
+            description: 'The string "unloc-staking".'
           },
           {
-            name: 'Authority',
+            name: 'STAKING_POOL',
+            type: (
+              <p>
+                literal: <Badge value={'staking-pool'} />
+              </p>
+            ),
+            description: 'The string "staking-pool".'
+          },
+          {
+            name: 'DATA_ACCOUNT',
+            type: (
+              <p>
+                literal: <Badge value={'data-account'} />
+              </p>
+            ),
+            description: 'The string "data-account".'
+          }
+        ]
+        break
+      case 'UpdatePoolConfigsInfo':
+        seeds = [
+          {
+            name: 'UNLOC_STAKING',
+            type: (
+              <p>
+                literal: <Badge value={'unloc-staking'} />
+              </p>
+            ),
+            description: 'The prefix "unloc-staking".'
+          },
+          {
+            name: 'UNLOC_UPDATE_CONFIGS',
+            type: (
+              <p>
+                literal: <Badge value={'pool-update-configs'} />
+              </p>
+            ),
+            description: 'The prefix "pool-update-configs".'
+          },
+          {
+            name: 'Proposal authority wallet',
+            type: 'Variable',
+            description: 'The public key of the user making the proposal.'
+          },
+          {
+            name: 'Pool info',
+            type: 'Variable',
+            description: 'PoolInfo PDA.'
+          },
+          {
+            name: 'DATA_ACCOUNT',
+            type: (
+              <p>
+                literal: <Badge value={'data-account'} />
+              </p>
+            ),
+            description: 'The prefix "data-account".'
+          }
+        ]
+        break
+      case 'UserStakingsInfo':
+        seeds = [
+          {
+            name: 'UNLOC_STAKING',
+            type: (
+              <p>
+                literal: <Badge value={'unloc-staking'} />
+              </p>
+            ),
+            description: 'The prefix "unloc-staking".'
+          },
+          {
+            name: 'USER_STAKE_INFO',
+            type: (
+              <p>
+                literal: <Badge value={'user-stake-info'} />
+              </p>
+            ),
+            description: 'The string "user-stake-info".'
+          },
+          {
+            name: 'User wallet',
             type: 'Variable',
             description: 'The public key (wallet) of the user.'
           },
           {
-            name: 'Stake seed',
+            name: 'Pool info',
             type: 'Variable',
-            description: (
+            description: 'PoolInfo PDA.'
+          },
+          {
+            name: 'DATA_ACCOUNT',
+            type: (
               <p>
-                The number <Badge value={'[1-20]'} /> or <Badge value={'60'} /> that identifies
-                seperate staking accounts
+                literal: <Badge value={'data-account'} />
               </p>
-            )
+            ),
+            description: 'The string "data-account".'
           }
         ]
         break

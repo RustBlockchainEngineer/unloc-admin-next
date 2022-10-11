@@ -1,254 +1,246 @@
-import { bignum } from '@metaplex-foundation/beet'
+import { bignum } from "@metaplex-foundation/beet";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { Connection, PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 import {
-  TOKEN_PROGRAM_ID,
-  getAssociatedTokenAddressSync,
-  getAccount,
-  TokenAccountNotFoundError,
-  TokenInvalidAccountOwnerError,
-  createAssociatedTokenAccountInstruction
-} from '@solana/spl-token'
-import {
-  AccountInfo,
-  Connection,
-  PublicKey,
-  SystemProgram,
-  SYSVAR_CLOCK_PUBKEY,
-  TransactionInstruction
-} from '@solana/web3.js'
-import {
-  createCreateExtraRewardConfigsInstruction,
-  createCreateStateInstruction,
-  createFundRewardTokenInstruction,
-  createCreatePoolInstruction,
-  DurationExtraRewardConfig,
-  PROGRAM_ID,
-  StateAccount,
-  ExtraRewardsAccount,
-  FarmPoolAccount,
-  createClosePoolInstruction,
-  createSetExtraRewardConfigsInstruction
-} from '@unloc-dev/unloc-staking-solita'
-import { BN } from 'bn.js'
-import { val } from './common'
-import { UNLOC_MINT } from './unloc-constants'
+  AllowedStakingDurationMonths,
+  createApproveUpdateProposalInstruction,
+  createCloseUpdateProposalInstruction,
+  createCreateUpdateProposalInstruction,
+  createFundRewardsVaultInstruction,
+  createInitializePoolInstruction,
+  FeeReductionLevels,
+  InterestRateFraction,
+  PoolInfo,
+  PROGRAM_ADDRESS,
+  ScoreMultiplier,
+  UpdatePoolConfigsInfo,
+} from "@unloc-dev/unloc-sdk-staking";
+import { getWalletTokenAccount } from "./common";
 
-// CONSTANTS
-export const STATE_SEED = Buffer.from('state')
-export const EXTRA_SEED = Buffer.from('extra')
+///////////////
+// CONSTANTS //
+///////////////
+export const STAKING_PID: PublicKey = new PublicKey(PROGRAM_ADDRESS);
+export const UNLOC_STAKING = Buffer.from("unloc-staking");
+export const LOCKED_TOKENS = Buffer.from("locked-tokens");
+export const USER_STAKE_INFO = Buffer.from("user-stake-info");
+export const FLEXI = Buffer.from("always-unlocked");
+export const LIQUIDITY_MINING = Buffer.from("2-months-lock");
+export const UNLOC_SCORE = Buffer.from("unloc-score");
+export const STAKING_POOL = Buffer.from("staking-pool");
+export const DATA_ACCOUNT = Buffer.from("data-account");
+export const STAKING_VAULT = Buffer.from("staking-vault");
+export const REWARDS_VAULT = Buffer.from("rewards-vault");
+export const TOKEN_ACCOUNT = Buffer.from("token-account");
+export const PENALITY_DEPOSIT_VAULT = Buffer.from("penality-deposit-vault");
+export const POOL_UPDATE_CONFIGS = Buffer.from("pool-update-configs");
+export const BPF_LOADER_UPGRADEABLE_PROGRAM_ID = new PublicKey(
+  "BPFLoaderUpgradeab1e11111111111111111111111",
+);
 
-// PDAs
-export const getStakingState = (programId: PublicKey) => {
-  return PublicKey.findProgramAddressSync([STATE_SEED], programId)[0]
-}
-
-export const getExtraConfig = (programId: PublicKey) => {
-  return PublicKey.findProgramAddressSync([EXTRA_SEED], programId)[0]
-}
-
-export const getPool = (mint: PublicKey, programId: PublicKey) => {
-  return PublicKey.findProgramAddressSync([mint.toBuffer()], programId)[0]
-}
-
-export const getPoolUser = (
-  pool: PublicKey,
-  authority: PublicKey,
-  stakeSeed: number,
-  programId: PublicKey
+/////////////////
+// PDA helpers //
+/////////////////
+export const getStakingPoolKey = (programId: PublicKey = STAKING_PID) => {
+  return PublicKey.findProgramAddressSync(
+    [UNLOC_STAKING, STAKING_POOL, DATA_ACCOUNT],
+    programId,
+  )[0];
+};
+export const getUserStakingsKey = (
+  userWallet: PublicKey,
+  poolKey: PublicKey = getStakingPoolKey(),
+  programId: PublicKey = STAKING_PID,
 ) => {
   return PublicKey.findProgramAddressSync(
-    [pool.toBuffer(), authority.toBuffer(), new BN(stakeSeed).toArrayLike(Buffer, 'le', 1)],
-    programId
-  )[0]
-}
+    [UNLOC_STAKING, USER_STAKE_INFO, userWallet.toBuffer(), poolKey.toBuffer(), DATA_ACCOUNT],
+    programId,
+  )[0];
+};
 
-export const stateParser = (pubkey: PublicKey, data: AccountInfo<Buffer>) => {
-  return StateAccount.fromAccountInfo(data)[0]
-}
+export const getStakingVaultKey = (programId: PublicKey = STAKING_PID) => {
+  return PublicKey.findProgramAddressSync(
+    [UNLOC_STAKING, STAKING_POOL, STAKING_VAULT, TOKEN_ACCOUNT],
+    programId,
+  )[0];
+};
+export const getRewardsVaultKey = (programId: PublicKey = STAKING_PID) => {
+  return PublicKey.findProgramAddressSync(
+    [UNLOC_STAKING, STAKING_POOL, REWARDS_VAULT, TOKEN_ACCOUNT],
+    programId,
+  )[0];
+};
+export const getUpdatePoolConfigsKey = (
+  proposalAuthorityWallet: PublicKey,
+  poolInfo: PublicKey,
+  programId: PublicKey = STAKING_PID
+  ) => {
+  return PublicKey.findProgramAddressSync(
+    [UNLOC_STAKING, POOL_UPDATE_CONFIGS, proposalAuthorityWallet.toBuffer(), poolInfo.toBuffer(), DATA_ACCOUNT],
+    programId,
+  )[0];
+};
+export const getPenaltyDepositVaultKey = (programId: PublicKey = STAKING_PID) => {
+  return PublicKey.findProgramAddressSync(
+    [UNLOC_STAKING, STAKING_POOL, PENALITY_DEPOSIT_VAULT, TOKEN_ACCOUNT],
+    programId,
+  )[0];
+};
+export const getProgramDataKey = (programId: PublicKey = STAKING_PID) => {
+  return PublicKey.findProgramAddressSync(
+    [STAKING_PID.toBytes()],
+    BPF_LOADER_UPGRADEABLE_PROGRAM_ID,
+  )[0];
+};
+/////////////////////////
+// Instruction helpers //
+/////////////////////////
+export const initializeStakingPool = async (
+  userWallet: PublicKey,
+  tokenMint: PublicKey,
+  programId: PublicKey = STAKING_PID,
+  numAuthorities: number = 1,
+  authorityWallets: PublicKey[] = [userWallet],
+  numApprovalsNeededForUpdate: number = 1,
+  interestRateFraction: InterestRateFraction,
+  scoreMultiplier: ScoreMultiplier,
+  profileLevelMultiplier: FeeReductionLevels,
+  unstakePenalityBasisPoints: bignum
+) => {
+  const poolInfo = getStakingPoolKey();
+  const stakingVault = getStakingVaultKey();
+  const rewardsVault = getRewardsVaultKey();
+  const penalityDepositVault = getPenaltyDepositVaultKey();
+  const programData = getProgramDataKey();
+  const instructions: TransactionInstruction[] = [];
+  instructions.push(
+    createInitializePoolInstruction(
+      {
+        payer: userWallet,
+        poolInfo,
+        stakingVault,
+        tokenMint,
+        rewardsVault,
+        penalityDepositVault,
+        program: programId,
+        programData,
+      },
+      {
+        args: {
+          numAuthorities,
+          authorityWallets,
+          numApprovalsNeededForUpdate,
+          interestRateFraction,
+          scoreMultiplier,
+          profileLevelMultiplier,
+          unstakePenalityBasisPoints,
+        }
+      },
+    ),
+  );
 
-export const extraRewardParser = (pubkey: PublicKey, data: AccountInfo<Buffer>) => {
-  return ExtraRewardsAccount.fromAccountInfo(data)[0]
-}
-
-export const farmPoolParser = (pubkey: PublicKey, data: AccountInfo<Buffer>) => {
-  return FarmPoolAccount.fromAccountInfo(data)[0]
-}
-
-// Instruction helpers
-export const createState = async (
+  return new Transaction().add(...instructions);
+};
+export const fundRewardTokens = async (
   connection: Connection,
-  wallet: PublicKey,
-  earlyUnlockFee: bignum,
-  tokenPerSecond: bignum,
-  profileLevels: bignum[],
-  feeVault: PublicKey,
-  programId?: PublicKey
-): Promise<TransactionInstruction[]> => {
-  const instructions: TransactionInstruction[] = []
-  const state = getStakingState(programId ?? PROGRAM_ID)
-  const rewardMint = UNLOC_MINT
-  const rewardVault = getAssociatedTokenAddressSync(rewardMint, state, true)
-
-  if (!(await isAccountInitialized(connection, rewardVault))) {
-    instructions.push(
-      createAssociatedTokenAccountInstruction(wallet, rewardVault, state, rewardMint)
-    )
-  }
-
-  const ix = createCreateStateInstruction(
-    {
-      authority: wallet,
-      payer: wallet,
-      state,
-      rewardMint,
-      rewardVault,
-      feeVault,
-      ...DEFAULT_PROGRAMS
-    },
-    {
-      earlyUnlockFee,
-      tokenPerSecond,
-      profileLevels
-    },
-    programId
-  )
-  return [...instructions, ix]
-}
-
-export const createRewardConfig = (
-  wallet: PublicKey,
-  configs: DurationExtraRewardConfig[],
-  programId?: PublicKey
+  userWallet: PublicKey,
+  amount: bignum
 ) => {
-  const state = getStakingState(programId ?? PROGRAM_ID)
-  const extraRewardAccount = getExtraConfig(programId ?? PROGRAM_ID)
-  const ix = createCreateExtraRewardConfigsInstruction(
-    {
-      authority: wallet,
-      state,
-      extraRewardAccount,
-      systemProgram: SystemProgram.programId
-    },
-    {
-      configs
-    },
-    programId
-  )
-  return [ix]
-}
+  const poolInfo = getStakingPoolKey();
+  const poolData = await PoolInfo.fromAccountAddress(connection, poolInfo);
+  const stakingVault = getStakingVaultKey();
+  const rewardsVault = getRewardsVaultKey();
+  const funderTokenAccountToDebit = await getWalletTokenAccount(connection, userWallet, poolData.tokenMint);
+  const instructions: TransactionInstruction[] = [];
+  instructions.push(
+    createFundRewardsVaultInstruction(
+      {
+        poolInfo,
+        stakingVault,
+        rewardsVault,
+        tokenMint: poolData.tokenMint,
+        funder: userWallet,
+        funderTokenAccountToDebit,
+      },
+      {
+        amount
+      },
+    ),
+  );
 
-export const editRewardConfig = (
-  wallet: PublicKey,
-  configs: DurationExtraRewardConfig[],
-  programId?: PublicKey
+  return new Transaction().add(...instructions);
+};
+
+export const createUpdateProposal = async (
+  userWallet: PublicKey,
+  interestRateFraction: InterestRateFraction,
+  scoreMultiplier: ScoreMultiplier,
+  profileLevelMultiplier: FeeReductionLevels,
+  unstakePenalityBasisPoints: bignum,
+  pausePool: boolean
 ) => {
-  const extraRewardAccount = getExtraConfig(programId ?? PROGRAM_ID)
-  const ix = createSetExtraRewardConfigsInstruction(
-    {
-      authority: wallet,
-      extraRewardAccount,
-      systemProgram: SystemProgram.programId
-    },
-    {
-      configs
-    },
-    programId
-  )
-  return [ix]
-}
+  const poolInfo = getStakingPoolKey();
+  const updatePoolConfigsInfo = getUpdatePoolConfigsKey(userWallet, poolInfo);
+  const instructions: TransactionInstruction[] = [];
+  instructions.push(
+    createCreateUpdateProposalInstruction(
+      {
+        poolInfo,
+        proposalAuthorityWallet: userWallet,
+        updatePoolConfigsInfo,
+      },
+      {
+        args: {
+          interestRateFraction,
+          scoreMultiplier,
+          profileLevelMultiplier,
+          unstakePenalityBasisPoints,
+          pausePool
+        }
+      },
+    ),
+  );
 
-export const createPool = async (
+  return new Transaction().add(...instructions);
+};
+
+export const approveUpdateProposal = async (
   connection: Connection,
-  wallet: PublicKey,
-  mint: PublicKey,
-  point: bignum,
-  programId?: PublicKey
+  userWallet: PublicKey,
 ) => {
-  const instructions: TransactionInstruction[] = []
-  const state = getStakingState(programId ?? PROGRAM_ID)
-  const pool = getPool(mint, programId ?? PROGRAM_ID)
-  const vault = getAssociatedTokenAddressSync(mint, pool, true)
+  const poolInfo = getStakingPoolKey();
+  const updatePoolConfigsInfo = getUpdatePoolConfigsKey(userWallet, poolInfo);
+  const updatePoolConfigsData = await UpdatePoolConfigsInfo.fromAccountAddress(connection, updatePoolConfigsInfo);
+  const instructions: TransactionInstruction[] = [];
+  instructions.push(
+    createApproveUpdateProposalInstruction(
+      {
+        poolInfo,
+        votingAuthorityWallet: userWallet,
+        proposalAuthorityWallet: updatePoolConfigsData.proposalAuthorityWallet,
+        updatePoolConfigsInfo,
+      }
+    ),
+  );
 
-  if (!(await isAccountInitialized(connection, vault))) {
-    instructions.push(createAssociatedTokenAccountInstruction(wallet, vault, pool, mint))
-  }
-  const ix = createCreatePoolInstruction(
-    {
-      authority: wallet,
-      payer: wallet,
-      mint,
-      state,
-      pool,
-      vault,
-      ...DEFAULT_PROGRAMS
-    },
-    {
-      amountMultipler: 0,
-      point
-    },
-    programId
-  )
-  return [...instructions, ix]
-}
+  return new Transaction().add(...instructions);
+};
 
-export const closePool = (wallet: PublicKey, mint: PublicKey, programId?: PublicKey) => {
-  const state = getStakingState(programId ?? PROGRAM_ID)
-  const pool = getPool(mint, programId ?? PROGRAM_ID)
-
-  const ix = createClosePoolInstruction(
-    {
-      authority: wallet,
-      state,
-      pool,
-      ...DEFAULT_PROGRAMS
-    },
-    programId
-  )
-  return [ix]
-}
-
-export const fundStakeProgram = (
-  wallet: PublicKey,
-  userVault: PublicKey,
-  rewardVault: PublicKey,
-  amount: bignum,
-  programId?: PublicKey
+export const closeUpdateProposal = async (
+  userWallet: PublicKey,
 ) => {
-  const state = getStakingState(programId ?? PROGRAM_ID)
-  const ix = createFundRewardTokenInstruction(
-    {
-      state,
-      authority: wallet,
-      userVault,
-      rewardVault,
-      tokenProgram: TOKEN_PROGRAM_ID
-    },
-    { amount },
-    programId
-  )
-  return [ix]
-}
+  const poolInfo = getStakingPoolKey();
+  const updatePoolConfigsInfo = getUpdatePoolConfigsKey(userWallet, poolInfo);
+  const instructions: TransactionInstruction[] = [];
+  instructions.push(
+    createCloseUpdateProposalInstruction(
+      {
+        poolInfo,
+        updatePoolConfigsInfo,
+        proposalAuthorityWallet: userWallet,
+      }
+    ),
+  );
 
-const DEFAULT_PROGRAMS = {
-  tokenProgram: TOKEN_PROGRAM_ID,
-  systemProgram: SystemProgram.programId,
-  clock: SYSVAR_CLOCK_PUBKEY
-}
-
-const isAccountInitialized = async (
-  connection: Connection,
-  account: PublicKey
-): Promise<boolean> => {
-  try {
-    await getAccount(connection, account)
-    return true
-  } catch (error: unknown) {
-    if (
-      error instanceof TokenAccountNotFoundError ||
-      error instanceof TokenInvalidAccountOwnerError
-    ) {
-      return false
-    } else {
-      throw Error()
-    }
-  }
-}
+  return new Transaction().add(...instructions);
+};
