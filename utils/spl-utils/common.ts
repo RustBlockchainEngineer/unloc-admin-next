@@ -55,11 +55,8 @@ const ACCOUNT_DISCRIMINATOR_SIZE = 8
 export function accountDiscriminator(name: string): Buffer {
   return Buffer.from(sha256.digest(`account:${name}`)).subarray(0, ACCOUNT_DISCRIMINATOR_SIZE)
 }
-export const getWalletTokenAccount = async (
-  connection: Connection,
-  walletPubkey: PublicKey,
-  mint: PublicKey,
-) => {
+
+export const getWalletTokenAccount = async (connection: Connection, walletPubkey: PublicKey, mint: PublicKey) => {
   const parsedTokenAccounts = await connection.getParsedTokenAccountsByOwner(
     walletPubkey,
     {
@@ -81,4 +78,13 @@ export const getWalletTokenAccount = async (
   })
 
   return result
+}
+
+export function isPublicKey(value: any) {
+  try {
+    new PublicKey(value)
+    return true
+  } catch {
+    return false
+  }
 }
