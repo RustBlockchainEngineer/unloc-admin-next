@@ -6,15 +6,12 @@ import { DocumentPlusIcon } from '@heroicons/react/24/solid'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, AccountInfo } from '@solana/web3.js'
 import clsx from 'clsx'
-import { StateOverview } from './StateOverview'
-import { useController, useFieldArray, useForm } from 'react-hook-form'
+import { useFieldArray, useForm } from 'react-hook-form'
 import { CompoundingFrequency, PoolInfo } from '@unloc-dev/unloc-sdk-staking'
 import { initializeStakingPool } from '@/utils/spl-utils/unloc-staking'
 import { UNLOC_MINT } from '@/utils/spl-utils/unloc-constants'
 import { BN } from 'bn.js'
-import { times, range } from 'lodash-es'
 import toast from 'react-hot-toast'
-import { objectPrototype } from 'mobx/dist/internal'
 import { isPublicKey } from '@/utils/spl-utils/common'
 import { useEffect } from 'react'
 
@@ -68,10 +65,6 @@ export const StakingInitialize = ({ loading, account, statePubkey, state }: Stak
     defaultValues: INITIAL_VALUES,
     mode: 'onChange'
   })
-
-  useEffect(() => {
-    console.log(errors)
-  }, [errors])
 
   const { fields: interestRateFields, replace: replace1 } = useFieldArray({
     name: 'interestRatesAndScoreMultipliers',
