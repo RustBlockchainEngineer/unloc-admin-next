@@ -13,7 +13,7 @@ import { UNLOC_MINT } from '@/utils/spl-utils/unloc-constants'
 import { BN } from 'bn.js'
 import toast from 'react-hot-toast'
 import { isPublicKey } from '@/utils/spl-utils/common'
-import { useEffect } from 'react'
+import { compressAddress } from '@/utils'
 
 export type StakingInitializeProps = {
   loading: boolean
@@ -49,9 +49,7 @@ type FormValues = {
 }
 
 export const StakingInitialize = ({ loading, account, statePubkey, state }: StakingInitializeProps) => {
-  const { connection } = useConnection()
   const { publicKey: wallet } = useWallet()
-  const { programs } = useStore()
   const sendAndConfirm = useSendTransaction()
 
   const {
@@ -66,7 +64,7 @@ export const StakingInitialize = ({ loading, account, statePubkey, state }: Stak
     mode: 'onChange'
   })
 
-  const { fields: interestRateFields, replace: replace1 } = useFieldArray({
+  const { fields: interestRateFields } = useFieldArray({
     name: 'interestRatesAndScoreMultipliers',
     control,
     rules: {
@@ -74,7 +72,7 @@ export const StakingInitialize = ({ loading, account, statePubkey, state }: Stak
     }
   })
 
-  const { fields: profileLevelFields, replace: replace2 } = useFieldArray({
+  const { fields: profileLevelFields } = useFieldArray({
     name: 'profileLevelBenefits',
     control,
     rules: {
@@ -123,7 +121,7 @@ export const StakingInitialize = ({ loading, account, statePubkey, state }: Stak
       {}
     )
 
-    const unstakePenalityBasisPoints = new BN(50)
+    const unstakePenalityBasisPoints = new BN(5000)
     const tx = await initializeStakingPool(
       wallet!,
       UNLOC_MINT,
@@ -136,7 +134,17 @@ export const StakingInitialize = ({ loading, account, statePubkey, state }: Stak
       profileLevelMultiplier,
       unstakePenalityBasisPoints
     )
-    await sendAndConfirm(tx, 'confirmed', true)
+
+    toast.promise(sendAndConfirm(tx, 'confirmed', false), {
+      loading: 'Confirming...',
+      error: (e) => (
+        <div>
+          <p>There was an error confirming your transaction</p>
+          <p>{e.message}</p>
+        </div>
+      ),
+      success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
+    })
   }
 
   return (
