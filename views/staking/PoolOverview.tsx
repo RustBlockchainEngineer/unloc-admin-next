@@ -5,7 +5,11 @@ import Image from 'next/image'
 import { AddressActions } from '@/components/common/AddressActions'
 import { amountToUiAmount, numVal } from '@/utils/spl-utils'
 import { InformationIcon } from '@/components/common'
-import { PoolInfo } from '@unloc-dev/unloc-sdk-staking'
+import { PoolInfo, createFundRewardsVaultInstruction, CompoundingFrequency } from '@unloc-dev/unloc-sdk-staking'
+import { InformationCircleIcon } from '@heroicons/react/20/solid'
+import clsx from 'clsx'
+import { Disclosure } from '@headlessui/react'
+import { FundPool } from './FundPool'
 
 const stateDetails = [
   'Once the state account is initialized, other instructions related to managing the staking contract can be called.',
@@ -43,13 +47,14 @@ export type PoolOverviewProps = {
 export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
   const poolPubkey58 = poolAddress.toBase58()
   const { info: rewardVaultInfo } = useTokenAccount(poolInfo.rewardsVault)
+  const { info: stakingVaultInfo } = useTokenAccount(poolInfo.stakingVault)
   const { info: penaltyVaultInfo } = useTokenAccount(poolInfo.penalityDepositVault)
 
   return (
     <div className='relative flex min-h-full flex-col justify-center'>
       <ul
         role='list'
-        className='before:box-inherit after:box-inherit mx-auto box-border columns-1 gap-8 [column-fill:_balance] sm:columns-2 lg:columns-3'
+        className='before:box-inherit after:box-inherit mx-auto box-border w-full columns-1 gap-8 sm:columns-2 lg:columns-3 xl:columns-4'
       >
         <li className='w-full break-inside-avoid divide-gray-600 rounded-md bg-slate-700 pb-4 shadow'>
           <div className='flex justify-between border-b border-gray-600 px-4 py-5 sm:px-6'>
@@ -68,12 +73,26 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
                 <AddressActions address={poolPubkey58} />
               </dd>
             </div>
-            {/* <div className='overflow-hidden'>
-              <dt className='truncate text-sm font-medium text-gray-300'>Authority address</dt>
+            <div className='overflow-hidden'>
+              <dt className='truncate text-sm font-medium text-gray-300'>Status</dt>
               <dd className='mt-1'>
-                <AddressActions address={authority58} />
+                {poolInfo.paused ? (
+                  <span className='inline-flex items-center rounded-full bg-red-100 px-3 py-0.5 text-sm font-medium text-red-800'>
+                    Paused!
+                  </span>
+                ) : (
+                  <span className='inline-flex items-center rounded-full bg-green-100 px-3 py-0.5 text-sm font-medium text-green-800'>
+                    Active
+                  </span>
+                )}
               </dd>
-            </div> */}
+            </div>
+            <div className='overflow-hidden'>
+              <dt className='truncate text-sm font-medium text-gray-300'>Compounding frequency</dt>
+              <dd className='mt-1 font-semibold'>
+                {CompoundingFrequency[poolInfo.interestRateFraction.compoundingFrequency]}
+              </dd>
+            </div>
             <div className='overflow-hidden'>
               <dt className='truncate text-sm font-medium text-gray-300'>Reward token</dt>
               <dd className='mt-1'>
@@ -96,15 +115,15 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
           </dl>
         </li>
         <li className='break-inside-avoid rounded-md bg-slate-700 shadow'>
-          <div className='px-4 py-5 sm:px-6'>
+          <div className='border-b border-gray-600 px-4 py-5 sm:px-6'>
             <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
               Reward Vault
               <InformationIcon info={rewardVaultDetails} />
             </h3>
           </div>
-          <dl className='flex flex-col gap-y-3 divide-y divide-gray-600 border-b border-gray-600 pb-4'>
+          <dl className='flex flex-col gap-y-6 border-b border-gray-600 py-6'>
             <div className='px-4 sm:px-6'>
-              <dt aria-hidden={true} className='hidden'>
+              <dt aria-hidden={true} className='sr-only'>
                 Balance
               </dt>
               <dd className=''>
@@ -119,37 +138,90 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
                   ></Image>
                 </p>
               </dd>
-              <div className='grid overflow-hidden pt-4 sm:grid-cols-2'>
-                <div>
-                  <dt className='truncate text-sm font-medium text-gray-300'>Address</dt>
-                  <dd className='mt-1'>
-                    <AddressActions
-                      address={poolInfo.rewardsVault}
-                      className='text-md flex items-center gap-x-2 font-semibold'
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt className='truncate text-sm font-medium text-gray-300'>Owner</dt>
-                  <dd className='mt-1'>
-                    <AddressActions
-                      address={rewardVaultInfo?.owner || PublicKey.default}
-                      className='text-md flex items-center gap-x-2 font-semibold'
-                    />
-                  </dd>
-                </div>
+            </div>
+            <div className='overflow-hidden px-4 sm:px-6'>
+              <div>
+                <dt className='truncate text-sm font-medium text-gray-300'>Address</dt>
+                <dd className='mt-1'>
+                  <AddressActions
+                    address={poolInfo.rewardsVault}
+                    className='text-md flex items-center gap-x-2 font-semibold'
+                  />
+                </dd>
               </div>
             </div>
           </dl>
-          <div>
-            <div className='px-4 py-5 sm:px-6'>
-              <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
-                Fee Vault
-                <InformationIcon info={feeVaultDetails} />
-              </h3>
+          <div className='w-full rounded-b-md bg-slate-700'>
+            <Disclosure>
+              {({ open }) => (
+                <>
+                  {!open && (
+                    <div className='flex justify-end px-3 py-4'>
+                      <Disclosure.Button
+                        as='button'
+                        type='button'
+                        className='inline-flex items-center rounded-full bg-pink-600 px-5 py-1 text-sm tracking-wide hover:bg-pink-700'
+                      >
+                        Fund
+                      </Disclosure.Button>
+                    </div>
+                  )}
+                  <Disclosure.Panel>
+                    <FundPool />
+                  </Disclosure.Panel>
+                </>
+              )}
+            </Disclosure>
+          </div>
+        </li>
+        <li className='break-inside-avoid rounded-md bg-slate-700 shadow'>
+          <div className='border-b border-gray-600 px-4 py-5 sm:px-6'>
+            <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
+              Staking Vault
+              <InformationIcon info={rewardVaultDetails} />
+            </h3>
+          </div>
+          <dl className='flex flex-col gap-y-6 py-6'>
+            <div className='px-4 sm:px-6'>
+              <dt aria-hidden={true} className='sr-only'>
+                Balance
+              </dt>
+              <dd className=''>
+                <p className='flex items-center gap-x-1 text-3xl font-semibold'>
+                  {amountToUiAmount(stakingVaultInfo?.amount ?? BigInt(0), 6).toLocaleString('en-us')}
+                  <Image
+                    className='rounded-full grayscale-[20%]'
+                    height={30}
+                    width={30}
+                    src={tokenLogo}
+                    alt='UNLOC Token'
+                  ></Image>
+                </p>
+              </dd>
             </div>
-            <dl className='px-4 sm:px-6'>
-              <dt aria-hidden={true} className='hidden'>
+            <div className='overflow-hidden px-4 sm:px-6'>
+              <div>
+                <dt className='truncate text-sm font-medium text-gray-300'>Address</dt>
+                <dd className='mt-1'>
+                  <AddressActions
+                    address={poolInfo.stakingVault}
+                    className='text-md flex items-center gap-x-2 font-semibold'
+                  />
+                </dd>
+              </div>
+            </div>
+          </dl>
+        </li>
+        <li className='my-4 break-inside-avoid rounded-md bg-slate-700 shadow'>
+          <div className='border-b border-gray-600 px-4 py-5 sm:px-6'>
+            <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
+              Penalty Vault
+              <InformationIcon info={rewardVaultDetails} />
+            </h3>
+          </div>
+          <dl className='flex flex-col gap-y-6 py-6'>
+            <div className='px-4 sm:px-6'>
+              <dt aria-hidden={true} className='sr-only'>
                 Balance
               </dt>
               <dd className=''>
@@ -164,29 +236,21 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
                   ></Image>
                 </p>
               </dd>
-              <div className='grid grid-cols-2 overflow-hidden pt-4'>
-                <div>
-                  <dt className='truncate text-sm font-medium text-gray-300'>Address</dt>
-                  <dd className='mt-1'>
-                    <AddressActions
-                      address={poolInfo.penalityDepositVault}
-                      className='text-md flex items-center gap-x-2 font-semibold'
-                    />
-                  </dd>
-                </div>
-                <div>
-                  <dt className='truncate text-sm font-medium text-gray-300'>Owner</dt>
-                  <dd className='mt-1'>
-                    <AddressActions
-                      address={penaltyVaultInfo?.owner || PublicKey.default}
-                      className='text-md flex items-center gap-x-2 font-semibold'
-                    />
-                  </dd>
-                </div>
+            </div>
+            <div className='overflow-hidden px-4 sm:px-6'>
+              <div>
+                <dt className='truncate text-sm font-medium text-gray-300'>Address</dt>
+                <dd className='mt-1'>
+                  <AddressActions
+                    address={poolInfo.penalityDepositVault}
+                    className='text-md flex items-center gap-x-2 font-semibold'
+                  />
+                </dd>
               </div>
-            </dl>
-          </div>
+            </div>
+          </dl>
         </li>
+
         {/*
         <li className='min-w-[320px] max-w-md rounded-md bg-slate-700 shadow'>
           <div className='border-b border-gray-600 px-4 py-5 sm:px-6'>
