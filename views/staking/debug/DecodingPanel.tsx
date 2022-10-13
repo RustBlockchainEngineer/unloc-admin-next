@@ -1,20 +1,21 @@
-import { useState, useMemo } from 'react'
 import { Spinner } from '@/components/common'
+import { accountDiscriminator } from '@/utils/spl-utils'
 import { ArrowPathIcon, CircleStackIcon } from '@heroicons/react/24/solid'
 import { useConnection } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
 import clsx from 'clsx'
+import { useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { AccountSelector } from './AccountSelector'
-import { accountDiscriminator } from '@/utils/spl-utils'
 
+import { useStore } from '@/stores'
+import { accountProviders, PoolInfo } from '@unloc-dev/unloc-sdk-staking'
+import { observer } from 'mobx-react-lite'
 import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 import { FilterOption } from './Filter'
-import { useStore } from '@/stores'
-import { accountProviders } from '@unloc-dev/unloc-sdk-staking'
 
-export const DecodingPanelView = () => {
+export const DecodingPanelView = observer(() => {
   const { programs } = useStore()
   const { connection } = useConnection()
   const [selectedAccount, setSelectedAccount] = useState<string>()
@@ -57,18 +58,12 @@ export const DecodingPanelView = () => {
             }
           }
         ]
-        const data = (await query.run(connection)).map(
-          ({ account }) => selectedProvider.fromAccountInfo(account)[0]
-        )
+        const data = (await query.run(connection)).map(({ account }) => selectedProvider.fromAccountInfo(account)[0])
         setData(data)
       } else {
         const discriminator = accountDiscriminator(selectedAccount)
-        const query = selectedProvider
-          .gpaBuilder(programs.stakePubkey)
-          .addFilter('accountDiscriminator', [...discriminator])
-        const data = (await query.run(connection)).map(
-          ({ account }) => selectedProvider.fromAccountInfo(account)[0]
-        )
+        const query = PoolInfo.gpaBuilder(programs.stakePubkey).addFilter('accountDiscriminator', [...discriminator])
+        const data = (await query.run(connection)).map(({ account }) => selectedProvider.fromAccountInfo(account)[0])
         setData(data)
       }
     } catch (e: any) {
@@ -104,12 +99,7 @@ export const DecodingPanelView = () => {
           <label htmlFor='address_input' className='px-1 text-xl'>
             Filter using:
           </label>
-          <FilterOption
-            option={option}
-            setOption={setOption}
-            filter={filter}
-            setFilter={setFilter}
-          />
+          <FilterOption option={option} setOption={setOption} filter={filter} setFilter={setFilter} />
         </div>
         <div className='flex w-56 md:flex-col md:justify-end'>
           <button
@@ -132,15 +122,11 @@ export const DecodingPanelView = () => {
           {/* Account name */}
           <div className='flex min-w-[220px] items-center gap-2'>
             <CircleStackIcon className='h-6 w-6 text-slate-300' />
-            <h5 className='tracking-wide'>
-              {selectedAccount ? selectedAccount : 'Select an Account'}
-            </h5>
+            <h5 className='tracking-wide'>{selectedAccount ? selectedAccount : 'Select an Account'}</h5>
           </div>
 
           {/* state */}
-          <div className='flex items-center justify-self-center'>
-            {data ? '1 account found' : 'No results found'}
-          </div>
+          <div className='flex items-center justify-self-center'>{data ? '1 account found' : 'No results found'}</div>
 
           {/* refresh action */}
           <button
@@ -167,4 +153,4 @@ export const DecodingPanelView = () => {
       </div>
     </div>
   )
-}
+})

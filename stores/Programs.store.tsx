@@ -6,7 +6,7 @@ import { GlobalState } from '@unloc-dev/unloc-loan-solita'
 
 export const initialValues = {
   loan: '6oVXrGCdtnTUR6xCvn2Z3f2CYaiboAGar1DKxzeX8QYh',
-  stake: 'GMdNWaWuQQAMTFr1gWd5VeT6CLbwn6QwiTy3Ek8F6Xvr',
+  stake: '65SDRmYzcAwHiSRyuij6f8LmHAwJ98fwfUnxkog17rbP',
   vote: '6z6RuFauTG511XRakJnPhxUTCVPohv6oC69xieMdm4Z9',
   buyback: '37TgoUgxSshhJmhNEAQMmAWF7XRhXEaY5HxcTZ6eYs6r'
 }

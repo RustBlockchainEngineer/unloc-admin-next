@@ -1,12 +1,11 @@
 import { useTokenAccount } from '@/hooks'
-import { InformationCircleIcon } from '@heroicons/react/20/solid'
 import { PublicKey } from '@solana/web3.js'
-import { StateAccount } from '@unloc-dev/unloc-staking-solita'
 import tokenLogo from '/public/unloc_token.png'
 import Image from 'next/image'
 import { AddressActions } from '@/components/common/AddressActions'
 import { amountToUiAmount, numVal } from '@/utils/spl-utils'
 import { InformationIcon } from '@/components/common'
+import { PoolInfo } from '@unloc-dev/unloc-sdk-staking'
 
 const stateDetails = [
   'Once the state account is initialized, other instructions related to managing the staking contract can be called.',
@@ -36,29 +35,26 @@ const profileLevelsDetails = [
   'They are set during initialization and can be adjusted at any time by the authority account.'
 ]
 
-export const StateOverview = ({
-  statePubkey,
-  state
-}: {
-  statePubkey: PublicKey
-  state: StateAccount
-}) => {
-  const authority58 = state.authority.toBase58()
-  const statePubkey58 = statePubkey.toBase58()
-  const { info: rewardVaultInfo } = useTokenAccount(state.rewardVault)
-  const { info: feeVaultInfo } = useTokenAccount(state.feeVault)
+export type PoolOverviewProps = {
+  poolInfo: PoolInfo
+  poolAddress: PublicKey
+}
+
+export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
+  const poolPubkey58 = poolAddress.toBase58()
+  const { info: rewardVaultInfo } = useTokenAccount(poolInfo.rewardsVault)
+  const { info: penaltyVaultInfo } = useTokenAccount(poolInfo.penalityDepositVault)
 
   return (
-    <div className='mx-auto'>
+    <div className='relative flex min-h-full flex-col justify-center'>
       <ul
         role='list'
-        // className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-        className='flex flex-wrap gap-2 sm:gap-5'
+        className='before:box-inherit after:box-inherit mx-auto box-border columns-1 gap-8 [column-fill:_balance] sm:columns-2 lg:columns-3'
       >
-        <li className='max-w-md divide-gray-600 rounded-md bg-slate-700 pb-4 shadow sm:min-w-[320px]'>
+        <li className='w-full break-inside-avoid divide-gray-600 rounded-md bg-slate-700 pb-4 shadow'>
           <div className='flex justify-between border-b border-gray-600 px-4 py-5 sm:px-6'>
             <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
-              State Info
+              Pool Info
               <InformationIcon info={stateDetails} />
             </h3>
             <span className='inline-flex items-center rounded-full bg-green-100 px-3 py-0.5 text-sm font-medium text-green-800'>
@@ -67,17 +63,17 @@ export const StateOverview = ({
           </div>
           <dl className='flex flex-col space-y-6 p-4 py-10 pt-4 sm:p-6'>
             <div className='overflow-hidden'>
-              <dt className='truncate text-sm font-medium text-gray-300'>State account</dt>
+              <dt className='truncate text-sm font-medium text-gray-300'>Pool info account</dt>
               <dd className='mt-1'>
-                <AddressActions address={statePubkey58} />
+                <AddressActions address={poolPubkey58} />
               </dd>
             </div>
-            <div className='overflow-hidden'>
+            {/* <div className='overflow-hidden'>
               <dt className='truncate text-sm font-medium text-gray-300'>Authority address</dt>
               <dd className='mt-1'>
                 <AddressActions address={authority58} />
               </dd>
-            </div>
+            </div> */}
             <div className='overflow-hidden'>
               <dt className='truncate text-sm font-medium text-gray-300'>Reward token</dt>
               <dd className='mt-1'>
@@ -99,7 +95,7 @@ export const StateOverview = ({
             </div>
           </dl>
         </li>
-        <li className='max-w-md rounded-md bg-slate-700 shadow sm:min-w-[320px] '>
+        <li className='break-inside-avoid rounded-md bg-slate-700 shadow'>
           <div className='px-4 py-5 sm:px-6'>
             <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
               Reward Vault
@@ -113,9 +109,7 @@ export const StateOverview = ({
               </dt>
               <dd className=''>
                 <p className='flex items-center gap-x-1 text-3xl font-semibold'>
-                  {amountToUiAmount(rewardVaultInfo?.amount ?? BigInt(0), 6).toLocaleString(
-                    'en-us'
-                  )}
+                  {amountToUiAmount(rewardVaultInfo?.amount ?? BigInt(0), 6).toLocaleString('en-us')}
                   <Image
                     className='rounded-full grayscale-[20%]'
                     height={30}
@@ -130,7 +124,7 @@ export const StateOverview = ({
                   <dt className='truncate text-sm font-medium text-gray-300'>Address</dt>
                   <dd className='mt-1'>
                     <AddressActions
-                      address={state.rewardVault}
+                      address={poolInfo.rewardsVault}
                       className='text-md flex items-center gap-x-2 font-semibold'
                     />
                   </dd>
@@ -160,7 +154,7 @@ export const StateOverview = ({
               </dt>
               <dd className=''>
                 <p className='flex items-center gap-x-1 text-3xl font-semibold'>
-                  {amountToUiAmount(feeVaultInfo?.amount ?? BigInt(0), 6).toLocaleString('en-us')}
+                  {amountToUiAmount(penaltyVaultInfo?.amount ?? BigInt(0), 6).toLocaleString('en-us')}
                   <Image
                     className='rounded-full grayscale-[20%]'
                     height={30}
@@ -175,7 +169,7 @@ export const StateOverview = ({
                   <dt className='truncate text-sm font-medium text-gray-300'>Address</dt>
                   <dd className='mt-1'>
                     <AddressActions
-                      address={state.feeVault}
+                      address={poolInfo.penalityDepositVault}
                       className='text-md flex items-center gap-x-2 font-semibold'
                     />
                   </dd>
@@ -184,7 +178,7 @@ export const StateOverview = ({
                   <dt className='truncate text-sm font-medium text-gray-300'>Owner</dt>
                   <dd className='mt-1'>
                     <AddressActions
-                      address={feeVaultInfo?.owner || PublicKey.default}
+                      address={penaltyVaultInfo?.owner || PublicKey.default}
                       className='text-md flex items-center gap-x-2 font-semibold'
                     />
                   </dd>
@@ -193,6 +187,7 @@ export const StateOverview = ({
             </dl>
           </div>
         </li>
+        {/*
         <li className='min-w-[320px] max-w-md rounded-md bg-slate-700 shadow'>
           <div className='border-b border-gray-600 px-4 py-5 sm:px-6'>
             <h3 className='flex items-center text-xl font-medium leading-6 text-gray-50'>
@@ -205,9 +200,7 @@ export const StateOverview = ({
               <dl className='sm:divide-y sm:divide-gray-600'>
                 <div className='py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6'>
                   <dt className='text-sm font-medium text-gray-200'>Total pool points</dt>
-                  <dd className='mt-1 text-sm text-gray-50 sm:col-span-2 sm:mt-0'>
-                    {state.totalPoint.toString()}
-                  </dd>
+                  <dd className='mt-1 text-sm text-gray-50 sm:col-span-2 sm:mt-0'>{state.totalPoint.toString()}</dd>
                 </div>
                 <div className='py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6'>
                   <dt className='text-sm font-medium text-gray-200'>Initialization time</dt>
@@ -217,9 +210,7 @@ export const StateOverview = ({
                 </div>
                 <div className='py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6'>
                   <dt className='text-sm font-medium text-gray-200'>Base reward rate</dt>
-                  <dd className='mt-1 text-sm text-gray-50 sm:col-span-2 sm:mt-0'>
-                    {state.tokenPerSecond.toString()}
-                  </dd>
+                  <dd className='mt-1 text-sm text-gray-50 sm:col-span-2 sm:mt-0'>{state.tokenPerSecond.toString()}</dd>
                 </div>
                 <div className='py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6'>
                   <dt className='text-sm font-medium text-gray-200'>Early unlock fee</dt>
@@ -238,7 +229,7 @@ export const StateOverview = ({
               <InformationIcon info={profileLevelsDetails} />
             </h3>
           </div>
-        </li>
+        </li> */}
       </ul>
     </div>
   )

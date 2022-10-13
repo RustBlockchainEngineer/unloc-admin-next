@@ -1,26 +1,21 @@
 import { InformationIcon } from '@/components/common'
-import { useSendTransaction } from '@/hooks'
-import { useStore } from '@/stores'
+import { useAccount, useSendTransaction } from '@/hooks'
 import { Transition } from '@headlessui/react'
 import { DocumentPlusIcon } from '@heroicons/react/24/solid'
-import { useConnection, useWallet } from '@solana/wallet-adapter-react'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey, AccountInfo } from '@solana/web3.js'
 import clsx from 'clsx'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { CompoundingFrequency, PoolInfo } from '@unloc-dev/unloc-sdk-staking'
-import { initializeStakingPool } from '@/utils/spl-utils/unloc-staking'
+import { getStakingPoolKey, initializeStakingPool } from '@/utils/spl-utils/unloc-staking'
 import { UNLOC_MINT } from '@/utils/spl-utils/unloc-constants'
 import { BN } from 'bn.js'
 import toast from 'react-hot-toast'
 import { isPublicKey } from '@/utils/spl-utils/common'
 import { compressAddress } from '@/utils'
-
-export type StakingInitializeProps = {
-  loading: boolean
-  statePubkey: PublicKey
-  account?: AccountInfo<Buffer>
-  state?: PoolInfo
-}
+import { stakePoolParser } from '@/pages/staking'
+import { observer } from 'mobx-react-lite'
+import { PoolOverview } from './PoolOverview'
 
 const initializeInfo = [
   'This instruction is ran to initialize the pool to its initial state.',
@@ -48,7 +43,9 @@ type FormValues = {
   }[]
 }
 
-export const StakingInitialize = ({ loading, account, statePubkey, state }: StakingInitializeProps) => {
+export const StakingInitialize = observer(() => {
+  const stakePool = getStakingPoolKey()
+  const { loading, account, info: poolInfo } = useAccount<PoolInfo>(stakePool, stakePoolParser, true)
   const { publicKey: wallet } = useWallet()
   const sendAndConfirm = useSendTransaction()
 
@@ -149,7 +146,7 @@ export const StakingInitialize = ({ loading, account, statePubkey, state }: Stak
 
   return (
     <main className='flex w-full flex-col gap-x-12 gap-y-4 text-white lg:flex-row'>
-      {!state && (
+      {!poolInfo && (
         <div className='max-w-xl rounded-lg bg-slate-700  shadow-sm lg:min-w-[450px]'>
           <div className='flex flex-wrap items-center justify-between border-b border-gray-500 p-8'>
             <p className='flex items-center text-2xl font-semibold text-gray-100'>
@@ -375,16 +372,16 @@ export const StakingInitialize = ({ loading, account, statePubkey, state }: Stak
       )}
 
       <Transition
-        show={!loading && !!account && !!state}
+        show={!loading && !!account && !!poolInfo}
         enter='transform transition-opacity duration-150'
         enterFrom='opacity-0 scale-75'
         enterTo='opacity-100 scale-100'
       >
-        {/* {state && <StateOverview statePubkey={statePubkey} state={state} />} */}
+        {poolInfo && <PoolOverview poolAddress={stakePool} poolInfo={poolInfo} />}
       </Transition>
     </main>
   )
-}
+})
 
 const INITIAL_VALUES: FormValues = {
   tokenMint: null,
