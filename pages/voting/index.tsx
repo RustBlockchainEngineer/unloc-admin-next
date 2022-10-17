@@ -7,6 +7,7 @@ import { useAccount } from '@/hooks'
 import { useStore } from '@/stores'
 import { getVotingProgramDataKey, getVotingSessionKey, VOTING_PID } from '@/utils/spl-utils/unloc-voting'
 import { accountProviders } from '@unloc-dev/unloc-sdk-voting'
+import { VotingDashboard } from '@/views/voting/Dashboard'
 
 const DynamicInitializeView = dynamic<{}>(() => Promise.resolve(VotingInitialize), {
   ssr: false
@@ -27,20 +28,20 @@ const DynamicSessionCycle = dynamic<{}>(() => Promise.resolve(SessionCycle), {
 const Voting: NextPage = () => {
   const { programs } = useStore()
   const votingSessionKey = getVotingSessionKey(VOTING_PID)
-  console.log(votingSessionKey.toBase58())
   const { info } = useAccount(
     votingSessionKey,
     (_, data) => accountProviders.VotingSessionInfo.fromAccountInfo(data)[0]
   )
   return (
     <main className='grid-content w-full p-7 text-white'>
-      {!info && <DynamicInitializeView />}
-      {info && (
+      {info && <DynamicInitializeView />}
+      {!info && (
         <>
-          <DynamicAuthorityOverview />
+        <VotingDashboard />
+          {/* <DynamicAuthorityOverview />
           <DynamicCollectionOverview />
           <DynamicEmissionConfig />
-          <DynamicSessionCycle />
+          <DynamicSessionCycle /> */}
         </>
       )}
     </main>
