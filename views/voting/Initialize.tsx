@@ -50,7 +50,7 @@ export const VotingInitialize = observer(() => {
       const staking = new PublicKey(data.stakingPid)
       const liqMin = new PublicKey(data.liquidityMiningPid)
       const rewardMint = new PublicKey(data.liquidityMiningRewardsMint)
-      tx = await initializeVotingSession(wallet, staking, liqMin, rewardMint)
+      tx = await initializeVotingSession(wallet, staking, liqMin, rewardMint, programs.votePubkey)
     } catch (err) {
       console.log(err)
       toast.error('Error creating transaction object, check the console.')
@@ -59,33 +59,15 @@ export const VotingInitialize = observer(() => {
 
     toast.promise(sendAndConfirm(tx, 'confirmed', false), {
       loading: 'Confirming...',
-      error: (e) => (
-        <div>
-          <p>There was an error confirming your transaction</p>
-          <p>{e.message}</p>
-        </div>
-      ),
-      success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
-    })
-  }
-
-  // Need to call when total_projects_count % 100 == 0
-  const onUpgrade = async () => {
-    if (!wallet) {
-      toast.error('Connect your wallet')
-      return
-    }
-
-    const tx = await reallocSessionAccount(wallet)
-
-    toast.promise(sendAndConfirm(tx, 'confirmed', false), {
-      loading: 'Confirming...',
-      error: (e) => (
-        <div>
-          <p>There was an error confirming your transaction</p>
-          <p>{e.message}</p>
-        </div>
-      ),
+      error: (e) => {
+        console.log(e)
+        return (
+          <div>
+            <p>There was an error confirming your transaction</p>
+            <p>{e.message}</p>
+          </div>
+        )
+      },
       success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
     })
   }

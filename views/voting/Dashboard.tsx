@@ -1,6 +1,13 @@
 import { Jdenticon } from '@/components/common/JdentIcon'
 import { useAccount, useSendTransaction } from '@/hooks'
-import { getVotingSessionKey, reallocSessionAccount, VOTING_PID } from '@/utils/spl-utils/unloc-voting'
+import {
+  addAuthority,
+  addCollection,
+  getVotingSessionKey,
+  reallocSessionAccount,
+  removeAuthority,
+  VOTING_PID
+} from '@/utils/spl-utils/unloc-voting'
 import { PublicKey } from '@solana/web3.js'
 import { VotingSessionInfo } from '@unloc-dev/unloc-sdk-voting'
 import { compressAddress } from '@/utils'
@@ -8,12 +15,49 @@ import { ChevronDoubleRightIcon } from '@heroicons/react/20/solid'
 import { Copyable } from '@/components/common'
 import { useWallet } from '@solana/wallet-adapter-react'
 import toast from 'react-hot-toast'
+import { Disclosure } from '@headlessui/react'
+import { FormEventHandler } from 'react'
+import { useStore } from '@/stores'
 
 export const VotingDashboard = () => {
+  const { programs } = useStore()
   const { publicKey: wallet } = useWallet()
   const sendAndConfirm = useSendTransaction()
-  const votingSessionKey = getVotingSessionKey(VOTING_PID)
+  const votingSessionKey = getVotingSessionKey(programs.votePubkey)
   const { loading, info } = useAccount(votingSessionKey, (_, data) => VotingSessionInfo.fromAccountInfo(data)[0])
+
+  if (!info) {
+    return <div>Loading...</div>
+  }
+
+  const onAddAuthority: FormEventHandler = async (e) => {
+    e.preventDefault()
+    if (!wallet) {
+      toast.error('Connect your wallet')
+      return
+    }
+
+    let newAuthority: PublicKey
+    try {
+      // @ts-ignore
+      newAuthority = new PublicKey(e.target.authority_pubkey.value)
+    } catch {
+      toast.error('Invalid pubkey')
+      return
+    }
+    const tx = await addAuthority(wallet, newAuthority, programs.votePubkey)
+
+    toast.promise(sendAndConfirm(tx, 'confirmed', true), {
+      loading: 'Confirming...',
+      error: (e) => (
+        <div>
+          <p>There was an error confirming your transaction</p>
+          <p>{e.message}</p>
+        </div>
+      ),
+      success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
+    })
+  }
 
   const onUpgrade = async () => {
     if (!wallet) {
@@ -35,17 +79,48 @@ export const VotingDashboard = () => {
     })
   }
 
-  //   if (!info) {
-  //     return <div>Loading...</div>
-  //   }
-  const authorities = [
-    new PublicKey('86J52egGfkzDmByk961appyevaJ5BqaATXzKMRXCPyZJ'),
-    new PublicKey('Le1PGWq1Hgdx1tKoDuWfaJa5etjaXVyXhAXLwCT8U4B'),
-    new PublicKey('86J52egGfkzDmByk961appyevaJ5BqaATXzKMRXCPyZJ'),
-    new PublicKey('86J52egGfkzDmByk961appyevaJ5BqaATXzKMRXCPyZJ')
-  ]
+  const onRemove = (authority: PublicKey) => async () => {
+    if (!wallet) {
+      toast.error('Connect your wallet')
+      return
+    }
+    const tx = await removeAuthority(wallet, authority, programs.votePubkey)
 
-  const initializer = new PublicKey('86J52egGfkzDmByk961appyevaJ5BqaATXzKMRXCPyZJ')
+    toast.promise(sendAndConfirm(tx, 'confirmed', true), {
+      loading: 'Confirming...',
+      error: (e) => (
+        <div>
+          <p>There was an error confirming your transaction</p>
+          <p>{e.message}</p>
+        </div>
+      ),
+      success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
+    })
+  }
+
+  const onAdd = async () => {
+    if (!wallet) {
+      toast.error('Connect your wallet')
+      return
+    }
+    //params - frontend binding part
+    const collectionNFT = PublicKey.default
+
+    const tx = await addCollection(wallet, collectionNFT)
+
+    toast.promise(sendAndConfirm(tx, 'confirmed', false), {
+      loading: 'Confirming...',
+      error: (e) => (
+        <div>
+          <p>There was an error confirming your transaction</p>
+          <p>{e.message}</p>
+        </div>
+      ),
+      success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
+    })
+  }
+
+  const reallocPercent = ((info?.projects.totalProjects / info?.projects.currentMaxProjectsPossible) * 100).toFixed(0)
 
   return (
     <div className='mx-auto'>
@@ -56,17 +131,10 @@ export const VotingDashboard = () => {
             Control the approved authorities, collections and account reallocation.
           </p>
         </div>
-        <div className='grid min-h-max w-full grid-cols-1 divide-x-2 divide-gray-700 overflow-hidden bg-gray-800 shadow-xl sm:rounded md:grid-cols-3'>
+        <div className='grid min-h-max w-full grid-cols-1 divide-x-2 divide-gray-700 overflow-hidden bg-gray-800 shadow-xl sm:rounded lg:grid-cols-3'>
           <div className='col-span-1 '>
-            <div>
+            <div className='flex h-full flex-col'>
               <h3 className='bg-indigo-900 py-3 px-4 text-xl'>Approved authorities</h3>
-
-              {info?.authorities.length === 0 && (
-                <div className='font-mono text-sm'>
-                  <p>There are no other authorities yet.</p>
-                  <p>Only the program deployer can add other authorities.</p>
-                </div>
-              )}
 
               <div className='mt-6 flow-root'>
                 <ul role='list' className='-my-5 px-3'>
@@ -76,12 +144,12 @@ export const VotingDashboard = () => {
                         <Jdenticon size={'32px'} value={info?.initialiser.toBase58()} />
                       </div>
                       <div className='min-w-0 flex-1'>
-                        <Copyable content={initializer.toBase58()}>
+                        <Copyable content={info.initialiser.toBase58()}>
                           <p className='truncate font-mono text-sm text-gray-50'>
-                            {compressAddress(4, initializer.toBase58())}
+                            {compressAddress(4, info.initialiser.toBase58())}
                           </p>
                         </Copyable>
-                        <p className='truncate text-sm text-gray-400'>{'@' + initializer.toBase58()}</p>
+                        <p className='truncate text-sm text-gray-400'>{'@' + info.initialiser.toBase58()}</p>
                       </div>
                       <div>
                         <button
@@ -95,51 +163,99 @@ export const VotingDashboard = () => {
                     </div>
                   </li>
 
-                  {authorities.map((authority) => (
-                    <li key={authority.toBase58()} className='py-4'>
-                      <div className='flex items-center space-x-4'>
-                        <div className='flex-shrink-0'>
-                          <Jdenticon size={'32px'} value={authority.toBase58()} />
+                  {info?.authorities
+                    .filter((address) => !address.equals(PublicKey.default))
+                    .map((authority) => (
+                      <li key={authority.toBase58()} className='py-4'>
+                        <div className='flex items-center space-x-4'>
+                          <div className='flex-shrink-0'>
+                            <Jdenticon size={'32px'} value={authority.toBase58()} />
+                          </div>
+                          <div className='min-w-0 flex-1'>
+                            <Copyable content={authority.toBase58()}>
+                              <p className='truncate font-mono text-sm text-gray-50'>
+                                {compressAddress(4, authority.toBase58())}
+                              </p>
+                            </Copyable>
+                            <p className='truncate text-sm text-gray-400'>{'@' + authority.toBase58()}</p>
+                          </div>
+                          <div>
+                            <button
+                              type='button'
+                              onClick={onRemove(authority)}
+                              className='font inline-flex items-center rounded-full border border-gray-300 bg-white px-2.5 py-0.5 text-sm leading-5 text-gray-700 shadow-sm hover:bg-gray-50'
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </div>
-                        <div className='min-w-0 flex-1'>
-                          <Copyable content={authority.toBase58()}>
-                            <p className='truncate font-mono text-sm text-gray-50'>
-                              {compressAddress(4, authority.toBase58())}
-                            </p>
-                          </Copyable>
-                          <p className='truncate text-sm text-gray-400'>{'@' + authority.toBase58()}</p>
-                        </div>
-                        <div>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+              <Disclosure>
+                {({ open }) => (
+                  <>
+                    <Disclosure.Panel as='form' onSubmit={onAddAuthority} className='mt-auto py-4 px-6'>
+                      <div className='mb-4 '>
+                        <label htmlFor='authority_pubkey' className='mb-1 block text-sm font-medium text-gray-400'>
+                          Authority pubkey
+                        </label>
+                        <div className='mt-1 flex w-full rounded-md shadow-sm'>
+                          <div className='relative flex flex-grow items-stretch focus-within:z-10'>
+                            <input
+                              id='authority_pubkey'
+                              name='authority_pubkey'
+                              type='text'
+                              className='w-full rounded-l-md py-1.5 px-3 text-gray-900 placeholder:text-gray-400'
+                              placeholder='address'
+                            />
+                          </div>
                           <button
-                            type='button'
-                            className='font inline-flex items-center rounded-full border border-gray-300 bg-white px-2.5 py-0.5 text-sm leading-5 text-gray-700 shadow-sm hover:bg-gray-50'
+                            type='submit'
+                            className='relative -ml-px inline-flex items-center space-x-2 rounded-r-md border border-transparent bg-pink-600 px-2 py-2 text-sm font-medium text-gray-50 hover:bg-pink-700'
                           >
-                            Remove
+                            <ChevronDoubleRightIcon className='h-5 w-5 text-white' aria-hidden='true' />
+                            <span>Submit</span>
                           </button>
                         </div>
                       </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className='mt-6 flex items-center justify-end gap-x-3 py-4 px-3'>
-                <p className='hidden truncate align-middle text-sm text-gray-400 sm:block'>
-                  Up to 5 different authorities can be added.
-                </p>
-                <button
-                  disabled={authorities.length === 5}
-                  className='inline-flex items-center truncate rounded-md bg-pink-600 px-3 py-1.5 hover:bg-pink-700'
-                  type='button'
-                >
-                  <ChevronDoubleRightIcon className='-ml-1 mr-1 h-5 w-5' />
-                  Add New
-                </button>
-              </div>
+                      <div className='flex items-center justify-end gap-x-2'>
+                        <Disclosure.Button
+                          as='button'
+                          type='button'
+                          className='inline-flex items-center rounded-md border border-gray-500 bg-transparent px-6 py-1.5 text-sm font-medium text-gray-100 shadow-sm hover:bg-gray-900 focus:outline-none'
+                        >
+                          Cancel
+                        </Disclosure.Button>
+                      </div>
+                    </Disclosure.Panel>
+                    {!open && (
+                      <div className='mt-auto flex flex-wrap items-center justify-end gap-x-3 py-4 px-3'>
+                        <p className='mb-1 hidden truncate align-middle text-sm text-gray-400 sm:block'>
+                          Up to 6 different authorities can be added.
+                        </p>
+
+                        <Disclosure.Button
+                          disabled={info?.authorities.length === 5}
+                          className='inline-flex items-center truncate rounded-md bg-pink-600 px-3 py-1.5 hover:bg-pink-700'
+                          as='button'
+                        >
+                          Add new authority
+                        </Disclosure.Button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </Disclosure>
             </div>
           </div>
           <div className='col-span-1'>
             <div className='flex justify-between bg-indigo-900 py-3 px-4'>
               <h3 className='text-xl'>Approved collections</h3>
+            </div>
+            <div className='px-3 py-4'>
+              <p className='text-sm text-gray-400'>Recently added collections:</p>
             </div>
           </div>
           <div>
@@ -163,12 +279,14 @@ export const VotingDashboard = () => {
               <small className='leading-tight text-gray-400'>
                 The account should be reallocated for every 100 approved collections added.
               </small>
-              <div className='mx-2 mt-1 h-8 w-full rounded-full bg-gray-700'>
+              <div className='relative mx-2 mt-1 h-8 w-[95%] rounded-full bg-gray-700'>
                 <div
-                  className='inline-flex h-8 items-center justify-end rounded-full bg-blue-600 px-6 text-sm'
-                  style={{ width: '40%' }}
+                  className='inline-flex h-8 items-center justify-end rounded-full bg-blue-600 text-sm'
+                  style={{ width: `${reallocPercent}%` }}
                 >
-                  40/100
+                  <span className='absolute left-1/2 -translate-x-1/2'>
+                    {info.projects.totalProjects}/{info.projects.currentMaxProjectsPossible}
+                  </span>
                 </div>
               </div>
             </div>

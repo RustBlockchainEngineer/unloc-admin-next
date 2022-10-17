@@ -10,7 +10,7 @@ import {
   createRemoveCollectionInstruction,
   createSetEmissionsInstruction,
   createSetVotingSessionTimeInstruction,
-  PROGRAM_ADDRESS,
+  PROGRAM_ID
 } from '@unloc-dev/unloc-sdk-voting'
 import { UNLOC_MINT } from './unloc-constants'
 import { LIQ_MINING_PID } from './unloc-liq-mining'
@@ -19,7 +19,7 @@ import { STAKING_PID } from './unloc-staking'
 ///////////////
 // CONSTANTS //
 ///////////////
-export const VOTING_PID: PublicKey = new PublicKey(PROGRAM_ADDRESS)
+export const VOTING_PID: PublicKey = PROGRAM_ID
 export const BPF_LOADER_UPGRADEABLE_PROGRAM_ID = new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111')
 export const METAPLEX_PID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s')
 
@@ -70,9 +70,9 @@ export const initializeVotingSession = async (
   liqMinRwdsMint: PublicKey = UNLOC_MINT,
   programId: PublicKey = VOTING_PID
 ) => {
-  const voteSessionInfo = getVotingSessionKey()
-  const liqMinRwdsVault = getLiqMinRwdsVaultKey()
-  const programData = getVotingProgramDataKey()
+  const voteSessionInfo = getVotingSessionKey(programId)
+  const liqMinRwdsVault = getLiqMinRwdsVaultKey(programId)
+  const programData = getVotingProgramDataKey(programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createInitializeVotingSessionInstruction(
@@ -89,7 +89,8 @@ export const initializeVotingSession = async (
           stakingProgram,
           liqMinProgram
         }
-      }
+      },
+      programId
     )
   )
 
@@ -108,47 +109,56 @@ export const reallocSessionAccount = async (userWallet: PublicKey) => {
   return new Transaction().add(...instructions)
 }
 
-export const addAuthority = async (userWallet: PublicKey, newAuthority: PublicKey) => {
-  const voteSessionInfo = getVotingSessionKey()
+export const addAuthority = async (userWallet: PublicKey, newAuthority: PublicKey, programId = VOTING_PID) => {
+  const voteSessionInfo = getVotingSessionKey(programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
-    createAddAuthorityInstruction({
-      initialiser: userWallet,
-      voteSessionInfo,
-      newAuthority
-    })
+    createAddAuthorityInstruction(
+      {
+        initialiser: userWallet,
+        voteSessionInfo,
+        newAuthority
+      },
+      programId
+    )
   )
 
   return new Transaction().add(...instructions)
 }
 
-export const removeAuthority = async (userWallet: PublicKey, authorityToRemove: PublicKey) => {
-  const voteSessionInfo = getVotingSessionKey()
+export const removeAuthority = async (userWallet: PublicKey, authorityToRemove: PublicKey, programId = PROGRAM_ID) => {
+  const voteSessionInfo = getVotingSessionKey(programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
-    createRemoveAuthorityInstruction({
-      initialiser: userWallet,
-      voteSessionInfo,
-      authorityToRemove
-    })
+    createRemoveAuthorityInstruction(
+      {
+        initialiser: userWallet,
+        voteSessionInfo,
+        authorityToRemove
+      },
+      programId
+    )
   )
 
   return new Transaction().add(...instructions)
 }
 
-export const addCollection = async (userWallet: PublicKey, collectionNft: PublicKey) => {
-  const voteSessionInfo = getVotingSessionKey()
-  const projectEmissionsInfo = getProjectEmissionsKey(collectionNft)
+export const addCollection = async (userWallet: PublicKey, collectionNft: PublicKey, programId = VOTING_PID) => {
+  const voteSessionInfo = getVotingSessionKey(programId)
+  const projectEmissionsInfo = getProjectEmissionsKey(collectionNft, programId)
   const collectionNftMetadata = getNftMetadataKey(collectionNft)
   const instructions: TransactionInstruction[] = []
   instructions.push(
-    createAddCollectionInstruction({
-      authority: userWallet,
-      voteSessionInfo,
-      projectEmissionsInfo,
-      collectionNft,
-      collectionNftMetadata
-    })
+    createAddCollectionInstruction(
+      {
+        authority: userWallet,
+        voteSessionInfo,
+        projectEmissionsInfo,
+        collectionNft,
+        collectionNftMetadata
+      },
+      programId
+    )
   )
 
   return new Transaction().add(...instructions)
