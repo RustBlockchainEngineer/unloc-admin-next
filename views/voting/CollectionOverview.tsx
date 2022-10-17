@@ -1,23 +1,25 @@
 import { useSendTransaction } from '@/hooks'
 import { compressAddress } from '@/utils'
-import { initializeVotingSession, reallocSessionAccount } from '@/utils/spl-utils/unloc-voting'
+import { addCollection, removeCollection } from '@/utils/spl-utils/unloc-voting'
 import { useWallet } from '@solana/wallet-adapter-react'
+import { Keypair } from '@solana/web3.js'
 import { observer } from 'mobx-react-lite'
 import toast from 'react-hot-toast'
 
 
-export const VotingInitialize = observer(() => {
+export const CollectionOverview = observer(() => {
   const { publicKey: wallet } = useWallet()
   const sendAndConfirm = useSendTransaction()
   
-  // Need to call only 1 time at starting
-  const onInitialize = async () => {
+  const onAdd = async () => {
     if (!wallet) {
       toast.error('Connect your wallet')
       return
     }
+    //params - frontend binding part
+    const collectionNFT = Keypair.generate().publicKey;
 
-    const tx = await initializeVotingSession(wallet);
+    const tx = await addCollection(wallet, collectionNFT);
 
     toast.promise(sendAndConfirm(tx, 'confirmed', false), {
       loading: 'Confirming...',
@@ -31,14 +33,17 @@ export const VotingInitialize = observer(() => {
     })
   }
 
-  // Need to call when total_projects_count % 100 == 0
-  const onUpgrade = async () => {
+  const onRemove = async () => {
     if (!wallet) {
       toast.error('Connect your wallet')
       return
     }
 
-    const tx = await reallocSessionAccount(wallet);
+    //params - frontend binding part
+    const collectionNFT = Keypair.generate().publicKey;
+    const projectId = 0; // this can get from VotingSessionInfo.projects.projects array
+
+    const tx = await removeCollection(wallet, collectionNFT, projectId);
 
     toast.promise(sendAndConfirm(tx, 'confirmed', false), {
       loading: 'Confirming...',
@@ -56,17 +61,17 @@ export const VotingInitialize = observer(() => {
     <main className='flex w-full flex-col gap-x-12 gap-y-4 text-white lg:flex-row'>
       <button
         type='button'
-        onClick={onInitialize}
+        onClick={onAdd}
         className='inline-flex items-center rounded-full bg-pink-600 px-5 py-1 text-sm tracking-wide hover:bg-pink-700'
       >
-        Intialize Voting Session
+        Add Collection
       </button>
       <button
         type='button'
-        onClick={onUpgrade}
+        onClick={onRemove}
         className='inline-flex items-center rounded-full bg-pink-600 px-5 py-1 text-sm tracking-wide hover:bg-pink-700'
       >
-        Upgrade Voting Session
+        Remove Collection
       </button>
     </main>
   )

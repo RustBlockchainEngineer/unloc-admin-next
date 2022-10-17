@@ -260,6 +260,12 @@ export const setEmissions = async (
   return new Transaction().add(...instructions);
 };
 
+// Need to call for every collection_nft stored in voting_session_info.projects
+// Can be called by anyone/crank. Need to call once voting is over and set_emissions is executed
+// VotingSessionInfo.emissions.allocations_updated_count == VotingSessionInfo.projects.total_projects will be true if we are done with all allocations
+// ProjectEmmisionsInfo.last_updated_at > total_emissions_updated_at will be true for a collection whose data is already updatd using allocate_liq_min_rwds
+
+// I think it's enough by calling often in the backend
 export const allocateLiqMinRwds = async (
   payer: PublicKey,
   projectId: number,
