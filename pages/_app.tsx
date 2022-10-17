@@ -46,15 +46,6 @@ const wrappedClusterApiUrl = (network: NetworkName, tls?: boolean): string => {
   return clusterApiUrl(WalletAdapterNetwork[network], tls)
 }
 
-const uiNetworkToWalletAdapter = (network: NetworkName) => {
-  if (network === 'Mainnet' || network === 'Devnet') {
-    return WalletAdapterNetwork[network]
-  } else {
-    // If Localnet, fallback to Devnet
-    return WalletAdapterNetwork.Devnet
-  }
-}
-
 const App = ({ Component, pageProps }: AppProps): ReactNode => {
   const [isAdmin, setIsAdmin] = useState(false)
   const [uiNetwork, setUiNetwork] = useState<NetworkName>('Devnet')
@@ -72,8 +63,7 @@ const App = ({ Component, pageProps }: AppProps): ReactNode => {
   )
 
   const onError = useCallback(
-    (error: any) =>
-      toast.error(error.message ? `${error.name}: ${error.message}` : `${error.name}`),
+    (error: any) => toast.error(error.message ? `${error.name}: ${error.message}` : `${error.name}`),
     []
   )
 

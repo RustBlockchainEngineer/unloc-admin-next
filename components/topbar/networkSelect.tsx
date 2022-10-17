@@ -1,4 +1,3 @@
-import { memo, useEffect } from 'react'
 import { NetworkName } from '../../pages/_app'
 import { Select } from '../common/Select'
 
