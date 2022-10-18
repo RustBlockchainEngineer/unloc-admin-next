@@ -364,13 +364,14 @@ export const VotingDashboard = () => {
 
           <div className='grid min-h-max w-full divide-x-2 divide-gray-700 overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
             <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Voting Session</h3>
+            <div className='grid'></div>
           </div>
 
           <div className='grid min-h-max w-full divide-x-2 divide-gray-700 overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
             <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Emissions</h3>
 
-            <div className='grid divide-y divide-gray-600 sm:grid-cols-2 sm:divide-x sm:divide-y-0'>
-              <div className='py-4 px-6'>
+            <div className='grid divide-y-2 divide-gray-600 md:grid-cols-2 md:divide-x-2 md:divide-y-0'>
+              <div className='py-6 px-6 md:py-4'>
                 <h3 className='mb-6 text-lg font-medium'>Current emission config</h3>
                 <div>
                   <dl className='flex flex-wrap gap-2'>
@@ -414,9 +415,9 @@ export const VotingDashboard = () => {
                 </div>
               </div>
 
-              <div className='mx-auto w-full max-w-2xl py-8 px-6 pt-4'>
+              <div className='mx-auto w-full max-w-2xl py-8 px-6 md:pt-4'>
                 <form onSubmit={handleSubmit(onSetEmission)} className='w-full space-y-6'>
-                  <h3 className='text-lg '>Set a new emission configuration</h3>
+                  <h3 className='text-lg font-semibold'>Set a new emission configuration</h3>
                   <div className='w-full'>
                     <label className='block text-sm font-medium text-gray-300'>Fund emissions (UNLOC)</label>
                     <div className='relative mt-1 rounded-md shadow-sm'>
