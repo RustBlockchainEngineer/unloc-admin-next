@@ -1,3 +1,5 @@
 export { VotingInitialize } from './Initialize'
 export { VotingDashboard } from './Dashboard'
 export { VotingSessionForm } from './VotingSessionForm'
+export { EmissionConfigInfo } from './EmissionConfigInfo'
+export { EmissionConfigForm } from './EmissionConfigForm'

@@ -4,13 +4,12 @@ import {
   addAuthority,
   getVotingSessionKey,
   reallocSessionAccount,
-  removeAuthority,
-  setEmissions
+  removeAuthority
 } from '@/utils/spl-utils/unloc-voting'
 import { PublicKey } from '@solana/web3.js'
 import { VotingSessionInfo } from '@unloc-dev/unloc-sdk-voting'
 import { compressAddress } from '@/utils'
-import { ChevronDoubleRightIcon, WalletIcon } from '@heroicons/react/20/solid'
+import { ChevronDoubleRightIcon } from '@heroicons/react/20/solid'
 import { PlusCircleIcon } from '@heroicons/react/24/outline'
 import { Copyable } from '@/components/common'
 import { useWallet } from '@solana/wallet-adapter-react'
@@ -21,7 +20,6 @@ import { useStore } from '@/stores'
 import { RecentCollection } from './RecentCollection'
 import { ManageCollections } from './ManageCollections'
 import { numVal, val } from '@/utils/spl-utils'
-import { useForm } from 'react-hook-form'
 import BN from 'bn.js'
 import dayjs from 'dayjs'
 import { VotingSessionForm } from './VotingSessionForm'
