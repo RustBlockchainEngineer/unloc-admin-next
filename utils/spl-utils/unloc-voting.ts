@@ -164,9 +164,14 @@ export const addCollection = async (userWallet: PublicKey, collectionNft: Public
   return new Transaction().add(...instructions)
 }
 
-export const removeCollection = async (userWallet: PublicKey, collectionNft: PublicKey, projectId: number) => {
-  const voteSessionInfo = getVotingSessionKey()
-  const projectEmissionsInfo = getProjectEmissionsKey(collectionNft)
+export const removeCollection = async (
+  userWallet: PublicKey,
+  collectionNft: PublicKey,
+  projectId: number,
+  programId = VOTING_PID
+) => {
+  const voteSessionInfo = getVotingSessionKey(programId)
+  const projectEmissionsInfo = getProjectEmissionsKey(collectionNft, programId)
   const collectionNftMetadata = getNftMetadataKey(collectionNft)
   const instructions: TransactionInstruction[] = []
   instructions.push(
@@ -180,7 +185,8 @@ export const removeCollection = async (userWallet: PublicKey, collectionNft: Pub
       },
       {
         projectId
-      }
+      },
+      programId
     )
   )
 

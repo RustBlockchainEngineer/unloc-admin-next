@@ -21,7 +21,7 @@ export const RecentCollection = ({ projectData }: { projectData: ProjectData }) 
   const loadingJson = !json && !error
 
   return (
-    <li className='py-4'>
+    <li className='py-3'>
       <div className='flex items-center space-x-4'>
         <div className='flex-shrink-0'>
           {loadingJson && <div className='h-8 w-8 animate-pulse rounded-full bg-slate-600'></div>}
