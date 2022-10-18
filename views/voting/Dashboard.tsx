@@ -16,8 +16,9 @@ import { Copyable } from '@/components/common'
 import { useWallet } from '@solana/wallet-adapter-react'
 import toast from 'react-hot-toast'
 import { Disclosure } from '@headlessui/react'
-import { FormEventHandler } from 'react'
+import { FormEventHandler, Fragment } from 'react'
 import { useStore } from '@/stores'
+import { RecentCollection } from './RecentCollection'
 
 export const VotingDashboard = () => {
   const { programs } = useStore()
@@ -104,9 +105,9 @@ export const VotingDashboard = () => {
       return
     }
     //params - frontend binding part
-    const collectionNFT = PublicKey.default
+    const collectionNFT = new PublicKey('MuNctnhwHR9JZFrZCmwkLYzjgmuojUyQ3SQdapy41km')
 
-    const tx = await addCollection(wallet, collectionNFT)
+    const tx = await addCollection(wallet, collectionNFT, programs.votePubkey)
 
     toast.promise(sendAndConfirm(tx, 'confirmed', false), {
       loading: 'Confirming...',
@@ -121,6 +122,7 @@ export const VotingDashboard = () => {
   }
 
   const reallocPercent = ((info?.projects.totalProjects / info?.projects.currentMaxProjectsPossible) * 100).toFixed(0)
+  const lastFiveAddedCollections = info.projects.projects.slice(-5).reverse()
 
   return (
     <div className='mx-auto'>
@@ -250,12 +252,36 @@ export const VotingDashboard = () => {
               </Disclosure>
             </div>
           </div>
-          <div className='col-span-1'>
+          <div className='flex flex-col h-full'>
             <div className='flex justify-between bg-indigo-900 py-3 px-4'>
               <h3 className='text-xl'>Approved collections</h3>
             </div>
             <div className='px-3 py-4'>
               <p className='text-sm text-gray-400'>Recently added collections:</p>
+              <div className='mt-6 flow-root'>
+                <ul role='list' className='-my-5 px-3'>
+                  {lastFiveAddedCollections.map((project) => (
+                    <Fragment key={project.collectionNft.toBase58()}>
+                      <RecentCollection projectData={project} />
+                    </Fragment>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className='mt-auto flex items-center justify-end gap-x-2 px-3 py-4'>
+              <button
+                type='button'
+                onClick={onAdd}
+                className='inline-flex items-center truncate rounded-md bg-pink-600 px-3 py-1.5 hover:bg-pink-700'
+              >
+                Add to collection
+              </button>
+              <button
+                type='button'
+                className='inline-flex items-center truncate rounded-md bg-pink-600 px-3 py-1.5 hover:bg-pink-700'
+              >
+                Manage collections
+              </button>
             </div>
           </div>
           <div>
@@ -279,12 +305,12 @@ export const VotingDashboard = () => {
               <small className='leading-tight text-gray-400'>
                 The account should be reallocated for every 100 approved collections added.
               </small>
-              <div className='relative mx-2 mt-1 h-8 w-[95%] rounded-full bg-gray-700'>
+              <div className='relative mx-2 mt-1 h-8 w-[95%] overflow-hidden rounded-full bg-gray-700'>
                 <div
-                  className='inline-flex h-8 items-center justify-end rounded-full bg-blue-600 text-sm'
+                  className='inline-flex h-8 items-center justify-end rounded-full bg-blue-600'
                   style={{ width: `${reallocPercent}%` }}
                 >
-                  <span className='absolute left-1/2 -translate-x-1/2'>
+                  <span className='absolute left-1/2 -translate-x-1/2 text-sm'>
                     {info.projects.totalProjects}/{info.projects.currentMaxProjectsPossible}
                   </span>
                 </div>
