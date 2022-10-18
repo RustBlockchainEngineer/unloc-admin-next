@@ -11,6 +11,7 @@ import { PublicKey } from '@solana/web3.js'
 import { VotingSessionInfo } from '@unloc-dev/unloc-sdk-voting'
 import { compressAddress } from '@/utils'
 import { ChevronDoubleRightIcon, WalletIcon } from '@heroicons/react/20/solid'
+import { PlusCircleIcon } from '@heroicons/react/24/outline'
 import { Copyable } from '@/components/common'
 import { useWallet } from '@solana/wallet-adapter-react'
 import toast from 'react-hot-toast'
@@ -19,19 +20,13 @@ import { FormEventHandler, Fragment, useState } from 'react'
 import { useStore } from '@/stores'
 import { RecentCollection } from './RecentCollection'
 import { ManageCollections } from './ManageCollections'
-import { amountToUiAmount, numVal, val } from '@/utils/spl-utils'
+import { numVal, val } from '@/utils/spl-utils'
 import { useForm } from 'react-hook-form'
 import BN from 'bn.js'
 import dayjs from 'dayjs'
-import UnlocToken from '../../public/unloc_token.png'
-import Image from 'next/image'
-
-type EmissionsFormData = {
-  amount: number
-  lenderPercentage: number
-  startTimestamp: number
-  endTimestamp: number
-}
+import { VotingSessionForm } from './VotingSessionForm'
+import { EmissionConfigInfo } from './EmissionConfigInfo'
+import { EmissionConfigForm } from './EmissionConfigForm'
 
 export const VotingDashboard = () => {
   const { programs } = useStore()
@@ -40,13 +35,6 @@ export const VotingDashboard = () => {
   const votingSessionKey = getVotingSessionKey(programs.votePubkey)
   const { loading, info } = useAccount(votingSessionKey, (_, data) => VotingSessionInfo.fromAccountInfo(data)[0])
   const [open, setOpen] = useState(false)
-
-  const { register, watch, handleSubmit, setValue } = useForm<EmissionsFormData>({
-    defaultValues: {
-      lenderPercentage: 50
-    }
-  })
-  const value = watch('lenderPercentage')
 
   if (loading || !info) {
     return <div>Loading...</div>
@@ -120,42 +108,11 @@ export const VotingDashboard = () => {
     })
   }
 
-  const onSetEmission = async (data: EmissionsFormData) => {
-    if (!wallet) {
-      toast.error('Connect your wallet')
-      return
-    }
-
-    const rewardAmount = new BN(data.amount).mul(new BN(10).pow(new BN(6)))
-    const startTime = data.startTimestamp
-    const endTime = data.endTimestamp
-    const lenderShareBp = data.lenderPercentage * 100
-    const borrowerShareBp = (100 - data.lenderPercentage) * 100
-
-    const tx = await setEmissions(
-      wallet,
-      rewardAmount,
-      startTime,
-      endTime,
-      lenderShareBp,
-      borrowerShareBp,
-      programs.votePubkey
-    )
-
-    toast.promise(sendAndConfirm(tx, 'confirmed', false), {
-      loading: 'Confirming...',
-      error: (e) => (
-        <div>
-          <p>There was an error confirming your transaction</p>
-          <p>{e.message}</p>
-        </div>
-      ),
-      success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
-    })
-  }
-
   const reallocPercent = ((info?.projects.projects.length / info?.projects.currentMaxProjectsPossible) * 100).toFixed(0)
   const lastFiveAddedCollections = info.projects.projects.slice(-5).reverse()
+  const totalTime = val(info.session.endTime).sub(val(info.session.startTime))
+  const elapsedTime = new BN(Date.now() / 1000).sub(val(info.session.startTime))
+  const voteProgress = elapsedTime.divRound(totalTime)
 
   return (
     <>
@@ -362,165 +319,101 @@ export const VotingDashboard = () => {
             <p className='truncate text-sm text-gray-500'>Start voting sessions and set emissions.</p>
           </div>
 
-          <div className='grid min-h-max w-full divide-x-2 divide-gray-700 overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
+          <div className='mb-10 grid min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
             <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Voting Session</h3>
-            <div className='grid'></div>
+            <div className='grid divide-y-2 divide-gray-600 md:grid-cols-2 md:divide-x-2 md:divide-y-0'>
+              <div className='py-6 px-6 md:py-4'>
+                <div className='flex items-center justify-between'>
+                  <h3 className='mb-6 text-lg font-medium'>Latest voting session</h3>
+
+                  {val(info.session.startTime).gt(new BN(Math.round(Date.now() / 1000))) && (
+                    <span className='inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800'>
+                      Not yet started
+                    </span>
+                  )}
+
+                  {val(info.session.endTime).gt(new BN(Math.round(Date.now() / 1000))) && (
+                    <span className='inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800'>
+                      Ongoing
+                    </span>
+                  )}
+
+                  {val(info.session.endTime).lte(new BN(Math.round(Date.now() / 1000))) && (
+                    <span className='inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800'>
+                      Ended
+                    </span>
+                  )}
+                </div>
+                {val(info.session.sessionCount).eqn(0) ? (
+                  <div className='flex justify-center pt-6'>
+                    <button
+                      type='button'
+                      className='group mx-8 flex w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-600 p-8 hover:border-gray-400'
+                    >
+                      <PlusCircleIcon className='mb-2 h-10 w-10 text-gray-500 group-hover:text-gray-400' />
+                      <p className='text-sm font-medium text-gray-200 group-hover:text-gray-100'>
+                        Start a voting session
+                      </p>
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className='mb-4 w-full border-b border-gray-600 pb-4'>
+                      <span className='text-gray-200'>Session</span>
+                      <span className='font-bold text-gray-50'> #{info.session.sessionCount.toString()}</span>
+                    </div>
+                    {/* <div className='my-4'>
+                      <p className='text-sm text-gray-300'>Progress</p>
+                      <div className='relative mx-2 mt-1 h-8 w-full overflow-hidden rounded-full bg-gray-700'>
+                        <div
+                          className='inline-flex h-8 items-center justify-end rounded-full bg-blue-600'
+                          style={{ width: `100%` }}
+                        >
+                          <span className='absolute left-1/2 -translate-x-1/2 text-sm'>
+                            {elapsedTime.toString()}/{totalTime.toString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div> */}
+                    <dl className='flex flex-wrap gap-2'>
+                      <div className='rounded-md border border-gray-500 px-4 py-2'>
+                        <dd className='text-xs text-gray-300'>Start time</dd>
+                        <dt className='mt-1 font-mono text-lg font-semibold leading-tight'>
+                          {dayjs.unix(numVal(info.session.startTime)).format('YYYY-MM-DD HH:mm')}
+                        </dt>
+                      </div>
+                      <div className='rounded-md border border-gray-500 px-4 py-2'>
+                        <dd className='text-xs text-gray-300'>End time</dd>
+                        <dt className='mt-1 font-mono text-lg font-semibold leading-tight'>
+                          {dayjs.unix(numVal(info.session.endTime)).format('YYYY-MM-DD HH:mm')}
+                        </dt>
+                      </div>
+                      <div className='rounded-md border border-gray-500 px-4 py-2'>
+                        <dd className='text-xs text-gray-300'>Started</dd>
+                        <dt className='mt-1 font-mono text-base  leading-tight'>{String(info.session.started)}</dt>
+                      </div>
+                    </dl>
+                  </div>
+                )}
+              </div>
+
+              <div className='py-6 px-6 md:py-4'>
+                <div className='mb-6'>
+                  <h3 className='mb-1 text-lg font-medium'>Start a voting session</h3>
+                  <p className='text-sm text-gray-400'>There can be one voting session at a time.</p>
+                </div>
+                <VotingSessionForm />
+              </div>
+            </div>
           </div>
 
-          <div className='grid min-h-max w-full divide-x-2 divide-gray-700 overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
+          <div className='grid min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
             <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Emissions</h3>
 
             <div className='grid divide-y-2 divide-gray-600 md:grid-cols-2 md:divide-x-2 md:divide-y-0'>
-              <div className='py-6 px-6 md:py-4'>
-                <h3 className='mb-6 text-lg font-medium'>Current emission config</h3>
-                <div>
-                  <dl className='flex flex-wrap gap-2'>
-                    <div className='max-w-fit rounded-md border border-gray-500 px-4 py-3'>
-                      <dd className='text-xs text-gray-300'>Emissions</dd>
-                      <dt className='mt-2 flex items-center text-xl font-semibold'>
-                        <p>{amountToUiAmount(info.emissions.rewards, 6).toLocaleString('en-us')}</p>
-                        <div className='ml-1 mt-2 flex-shrink-0'>
-                          <Image src={UnlocToken} height={24} width={24} alt='' className='rounded-full' />
-                        </div>
-                      </dt>
-                    </div>
-                    <div className='max-w-fit rounded-md border border-gray-500 px-4 py-3'>
-                      <dd className='text-xs text-gray-300'>Reward split</dd>
-                      <dt className='mt-2 grid grid-cols-2 gap-x-2'>
-                        <span className='font-semibold'>{numVal(info.emissions.lenderShareBp) / 100}%</span>
-                        <span className='text-right font-semibold'>
-                          {numVal(info.emissions.borrowerShareBp) / 100}%
-                        </span>
-                        <span className='text-sm font-light'>Lender</span>
-                        <span className='text-right text-sm font-light'>Borrower</span>
-                      </dt>
-                    </div>
-                    <div className='rounded-md border border-gray-500 px-4 py-3'>
-                      <dd className='text-xs text-gray-300'>Start time</dd>
-                      <dt className='mt-2 font-mono text-xl font-semibold'>
-                        {dayjs.unix(numVal(info.emissions.start)).format('YYYY-MM-DD HH:mm:ssZ[Z]')}
-                      </dt>
-                    </div>
-                    <div className='rounded-md border border-gray-500 px-4 py-3'>
-                      <dd className='text-xs text-gray-300'>End time</dd>
-                      <dt className='mt-2 font-mono text-xl font-semibold'>
-                        {dayjs.unix(numVal(info.emissions.end)).format('YYYY-MM-DD HH:mm:ssZ[Z]')}
-                      </dt>
-                    </div>
-                    <div className='max-w-fit rounded-md border border-gray-500 px-4 py-3'>
-                      <dd className='text-xs text-gray-300'>Updated allocations</dd>
-                      <dt className='mt-2 text-xl font-semibold'>{info.emissions.allocationsUpdatedCount}</dt>
-                    </div>
-                  </dl>
-                </div>
-              </div>
+              <EmissionConfigInfo info={info} />
 
-              <div className='mx-auto w-full max-w-2xl py-8 px-6 md:pt-4'>
-                <form onSubmit={handleSubmit(onSetEmission)} className='w-full space-y-6'>
-                  <h3 className='text-lg font-semibold'>Set a new emission configuration</h3>
-                  <div className='w-full'>
-                    <label className='block text-sm font-medium text-gray-300'>Fund emissions (UNLOC)</label>
-                    <div className='relative mt-1 rounded-md shadow-sm'>
-                      <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
-                        <WalletIcon className='h-5 w-5 text-gray-400' aria-hidden='true' />
-                      </div>
-                      <input
-                        {...register('amount', { required: true })}
-                        className='w-full rounded-md py-1.5 pl-10 text-gray-900'
-                        type='number'
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor='lender_borrower_slider' className='mb-2 block text-sm text-gray-300'>
-                      {'Reward ratio'}
-                    </label>
-                    <div className='rounded-md border border-gray-500 px-2 py-5'>
-                      <input
-                        id='lender_borrower_slider'
-                        {...register('lenderPercentage', { required: true })}
-                        defaultValue='50'
-                        className='w-full '
-                        type='range'
-                        min='1'
-                        max='100'
-                      />
-                      <div className='flex justify-between font-mono text-sm tracking-tighter text-gray-300'>
-                        <span>Lender: {value}%</span>
-                        <span>Borrower: {100 - value}%</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className='mb-1 flex justify-between'>
-                      <label htmlFor='start_timestamp' className='block text-sm font-medium text-gray-300'>
-                        Start time
-                      </label>
-                      <button
-                        type='button'
-                        onClick={() =>
-                          setValue('startTimestamp', Math.round((Date.now() + 60 * 1000) / 1000), {
-                            shouldDirty: true,
-                            shouldValidate: true
-                          })
-                        }
-                        className='inline-flex rounded-sm border border-gray-600 bg-transparent px-2 py-0.5 text-sm text-gray-50'
-                      >
-                        Now + 1 min
-                      </button>
-                    </div>
-                    <input
-                      id='start_timestamp'
-                      type='text'
-                      {...register('startTimestamp', { required: true })}
-                      step='1'
-                      className='w-full rounded-md py-1.5 px-3 font-mono text-gray-900 placeholder:text-sm placeholder:text-gray-400'
-                      placeholder='Enter timestamp (seconds)'
-                    />
-                  </div>
-                  <div>
-                    <div className='mb-1 flex justify-between'>
-                      <label htmlFor='end_timestamp' className='mb-1 block text-sm font-medium text-gray-300'>
-                        End time
-                      </label>
-                      <div className='space-x-1'>
-                        <button
-                          type='button'
-                          onClick={() => setValue('endTimestamp', Math.round((Date.now() + 60 * 60 * 1000) / 1000))}
-                          className='inline-flex rounded-sm border border-gray-600 bg-transparent px-2 py-0.5 text-sm text-gray-50'
-                        >
-                          Now + 1 h
-                        </button>
-                        <button
-                          type='button'
-                          onClick={() =>
-                            setValue('endTimestamp', Math.round((Date.now() + 7 * 24 * 60 * 60 * 1000) / 1000))
-                          }
-                          className='inline-flex rounded-sm border border-gray-600 bg-transparent px-2 py-0.5 text-sm text-gray-50'
-                        >
-                          Now + 1 week
-                        </button>
-                      </div>
-                    </div>
-                    <input
-                      id='end_timestamp'
-                      type='number'
-                      {...register('endTimestamp', { required: true })}
-                      step='1'
-                      className='w-full rounded-md py-1.5 px-3 font-mono text-gray-900 placeholder:text-sm placeholder:text-gray-400'
-                      placeholder='Enter timestamp (seconds)'
-                    />
-                  </div>
-                  <div>
-                    <button
-                      type='submit'
-                      className='block w-full rounded-md bg-pink-600 px-1 py-2 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 focus:ring-offset-gray-600'
-                    >
-                      Create configuration
-                    </button>
-                  </div>
-                </form>
-              </div>
+              <EmissionConfigForm />
             </div>
           </div>
         </div>

@@ -193,8 +193,13 @@ export const removeCollection = async (
   return new Transaction().add(...instructions)
 }
 
-export const setVotingSessionTime = async (userWallet: PublicKey, startTime: bignum, endTime: bignum) => {
-  const voteSessionInfo = getVotingSessionKey()
+export const setVotingSessionTime = async (
+  userWallet: PublicKey,
+  startTime: bignum,
+  endTime: bignum,
+  programId = VOTING_PID
+) => {
+  const voteSessionInfo = getVotingSessionKey(programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createSetVotingSessionTimeInstruction(
@@ -205,7 +210,8 @@ export const setVotingSessionTime = async (userWallet: PublicKey, startTime: big
       {
         startTime,
         endTime
-      }
+      },
+      programId
     )
   )
 
