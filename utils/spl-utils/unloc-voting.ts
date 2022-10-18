@@ -218,9 +218,10 @@ export const setEmissions = async (
   startTimestamp: bignum,
   endTimestamp: bignum,
   lenderShareBp: number,
-  borrowerShareBp: number
+  borrowerShareBp: number,
+  programId = VOTING_PID
 ) => {
-  const voteSessionInfo = getVotingSessionKey()
+  const voteSessionInfo = getVotingSessionKey(programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createSetEmissionsInstruction(
@@ -236,7 +237,8 @@ export const setEmissions = async (
           lenderShareBp,
           borrowerShareBp
         }
-      }
+      },
+      programId
     )
   )
 

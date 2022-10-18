@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['arweave.net']
+    domains: ['arweave.net', 's3.eu-central-1.amazonaws.com']
   }
 }
 

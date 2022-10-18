@@ -43,11 +43,11 @@ export const RecentCollection = ({ projectData }: { projectData: ProjectData }) 
         </div>
         <div>
           {projectData.active ? (
-            <span className='inline-flex items-center rounded-full border border-blue-400 bg-blue-400 px-2.5 py-0.5 text-sm font-medium leading-5 text-blue-900 shadow-sm hover:bg-gray-50'>
+            <span className='inline-flex items-center rounded-full border border-blue-400 bg-blue-400 px-2.5 py-0.5 text-sm font-medium leading-5 text-blue-900 shadow-sm'>
               {projectData.active ? 'Active' : 'Not Active'}
             </span>
           ) : (
-            <span className='font inline-flex items-center rounded-full border border-gray-600 bg-white px-2.5 py-0.5 text-sm leading-5 text-blue-900 shadow-sm hover:bg-gray-50'>
+            <span className='font inline-flex items-center rounded-full border border-gray-600 bg-white px-2.5 py-0.5 text-sm leading-5 text-blue-900 shadow-sm'>
               Disabled
             </span>
           )}
