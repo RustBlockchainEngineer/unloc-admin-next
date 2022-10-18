@@ -2,6 +2,7 @@ import { Jdenticon } from '@/components/common/JdentIcon'
 import { useAccount, useSendTransaction } from '@/hooks'
 import {
   addAuthority,
+  allocateLiqMinRwds,
   getVotingSessionKey,
   reallocSessionAccount,
   removeAuthority
@@ -94,7 +95,7 @@ export const VotingDashboard = () => {
     }
     const tx = await removeAuthority(wallet, authority, programs.votePubkey)
 
-    toast.promise(sendAndConfirm(tx, 'confirmed', true), {
+    toast.promise(sendAndConfirm(tx, 'confirmed', false), {
       loading: 'Confirming...',
       error: (e) => (
         <div>
@@ -106,11 +107,50 @@ export const VotingDashboard = () => {
     })
   }
 
+  const onAllocateRewards = async () => {
+    if (!wallet) {
+      toast.error('Connect your wallet')
+      return
+    }
+
+    try {
+      const emissions = info.emissions
+
+      if (emissions.allocationsUpdatedCount === info.projects.totalProjects) {
+        console.log('All is already allocated.')
+      }
+
+      let allocatedCount = 0
+      for (const project of info.projects.projects) {
+        if (project.active && project.allocationUpdatedAt < emissions.udpatedAt) {
+          try {
+            const tx = await allocateLiqMinRwds(wallet, project.id, project.collectionNft, programs.votePubkey)
+
+            toast.promise(sendAndConfirm(tx, 'confirmed', true), {
+              loading: 'Confirming...',
+              error: (e) => (
+                <div>
+                  <p>There was an error confirming your transaction</p>
+                  <p>{e.message}</p>
+                </div>
+              ),
+              success: (e: any) => {
+                allocatedCount++
+                return `Transaction confirmed, count: ${allocatedCount}.`
+              }
+            })
+          } catch (err) {
+            console.log('failed for this collectionNft: ', project.collectionNft.toString())
+          }
+        }
+      }
+    } catch (err) {
+      console.log('allocateLiqMinRwds error: ', err)
+    }
+  }
+
   const reallocPercent = ((info?.projects.projects.length / info?.projects.currentMaxProjectsPossible) * 100).toFixed(0)
   const lastFiveAddedCollections = info.projects.projects.slice(-5).reverse()
-  const totalTime = val(info.session.endTime).sub(val(info.session.startTime))
-  const elapsedTime = new BN(Date.now() / 1000).sub(val(info.session.startTime))
-  const voteProgress = elapsedTime.divRound(totalTime)
 
   return (
     <>
@@ -405,13 +445,27 @@ export const VotingDashboard = () => {
             </div>
           </div>
 
-          <div className='grid min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
+          <div className='mb-10 grid min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
             <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Emissions</h3>
 
             <div className='grid divide-y-2 divide-gray-600 md:grid-cols-2 md:divide-x-2 md:divide-y-0'>
               <EmissionConfigInfo info={info} />
 
               <EmissionConfigForm />
+            </div>
+          </div>
+          <div className='grid min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
+            <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Allocate rewards</h3>
+
+            <div className='flex max-w-md items-center justify-center py-4 px-5'>
+              <p className='m-3'>Start allocating. This will require multiple confirmations.</p>
+              <button
+                className='inline-flex items-center rounded-md bg-pink-600 px-5 py-2 hover:bg-pink-700'
+                type='button'
+                onClick={onAllocateRewards}
+              >
+                Start
+              </button>
             </div>
           </div>
         </div>

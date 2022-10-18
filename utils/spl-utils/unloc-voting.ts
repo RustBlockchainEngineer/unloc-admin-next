@@ -257,9 +257,14 @@ export const setEmissions = async (
 // ProjectEmmisionsInfo.last_updated_at > total_emissions_updated_at will be true for a collection whose data is already updatd using allocate_liq_min_rwds
 
 // I think it's enough by calling often in the backend
-export const allocateLiqMinRwds = async (payer: PublicKey, projectId: number, collectionNft: PublicKey) => {
-  const voteSessionInfo = getVotingSessionKey()
-  const projectEmissionsInfo = getProjectEmissionsKey(collectionNft)
+export const allocateLiqMinRwds = async (
+  payer: PublicKey,
+  projectId: number,
+  collectionNft: PublicKey,
+  programId = VOTING_PID
+) => {
+  const voteSessionInfo = getVotingSessionKey(programId)
+  const projectEmissionsInfo = getProjectEmissionsKey(collectionNft, programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createAllocateLiqMinRwdsInstruction(
@@ -271,7 +276,8 @@ export const allocateLiqMinRwds = async (payer: PublicKey, projectId: number, co
       {
         projectId,
         collectionNft
-      }
+      },
+      programId
     )
   )
 

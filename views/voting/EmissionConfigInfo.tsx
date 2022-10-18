@@ -57,7 +57,7 @@ export const EmissionConfigInfo = ({ info }: { info: VotingSessionInfo }) => {
             </div>
             <div className='max-w-fit rounded-md border border-gray-500 px-4 py-3'>
               <dd className='text-xs text-gray-300'>Updated allocations</dd>
-              <dt className='mt-2 text-xl font-semibold'>{info.emissions.allocationsUpdatedCount}</dt>
+              <dt className='mt-2 text-xl font-semibold'>{info.emissions.allocationsUpdatedCount} / {info.projects.totalProjects}</dt>
             </div>
             <div className='max-w-fit rounded-md border border-gray-500 px-4 py-3'>
               <dd className='text-xs text-gray-300'>Last update</dd>
