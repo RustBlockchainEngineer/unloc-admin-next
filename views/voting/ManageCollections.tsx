@@ -7,16 +7,17 @@ import { val, numVal } from '@/utils/spl-utils'
 import dayjs from 'dayjs'
 import { PublicKey } from '@solana/web3.js'
 import { useAccount, useSendTransaction } from '@/hooks'
-import { useWallet } from '@solana/wallet-adapter-react'
+import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { addCollection, getNftMetadataKey, removeCollection } from '@/utils/spl-utils/unloc-voting'
 import toast from 'react-hot-toast'
 import { useMemo, useState } from 'react'
-import { ChevronDoubleRightIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
+import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useForm } from 'react-hook-form'
 import { isPublicKey } from '@/utils/spl-utils/common'
 import { useStore } from '@/stores'
 import { Metadata } from '@metaplex-foundation/mpl-token-metadata'
 import { Copyable } from '@/components/common'
+import { airdropNfts } from '@/utils/airdrop'
 
 type FormData = {
   collectionMint: string
@@ -25,6 +26,7 @@ type FormData = {
 export const ManageCollections = ({ projectsData }: { projectsData: ProjectData[] }) => {
   const { programs } = useStore()
   const { publicKey: wallet } = useWallet()
+  const {connection} = useConnection()
   const sendAndConfirm = useSendTransaction()
   const [isAdding, setIsAdding] = useState(false)
   const {
@@ -74,6 +76,9 @@ export const ManageCollections = ({ projectsData }: { projectsData: ProjectData[
       success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
     })
   }
+  const addManyCollectionsToTest = () => async () => {
+    airdropNfts(connection, 100);
+  }
 
   return (
     <div className='sm:flex sm:items-start'>
@@ -115,12 +120,20 @@ export const ManageCollections = ({ projectsData }: { projectsData: ProjectData[
               {errors.collectionMint && <p className='text-sm text-red-500'>{errors.collectionMint.message}</p>}
             </form>
           ) : (
-            <button
-              onClick={() => setIsAdding(true)}
-              className='inline-flex items-center rounded-md border border-transparent bg-pink-600 px-4 py-2 text-white hover:bg-pink-700'
-            >
-              Add Collection
-            </button>
+            <div>
+              <button
+                onClick={() => setIsAdding(true)}
+                className='inline-flex items-center rounded-md border border-transparent bg-pink-600 px-4 py-2 text-white hover:bg-pink-700'
+              >
+                Add Collection
+              </button>
+              <button
+                onClick={() => addManyCollectionsToTest()}
+                className='inline-flex items-center rounded-md border border-transparent bg-pink-600 px-4 py-2 text-white hover:bg-pink-700'
+              >
+                Add 105 Collections
+              </button>
+            </div>
           )}
         </div>
         <div className='mt-2 sm:flex sm:items-center'>
