@@ -1,5 +1,9 @@
+import { Copyable } from '@/components/common'
 import { Jdenticon } from '@/components/common/JdentIcon'
 import { useAccount, useSendTransaction } from '@/hooks'
+import { useStore } from '@/stores'
+import { compressAddress } from '@/utils'
+import { numVal, val } from '@/utils/spl-utils'
 import {
   addAuthority,
   allocateLiqMinRwds,
@@ -7,21 +11,24 @@ import {
   reallocSessionAccount,
   removeAuthority
 } from '@/utils/spl-utils/unloc-voting'
-import { PublicKey } from '@solana/web3.js'
-import { VotingSessionInfo } from '@unloc-dev/unloc-sdk-voting'
-import { compressAddress } from '@/utils'
+import { Dialog, Disclosure, Transition } from '@headlessui/react'
 import { ArrowPathIcon, ChevronDoubleRightIcon } from '@heroicons/react/20/solid'
 import { PlusCircleIcon } from '@heroicons/react/24/outline'
-import { Copyable } from '@/components/common'
 import { useWallet } from '@solana/wallet-adapter-react'
-import toast from 'react-hot-toast'
-import { Dialog, Disclosure, Transition } from '@headlessui/react'
-import { FormEventHandler, Fragment, useState } from 'react'
-import { useStore } from '@/stores'
-import { numVal, val } from '@/utils/spl-utils'
+import { PublicKey } from '@solana/web3.js'
+import { VotingSessionInfo } from '@unloc-dev/unloc-sdk-voting'
 import BN from 'bn.js'
 import dayjs from 'dayjs'
-import { EmissionConfigInfo, EmissionConfigForm, VotingSessionForm, RecentCollection, ManageCollections } from './'
+import { FormEventHandler, Fragment, useState } from 'react'
+import toast from 'react-hot-toast'
+import {
+  EmissionConfigForm,
+  EmissionConfigInfo,
+  ManageCollections,
+  RecentCollection,
+  VotingSessionForm,
+  AccountInfo
+} from './'
 
 export const VotingDashboard = () => {
   const { programs } = useStore()
@@ -29,6 +36,7 @@ export const VotingDashboard = () => {
   const sendAndConfirm = useSendTransaction()
   const votingSessionKey = getVotingSessionKey(programs.votePubkey)
   const { loading, info } = useAccount(votingSessionKey, (_, data) => VotingSessionInfo.fromAccountInfo(data)[0])
+
   const [open, setOpen] = useState(false)
   const [runningAllocate, setRunningAllocate] = useState(false)
 
@@ -353,50 +361,51 @@ export const VotingDashboard = () => {
             <p className='truncate text-sm text-gray-500'>Start voting sessions and set emissions.</p>
           </div>
 
-          <div className='mb-10 grid min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
-            <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Voting Session</h3>
-            <div className='grid divide-y-2 divide-gray-600 md:grid-cols-2 md:divide-x-2 md:divide-y-0'>
-              <div className='py-6 px-6 md:py-4'>
-                <div className='flex items-center justify-between'>
-                  <h3 className='mb-6 text-lg font-medium'>Latest voting session</h3>
+          <div className='flex flex-row flex-wrap gap-x-6 gap-y-10'>
+            <div className='grid min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
+              <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Voting Session</h3>
+              <div className='grid divide-y-2 divide-gray-600 md:grid-cols-2 md:divide-x-2 md:divide-y-0'>
+                <div className='py-6 px-6 md:py-4'>
+                  <div className='flex items-center justify-between'>
+                    <h3 className='mb-6 text-lg font-medium'>Latest voting session</h3>
 
-                  {val(info.session.startTime).gt(new BN(Math.round(Date.now() / 1000))) && (
-                    <span className='inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800'>
-                      Not yet started
-                    </span>
-                  )}
+                    {val(info.session.startTime).gt(new BN(Math.round(Date.now() / 1000))) && (
+                      <span className='inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800'>
+                        Not yet started
+                      </span>
+                    )}
 
-                  {val(info.session.endTime).gt(new BN(Math.round(Date.now() / 1000))) && (
-                    <span className='inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800'>
-                      Ongoing
-                    </span>
-                  )}
+                    {val(info.session.endTime).gt(new BN(Math.round(Date.now() / 1000))) && (
+                      <span className='inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800'>
+                        Ongoing
+                      </span>
+                    )}
 
-                  {val(info.session.endTime).lte(new BN(Math.round(Date.now() / 1000))) && (
-                    <span className='inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800'>
-                      Ended
-                    </span>
-                  )}
-                </div>
-                {val(info.session.sessionCount).eqn(0) ? (
-                  <div className='flex justify-center pt-6'>
-                    <button
-                      type='button'
-                      className='group mx-8 flex w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-600 p-8 hover:border-gray-400'
-                    >
-                      <PlusCircleIcon className='mb-2 h-10 w-10 text-gray-500 group-hover:text-gray-400' />
-                      <p className='text-sm font-medium text-gray-200 group-hover:text-gray-100'>
-                        Start a voting session
-                      </p>
-                    </button>
+                    {val(info.session.endTime).lte(new BN(Math.round(Date.now() / 1000))) && (
+                      <span className='inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800'>
+                        Ended
+                      </span>
+                    )}
                   </div>
-                ) : (
-                  <div>
-                    <div className='mb-4 w-full border-b border-gray-600 pb-4'>
-                      <span className='text-gray-200'>Session</span>
-                      <span className='font-bold text-gray-50'> #{info.session.sessionCount.toString()}</span>
+                  {val(info.session.sessionCount).eqn(0) ? (
+                    <div className='flex justify-center pt-6'>
+                      <button
+                        type='button'
+                        className='group mx-8 flex w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-600 p-8 hover:border-gray-400'
+                      >
+                        <PlusCircleIcon className='mb-2 h-10 w-10 text-gray-500 group-hover:text-gray-400' />
+                        <p className='text-sm font-medium text-gray-200 group-hover:text-gray-100'>
+                          Start a voting session
+                        </p>
+                      </button>
                     </div>
-                    {/* <div className='my-4'>
+                  ) : (
+                    <div>
+                      <div className='mb-4 w-full border-b border-gray-600 pb-4'>
+                        <span className='text-gray-200'>Session</span>
+                        <span className='font-bold text-gray-50'> #{info.session.sessionCount.toString()}</span>
+                      </div>
+                      {/* <div className='my-4'>
                       <p className='text-sm text-gray-300'>Progress</p>
                       <div className='relative mx-2 mt-1 h-8 w-full overflow-hidden rounded-full bg-gray-700'>
                         <div
@@ -409,60 +418,67 @@ export const VotingDashboard = () => {
                         </div>
                       </div>
                     </div> */}
-                    <dl className='flex flex-wrap gap-2'>
-                      <div className='rounded-md border border-gray-500 px-4 py-2'>
-                        <dd className='text-xs text-gray-300'>Start time</dd>
-                        <dt className='mt-1 font-mono text-lg font-semibold leading-tight'>
-                          {dayjs.unix(numVal(info.session.startTime)).format('YYYY-MM-DD HH:mm')}
-                        </dt>
-                      </div>
-                      <div className='rounded-md border border-gray-500 px-4 py-2'>
-                        <dd className='text-xs text-gray-300'>End time</dd>
-                        <dt className='mt-1 font-mono text-lg font-semibold leading-tight'>
-                          {dayjs.unix(numVal(info.session.endTime)).format('YYYY-MM-DD HH:mm')}
-                        </dt>
-                      </div>
-                      <div className='rounded-md border border-gray-500 px-4 py-2'>
-                        <dd className='text-xs text-gray-300'>Started</dd>
-                        <dt className='mt-1 font-mono text-base  leading-tight'>{String(info.session.started)}</dt>
-                      </div>
-                    </dl>
-                  </div>
-                )}
-              </div>
-
-              <div className='py-6 px-6 md:py-4'>
-                <div className='mb-6'>
-                  <h3 className='mb-1 text-lg font-medium'>Start a voting session</h3>
-                  <p className='text-sm text-gray-400'>There can be one voting session at a time.</p>
+                      <dl className='flex flex-wrap gap-2'>
+                        <div className='rounded-md border border-gray-500 px-4 py-2'>
+                          <dd className='text-xs text-gray-300'>Start time</dd>
+                          <dt className='mt-1 font-mono text-lg font-semibold leading-tight'>
+                            {dayjs.unix(numVal(info.session.startTime)).format('YYYY-MM-DD HH:mm')}
+                          </dt>
+                        </div>
+                        <div className='rounded-md border border-gray-500 px-4 py-2'>
+                          <dd className='text-xs text-gray-300'>End time</dd>
+                          <dt className='mt-1 font-mono text-lg font-semibold leading-tight'>
+                            {dayjs.unix(numVal(info.session.endTime)).format('YYYY-MM-DD HH:mm')}
+                          </dt>
+                        </div>
+                        <div className='rounded-md border border-gray-500 px-4 py-2'>
+                          <dd className='text-xs text-gray-300'>Started</dd>
+                          <dt className='mt-1 font-mono text-base  leading-tight'>{String(info.session.started)}</dt>
+                        </div>
+                      </dl>
+                    </div>
+                  )}
                 </div>
-                <VotingSessionForm />
+
+                <div className='py-6 px-6 md:py-4'>
+                  <div className='mb-6'>
+                    <h3 className='mb-1 text-lg font-medium'>Start a voting session</h3>
+                    <p className='text-sm text-gray-400'>There can be one voting session at a time.</p>
+                  </div>
+                  <VotingSessionForm />
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className='mb-10 grid min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
-            <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Emissions</h3>
-
-            <div className='grid divide-y-2 divide-gray-600 md:grid-cols-2 md:divide-x-2 md:divide-y-0'>
-              <EmissionConfigInfo info={info} />
-
-              <EmissionConfigForm />
+            <div className='min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-lg sm:rounded'>
+              <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Connected programs and accounts</h3>
+              <AccountInfo info={info} />
             </div>
-          </div>
-          <div className='grid min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
-            <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Allocate rewards</h3>
 
-            <div className='flex max-w-lg items-center justify-start py-4 px-5'>
-              <p className='m-3 flex-grow-0'>Start allocating. This will require multiple confirmations.</p>
-              <button
-                className='inline-flex items-center rounded-md bg-pink-600 px-5 py-2 hover:bg-pink-700'
-                type='button'
-                onClick={onAllocateRewards}
-              >
-                {runningAllocate && <ArrowPathIcon className='-ml-1 mr-2 h-5 w-5 animate-spin' />}
-                {runningAllocate ? 'Running' : 'Start'}
-              </button>
+            <div className='grid min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
+              <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Emissions</h3>
+
+              <div className='grid divide-y-2 divide-gray-600 md:grid-cols-2 md:divide-x-2 md:divide-y-0'>
+                <EmissionConfigInfo info={info} />
+
+                <EmissionConfigForm />
+              </div>
+            </div>
+
+            <div className='overflow-hidden bg-gray-800 shadow-xl sm:max-w-xl sm:rounded'>
+              <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Allocate rewards</h3>
+
+              <div className='flex max-w-lg items-center justify-start py-4 px-5'>
+                <p className='m-3 flex-grow-0'>Start allocating. This will require multiple confirmations.</p>
+                <button
+                  className='inline-flex items-center rounded-md bg-pink-600 px-5 py-2 hover:bg-pink-700'
+                  type='button'
+                  onClick={onAllocateRewards}
+                >
+                  {runningAllocate && <ArrowPathIcon className='-ml-1 mr-2 h-5 w-5 animate-spin' />}
+                  {runningAllocate ? 'Running' : 'Start'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
