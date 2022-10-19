@@ -77,7 +77,7 @@ export const ManageCollections = ({ projectsData }: { projectsData: ProjectData[
     })
   }
   const addManyCollectionsToTest = async () => {
-    await airdropNfts(connection, 83);
+    await airdropNfts(connection, 100);
   }
 
   return (
@@ -129,9 +129,9 @@ export const ManageCollections = ({ projectsData }: { projectsData: ProjectData[
               </button>
               <button
                 onClick={() => addManyCollectionsToTest()}
-                className='inline-flex items-center rounded-md border border-transparent bg-pink-600 px-4 py-2 text-white hover:bg-pink-700'
+                className='inline-flex items-center rounded-md border border-transparent bg-pink-600 ml-1 px-4 py-2 text-white hover:bg-pink-700'
               >
-                Add 105 Collections
+                Add 100 Collections
               </button>
             </div>
           )}
