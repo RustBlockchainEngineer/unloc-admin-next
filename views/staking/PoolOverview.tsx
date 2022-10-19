@@ -3,9 +3,14 @@ import { PublicKey } from '@solana/web3.js'
 import tokenLogo from '/public/unloc_token.png'
 import Image from 'next/image'
 import { AddressActions } from '@/components/common/AddressActions'
-import { amountToUiAmount, numVal } from '@/utils/spl-utils'
+import { amountToUiAmount, numVal, val } from '@/utils/spl-utils'
 import { InformationIcon } from '@/components/common'
-import { PoolInfo, createFundRewardsVaultInstruction, CompoundingFrequency } from '@unloc-dev/unloc-sdk-staking'
+import {
+  PoolInfo,
+  createFundRewardsVaultInstruction,
+  CompoundingFrequency,
+  NumDenPair
+} from '@unloc-dev/unloc-sdk-staking'
 import { InformationCircleIcon } from '@heroicons/react/20/solid'
 import clsx from 'clsx'
 import { Disclosure } from '@headlessui/react'
@@ -49,6 +54,44 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
   const { info: rewardVaultInfo } = useTokenAccount(poolInfo.rewardsVault)
   const { info: stakingVaultInfo } = useTokenAccount(poolInfo.stakingVault)
   const { info: penaltyVaultInfo } = useTokenAccount(poolInfo.penalityDepositVault)
+
+  const interestRates = [
+    {
+      label: 'Flexi (0)',
+      rate: numDenPairToDecimal(poolInfo.interestRateFraction.flexi),
+      scoreMulti: numDenPairToDecimal(poolInfo.scoreMultiplier.flexi)
+    },
+    {
+      label: 'Liq min (2)',
+      rate: numDenPairToDecimal(poolInfo.interestRateFraction.liqMin),
+      scoreMulti: numDenPairToDecimal(poolInfo.scoreMultiplier.liqMin)
+    },
+    {
+      label: '1-0 months',
+      rate: numDenPairToDecimal(poolInfo.interestRateFraction.rldm10),
+      scoreMulti: numDenPairToDecimal(poolInfo.scoreMultiplier.rldm10)
+    },
+    {
+      label: '3-1 months',
+      rate: numDenPairToDecimal(poolInfo.interestRateFraction.rldm31),
+      scoreMulti: numDenPairToDecimal(poolInfo.scoreMultiplier.rldm31)
+    },
+    {
+      label: '6-3 months',
+      rate: numDenPairToDecimal(poolInfo.interestRateFraction.rldm63),
+      scoreMulti: numDenPairToDecimal(poolInfo.scoreMultiplier.rldm63)
+    },
+    {
+      label: '12-6 months',
+      rate: numDenPairToDecimal(poolInfo.interestRateFraction.rldm126),
+      scoreMulti: numDenPairToDecimal(poolInfo.scoreMultiplier.rldm126)
+    },
+    {
+      label: '24-12 months',
+      rate: numDenPairToDecimal(poolInfo.interestRateFraction.rldm2412),
+      scoreMulti: numDenPairToDecimal(poolInfo.scoreMultiplier.rldm2412)
+    }
+  ]
 
   return (
     <div className='relative flex min-h-full flex-col justify-center'>
@@ -295,6 +338,131 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
           </div>
         </li> */}
       </ul>
+
+      <div className='mt-10 flex flex-row flex-wrap gap-x-6 gap-y-10'>
+        <div className='grid min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
+          <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Rates and multipliers overview</h3>
+
+          <div className='my-4 flex w-full flex-col px-5'>
+            <div className='-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8'>
+              <div className='inline-block min-w-full py-2 align-middle md:px-6 lg:px-8'>
+                <div className='overflow-hidden overflow-y-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg'>
+                  <table className=' divide-y divide-gray-300'>
+                    <thead className='bg-slat-800 text-left text-sm font-semibold text-gray-50'>
+                      <tr>
+                        <th scope='col' className='sr-only'>
+                          Rate/Multiplier
+                        </th>
+                        <th scope='col' className='px-3 py-3.5'>
+                          Flexi (0)
+                        </th>
+                        <th scope='col' className='px-3 py-3.5'>
+                          Liq mining (2)
+                        </th>
+                        <th scope='col' className='px-3 py-3.5'>
+                          0-1 months
+                        </th>
+                        <th scope='col' className='px-3 py-3.5'>
+                          1-3 months
+                        </th>
+                        <th scope='col' className='px-3 py-3.5'>
+                          3-6 months
+                        </th>
+                        <th scope='col' className='px-3 py-3.5'>
+                          6-12 months
+                        </th>
+                        <th scope='col' className='px-3 py-3.5'>
+                          12-24 months
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className='divide-y divide-gray-400 bg-slate-200'>
+                      <tr className='divide-x divide-gray-400'>
+                        <td className='border border-slate-800 bg-indigo-900/80 py-4 pl-4 pr-3 text-sm sm:pl-4'>
+                          Interest rate multipliers
+                        </td>
+                        {interestRates.map((rate) => (
+                          <td className='whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-4' key={rate.label}>
+                            <div>
+                              <div className='font-medium text-gray-900'>{rate.rate}</div>
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                      <tr className='divide-x divide-gray-400'>
+                        <td className='border border-slate-800 bg-indigo-900/80 py-4 pl-4 pr-3 text-sm sm:pl-4'>
+                          User score multipliers
+                        </td>
+                        {interestRates.map((rate) => (
+                          <td className='whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-4' key={rate.label}>
+                            <div>
+                              <div className='font-medium text-gray-900'>{rate.scoreMulti}</div>
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className='my-4 flex w-full flex-col px-5'>
+            <div className='-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8'>
+              <div className='inline-block min-w-full py-2 align-middle md:px-6 lg:px-8'>
+                <div className='overflow-hidden overflow-y-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg'>
+                  <table className=' divide-y divide-gray-300'>
+                    <thead className='bg-slat-800 text-left text-sm font-semibold text-gray-50'>
+                      <tr>
+                        {Object.keys(poolInfo.profileLevelMultiplier).map((level) => (
+                          <th key={level} scope='col' className='px-3 py-3.5'>
+                            {level}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className='divide-y divide-gray-400 bg-slate-200'>
+                      <tr className='divide-x divide-gray-400'>
+                        <td className='border border-slate-800 bg-indigo-900/80 py-4 pl-4 pr-3 text-sm sm:pl-4'>
+                          Interest rate multipliers
+                        </td>
+                        {/* {Object.values(poolInfo.profileLevelMultiplier).map((multiplier) => (
+                          <td className='whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-4' key={rate.label}>
+                            <div>
+                              <div className='font-medium text-gray-900'>{rate.rate}</div>
+                            </div>
+                          </td>
+                        ))} */}
+                      </tr>
+                      <tr className='divide-x divide-gray-400'>
+                        <td className='border border-slate-800 bg-indigo-900/80 py-4 pl-4 pr-3 text-sm sm:pl-4'>
+                          User score multipliers
+                        </td>
+                        {interestRates.map((rate) => (
+                          <td className='whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-4' key={rate.label}>
+                            <div>
+                              <div className='font-medium text-gray-900'>{rate.scoreMulti}</div>
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
+}
+
+function numDenPairToDecimal(pair: NumDenPair) {
+  // TODO:
+  const { numerator, denominator } = pair
+  const val = Math.round(numVal(numerator) / numVal(denominator))
+
+  return val
 }
