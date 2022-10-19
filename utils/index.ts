@@ -1,2 +1,2 @@
-export { chunks, durationToSeconds } from './common'
+export { chunks, durationToSeconds, removeNulChars } from './common'
 export { compressAddress } from './compress'

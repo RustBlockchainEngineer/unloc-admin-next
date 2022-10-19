@@ -7,13 +7,13 @@ import clsx from 'clsx'
 import { useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import SyntaxHighlighter from 'react-syntax-highlighter'
-import { AccountSelector } from '../../../components/AccountSelector'
+import { AccountSelector } from '@/components/AccountSelector'
 
 import { useStore } from '@/stores'
-import { accountProviders, PoolInfo } from '@unloc-dev/unloc-sdk-staking'
+import { accountProviders } from '@unloc-dev/unloc-sdk-voting'
 import { observer } from 'mobx-react-lite'
 import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
-import { FilterOption } from './Filter'
+import { FilterOption } from '@/views/staking/debug'
 
 export const DecodingPanelView = observer(() => {
   const { programs } = useStore()
@@ -48,7 +48,7 @@ export const DecodingPanelView = observer(() => {
       } else if (filter.offset && filter.bytes) {
         const discriminator = accountDiscriminator(selectedAccount)
         const query = selectedProvider
-          .gpaBuilder(programs.stakePubkey)
+          .gpaBuilder(programs.votePubkey)
           .addFilter('accountDiscriminator', [...discriminator])
         query.config.filters = [
           {
@@ -62,7 +62,9 @@ export const DecodingPanelView = observer(() => {
         setData(data)
       } else {
         const discriminator = accountDiscriminator(selectedAccount)
-        const query = PoolInfo.gpaBuilder(programs.stakePubkey).addFilter('accountDiscriminator', [...discriminator])
+        const query = selectedProvider
+          .gpaBuilder(programs.votePubkey)
+          .addFilter('accountDiscriminator', [...discriminator])
         const data = (await query.run(connection)).map(({ account }) => selectedProvider.fromAccountInfo(account)[0])
         setData(data)
       }

@@ -1,6 +1,6 @@
 import { accountProviders } from '@unloc-dev/unloc-sdk-staking'
 import { useState } from 'react'
-import { AccountSelector } from './AccountSelector'
+import { AccountSelector } from '../../../components/AccountSelector'
 import { ExtraRewardPdaForm, FarmPoolPdaForm, FarmPoolUserPdaForm, StatePdaForm } from './PdaForms'
 
 const Badge = ({ value }: { value: string }) => {

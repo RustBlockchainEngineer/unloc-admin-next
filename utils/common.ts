@@ -13,3 +13,7 @@ export function durationToSeconds(duration: number, unit: 'days' | 'weeks' | 'mo
 export function secondsToDays(duration: number) {
   return dayjs.duration({ seconds: duration }).asDays()
 }
+
+export function removeNulChars(str: string) {
+  return str.replace(/\0/g, '')
+}
