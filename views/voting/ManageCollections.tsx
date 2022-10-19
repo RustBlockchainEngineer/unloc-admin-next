@@ -76,8 +76,8 @@ export const ManageCollections = ({ projectsData }: { projectsData: ProjectData[
       success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
     })
   }
-  const addManyCollectionsToTest = () => async () => {
-    airdropNfts(connection, 100);
+  const addManyCollectionsToTest = async () => {
+    await airdropNfts(connection, 83);
   }
 
   return (

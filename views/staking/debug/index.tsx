@@ -1,4 +1,4 @@
-export { AccountSelector } from './AccountSelector'
+export { AccountSelector } from '../../../components/AccountSelector'
 export { DecodingPanelView } from './DecodingPanel'
 export { FilterOption } from './Filter'
 export { PdaPanel } from './PdaPanel'

@@ -2,8 +2,10 @@ import * as web3 from "@solana/web3.js";
 import * as splToken from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 import { createCreateMasterEditionV3Instruction, createCreateMetadataAccountV2Instruction, PROGRAM_ADDRESS as MetaplexPid } from "@metaplex-foundation/mpl-token-metadata";
-import { BN, Wallet } from "@project-serum/anchor";
+import { AnchorError, BN, Wallet } from "@project-serum/anchor";
 import { addCollection } from "./spl-utils/unloc-voting";
+import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 
 type SimpleMetadata = {
   name: string;
@@ -146,7 +148,7 @@ export async function airdropNft(
   wallet: Wallet,
   index: number,
 ): Promise<[string, PublicKey]> {
-  const metadata: SimpleMetadata = airdropMetadata[index];
+  const metadata: SimpleMetadata = airdropMetadata[index % 5];
 
   const transaction = new web3.Transaction();
   const masterEditionMint = web3.Keypair.generate();
@@ -234,8 +236,8 @@ export const airdropNfts = async (
   connection: web3.Connection,
   count: number,
 ): Promise<[string, PublicKey][]> => {
-  const payer = web3.Keypair.generate();
-
+  const payer = web3.Keypair.fromSecretKey(bs58.decode("5LCSYZqYGHNzVgBzS99CpBP8471bDPgKXPhDWXk3UFVeteeYoYJ2odKEh5EHAeavcyicbku3eXXJ25Rtz1RTmz1U"));
+  console.log("airdrop: ", "started airdropNfts")
   // airdrop 2 sol
   const {
     value: { blockhash: blockhash1, lastValidBlockHeight:lastValidBlockHeight1 },
@@ -245,12 +247,13 @@ export const airdropNfts = async (
     { blockhash: blockhash1, lastValidBlockHeight:lastValidBlockHeight1, signature: airdropSolTxid },
     "finalized",
   );
-
-  const payerWallet = new Wallet(payer);
+  console.log("airdrop: ", "airdroped 2 SOL")
+  const payerWallet = new NodeWallet(payer);
   const txids: [string, PublicKey][] = [];
   let addedCollectionCount = 0;
   for (let i = 0; i < count; i++) {
     try {
+      console.log("airdrop: ", "trying addCollection ", i);
       const [airdropTxid, mintId] = await airdropNft(connection, payerWallet, i);
       txids.push([airdropTxid, mintId]);
 
@@ -272,7 +275,7 @@ export const airdropNfts = async (
       );
       if(!confimedResult.value.err){
         addedCollectionCount++;
-        console.log("added collections: ", addedCollectionCount);
+        console.log("airdrop: ", "added collections - ", addedCollectionCount);
       }
     } catch (e) {
       console.log(e);

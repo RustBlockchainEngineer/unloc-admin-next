@@ -65,6 +65,7 @@ export const Sidebar = ({ className, network, setNetwork }: SidebarProps) => {
             </NavItem>
             <NavItem label='Voting' mode='list'>
               <NavListItem label='Settings' path='voting' />
+              <NavListItem label='Debug' path='voting/debug' />
             </NavItem>
 
             <NavItem label='Users' mode='list'>
