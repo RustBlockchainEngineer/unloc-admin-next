@@ -1,7 +1,7 @@
 import { Copyable } from '@/components/common'
 import { Jdenticon } from '@/components/common/JdentIcon'
 import { useAccount } from '@/hooks'
-import { compressAddress } from '@/utils'
+import { compressAddress, removeNulChars } from '@/utils'
 import { getNftMetadataKey } from '@/utils/spl-utils/unloc-voting'
 import { ProjectData } from '@unloc-dev/unloc-sdk-voting'
 import { Metadata } from '@metaplex-foundation/mpl-token-metadata'
@@ -34,7 +34,7 @@ export const RecentCollection = ({ projectData }: { projectData: ProjectData }) 
         <div className='min-w-0 flex-1'>
           {loading && <div className='h-5 w-full animate-pulse rounded-full bg-slate-600'></div>}
           {errorLoading && <p className='truncate text-sm text-gray-50'>{collectionKey}</p>}
-          {info && <p className='truncate text-sm text-gray-50'>{info.data.name}</p>}
+          {info && <p className='truncate text-sm text-gray-50'>{removeNulChars(info.data.name)}</p>}
           <div>
             <Copyable content={collectionKey}>
               <p className='truncate font-mono text-sm text-gray-400'>{compressAddress(6, collectionKey)}</p>

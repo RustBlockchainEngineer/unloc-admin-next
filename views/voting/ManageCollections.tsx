@@ -1,6 +1,6 @@
 // Shown inside a dialog
 
-import { compressAddress } from '@/utils'
+import { compressAddress, removeNulChars } from '@/utils'
 import { Dialog } from '@headlessui/react'
 import { ProjectData } from '@unloc-dev/unloc-sdk-voting'
 import { val, numVal } from '@/utils/spl-utils'
@@ -240,5 +240,5 @@ export const CollectionName = ({ collectionKey }: { collectionKey: PublicKey }) 
     return <>{compressAddress(4, collectionKey.toBase58())}</>
   }
 
-  return <>{info.data.name}</>
+  return <>{removeNulChars(info.data.name)}</>
 }
