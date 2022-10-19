@@ -10,7 +10,7 @@ import {
 import { PublicKey } from '@solana/web3.js'
 import { VotingSessionInfo } from '@unloc-dev/unloc-sdk-voting'
 import { compressAddress } from '@/utils'
-import { ChevronDoubleRightIcon } from '@heroicons/react/20/solid'
+import { ArrowPathIcon, ChevronDoubleRightIcon } from '@heroicons/react/20/solid'
 import { PlusCircleIcon } from '@heroicons/react/24/outline'
 import { Copyable } from '@/components/common'
 import { useWallet } from '@solana/wallet-adapter-react'
@@ -18,14 +18,10 @@ import toast from 'react-hot-toast'
 import { Dialog, Disclosure, Transition } from '@headlessui/react'
 import { FormEventHandler, Fragment, useState } from 'react'
 import { useStore } from '@/stores'
-import { RecentCollection } from './RecentCollection'
-import { ManageCollections } from './ManageCollections'
 import { numVal, val } from '@/utils/spl-utils'
 import BN from 'bn.js'
 import dayjs from 'dayjs'
-import { VotingSessionForm } from './VotingSessionForm'
-import { EmissionConfigInfo } from './EmissionConfigInfo'
-import { EmissionConfigForm } from './EmissionConfigForm'
+import { EmissionConfigInfo, EmissionConfigForm, VotingSessionForm, RecentCollection, ManageCollections } from './'
 
 export const VotingDashboard = () => {
   const { programs } = useStore()
@@ -34,6 +30,7 @@ export const VotingDashboard = () => {
   const votingSessionKey = getVotingSessionKey(programs.votePubkey)
   const { loading, info } = useAccount(votingSessionKey, (_, data) => VotingSessionInfo.fromAccountInfo(data)[0])
   const [open, setOpen] = useState(false)
+  const [runningAllocate, setRunningAllocate] = useState(false)
 
   if (loading || !info) {
     return <div>Loading...</div>
@@ -113,6 +110,7 @@ export const VotingDashboard = () => {
       return
     }
 
+    setRunningAllocate(true)
     try {
       const emissions = info.emissions
 
@@ -126,26 +124,24 @@ export const VotingDashboard = () => {
           try {
             const tx = await allocateLiqMinRwds(wallet, project.id, project.collectionNft, programs.votePubkey)
 
-            toast.promise(sendAndConfirm(tx, 'confirmed', true), {
-              loading: 'Confirming...',
-              error: (e) => (
-                <div>
-                  <p>There was an error confirming your transaction</p>
-                  <p>{e.message}</p>
-                </div>
-              ),
-              success: (e: any) => {
-                allocatedCount++
-                return `Transaction confirmed, count: ${allocatedCount}.`
-              }
-            })
+            const result = await sendAndConfirm(tx, 'finalized', false)
+            if (!result.result.value.err) {
+              allocatedCount++
+              toast.success(`Transaction confirmed, count: ${allocatedCount}.`)
+            } else {
+              toast.error(`Failed for this collectionNft: ${project.collectionNft.toString()}`)
+              console.log('Failed for this collectionNft: ', project.collectionNft.toString(), result.result.value.err)
+            }
           } catch (err) {
-            console.log('failed for this collectionNft: ', project.collectionNft.toString())
+            toast.error(`Failed for this collectionNft: ${project.collectionNft.toString()}`)
+            console.log('Failed for this collectionNft: ', project.collectionNft.toString(), err)
           }
         }
       }
     } catch (err) {
       console.log('allocateLiqMinRwds error: ', err)
+    } finally {
+      setRunningAllocate(false)
     }
   }
 
@@ -457,14 +453,15 @@ export const VotingDashboard = () => {
           <div className='grid min-h-max w-full overflow-hidden bg-gray-800 shadow-xl sm:max-w-5xl sm:rounded'>
             <h3 className='bg-indigo-900 py-4 px-5 text-lg font-medium'>Allocate rewards</h3>
 
-            <div className='flex max-w-md items-center justify-center py-4 px-5'>
-              <p className='m-3'>Start allocating. This will require multiple confirmations.</p>
+            <div className='flex max-w-lg items-center justify-start py-4 px-5'>
+              <p className='m-3 flex-grow-0'>Start allocating. This will require multiple confirmations.</p>
               <button
                 className='inline-flex items-center rounded-md bg-pink-600 px-5 py-2 hover:bg-pink-700'
                 type='button'
                 onClick={onAllocateRewards}
               >
-                Start
+                {runningAllocate && <ArrowPathIcon className='-ml-1 mr-2 h-5 w-5 animate-spin' />}
+                {runningAllocate ? 'Running' : 'Start'}
               </button>
             </div>
           </div>
