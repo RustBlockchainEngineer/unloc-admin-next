@@ -41,6 +41,7 @@ type FormValues = {
     minUnlocScore: number | null
     feeReductionBasisPoints: number | null
   }[]
+  unstakePenalityBasisPoints: number | null
 }
 
 export const StakingInitialize = observer(() => {
@@ -118,7 +119,7 @@ export const StakingInitialize = observer(() => {
       {}
     )
 
-    const unstakePenalityBasisPoints = new BN(5000)
+    const unstakePenalityBasisPoints = new BN(data.unstakePenalityBasisPoints ?? 0)
     const tx = await initializeStakingPool(
       wallet!,
       UNLOC_MINT,
@@ -353,6 +354,18 @@ export const StakingInitialize = observer(() => {
               {errors?.authorityWallet && (
                 <p className='mt-2 text-sm text-red-500'>{errors.authorityWallet?.message}</p>
               )}
+              <div className='sm:col-span-1'>
+                <label htmlFor='unstakePenalityBasisPoints' className='text-sm text-gray-50'>
+                </label>
+                  Penality Basis Points
+                <input
+                  type='number'
+                  disabled={true}
+                  id='unstakePenalityBasisPoints'
+                  {...register('unstakePenalityBasisPoints', { min: 0, required: true })}
+                  className='h-8 w-full rounded-md text-gray-900'
+                />
+              </div>
             </div>
             <div>
               <button
@@ -470,7 +483,8 @@ const INITIAL_VALUES: FormValues = {
       minUnlocScore: null,
       feeReductionBasisPoints: null
     }
-  ]
+  ],
+  unstakePenalityBasisPoints: 5000
 }
 
 const DEFAULT_VALUES: FormValues = {
@@ -560,7 +574,8 @@ const DEFAULT_VALUES: FormValues = {
       interestRateMultiplier: 0.8,
       scoreMultiplier: 8
     }
-  ]
+  ],
+  unstakePenalityBasisPoints: 5000
 }
 
 const toNumDenPair = (number: number, exp: number) => {
