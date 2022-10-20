@@ -4,9 +4,9 @@ import { useAccount, useSendTransaction } from '@/hooks'
 import { useStore } from '@/stores'
 import { compressAddress } from '@/utils'
 import { numVal, val } from '@/utils/spl-utils'
+import { allocateLiqMinRwds } from '@/utils/spl-utils/unloc-liq-mining'
 import {
   addAuthority,
-  allocateLiqMinRwds,
   getVotingSessionKey,
   reallocSessionAccount,
   removeAuthority
