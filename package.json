@@ -26,6 +26,7 @@
     "@unloc-dev/unloc-voting-solita": "1.0.1",
     "clsx": "^1.1.1",
     "dayjs": "^1.11.3",
+    "decimal.js": "^10.4.2",
     "eventemitter3": "^4.0.7",
     "final-form": "^4.20.7",
     "humanize-string": "^3.0.0",

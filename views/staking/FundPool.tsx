@@ -3,10 +3,8 @@ import { compressAddress } from '@/utils'
 import { amountToUiAmount, uiAmountToAmount } from '@/utils/spl-utils'
 import { UNLOC_MINT } from '@/utils/spl-utils/unloc-constants'
 import { fundRewardTokens } from '@/utils/spl-utils/unloc-staking'
-import { Disclosure } from '@headlessui/react'
 import { WalletIcon } from '@heroicons/react/20/solid'
 import { getAssociatedTokenAddressSync } from '@solana/spl-token'
-import { WalletNotConnectedError } from '@solana/wallet-adapter-base'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import clsx from 'clsx'
 import { useState, ChangeEvent, useCallback, SyntheticEvent, useRef } from 'react'
@@ -65,11 +63,10 @@ export const FundPool = () => {
   )
 
   return (
-    <div className='w-full'>
-      <h3 className='mt-3 mb-1 px-6'>Fund reward vault</h3>
+    <div className='w-80'>
       <form onSubmit={handleSubmit} className='w-full'>
-        <label className='flex flex-col border-b border-gray-500 px-6 pb-4'>
-          <small className='mx-1 flex items-center self-end text-base'>
+        <label className='flex flex-col border-b border-gray-500 pb-4'>
+          <small className='mx-1 flex items-center self-end text-base text-gray-300'>
             <span title='Wallet balance'>
               <WalletIcon className='mr-2 h-5 w-5 text-slate-400' />
             </span>
@@ -104,16 +101,9 @@ export const FundPool = () => {
           </div>
         </label>
         <div className='flex items-center justify-end gap-x-1 px-3 py-4'>
-          <Disclosure.Button
-            as='button'
-            type='button'
-            className='inline-flex items-center rounded-md border border-transparent bg-pink-100 px-5 py-1 text-sm tracking-wide text-pink-700 hover:bg-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2'
-          >
-            Cancel
-          </Disclosure.Button>
           <button
             type='submit'
-            className='inline-flex items-center rounded-md border border-transparent bg-pink-600 px-5 py-1 text-sm tracking-wide hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2'
+            className='inline-flex items-center rounded-md border border-transparent bg-pink-600 px-5 py-1 text-sm tracking-wide text-white hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2'
           >
             Transfer
           </button>

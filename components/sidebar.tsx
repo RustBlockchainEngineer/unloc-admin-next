@@ -60,6 +60,7 @@ export const Sidebar = ({ className, network, setNetwork }: SidebarProps) => {
 
             <NavItem label='Staking' mode='list'>
               <NavListItem label='Settings' path='staking' />
+              <NavListItem label="Update" path='staking/update' />
               <NavListItem label='Stats' path='staking/stats' />
               <NavListItem label='Debug' path='staking/debug' />
             </NavItem>

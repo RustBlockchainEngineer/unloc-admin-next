@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { update } from 'jdenticon'
-import { useWallet } from '@solana/wallet-adapter-react'
 
 export const Jdenticon = ({ size = '100%', value = 'test-value' }) => {
   const iconRef = useRef<SVGSVGElement>(null)

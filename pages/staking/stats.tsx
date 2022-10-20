@@ -4,10 +4,11 @@ import { PoolInfo } from '@unloc-dev/unloc-sdk-staking'
 import { NextPage } from 'next'
 import { stakePoolParser } from '.'
 import { times } from 'lodash-es'
-import { Info } from '@solana/web3.js'
+import { useStore } from '@/stores'
 
 const Stats: NextPage = () => {
-  const stakePool = getStakingPoolKey()
+  const { programs } = useStore()
+  const stakePool = getStakingPoolKey(programs.stakePubkey)
   const { loading, info } = useAccount<PoolInfo>(stakePool, stakePoolParser, true)
 
   if (loading || !info) {

@@ -27,7 +27,7 @@ export const AccountInfo = ({ info }: { info: VotingSessionInfo }) => {
           </a>
         </div>
         <div className='flex justify-start'>
-          <span className='mr-6 text-gray-300'>Voting program</span>
+          <span className='mr-6 text-gray-300'>Liq mining program</span>
           <Copyable content={info.liqMinProgram.toBase58()}>
             <span className='mr-2 font-mono font-semibold'>{compressAddress(6, info.liqMinProgram.toBase58())}</span>
           </Copyable>
