@@ -1,5 +1,5 @@
 import { bignum } from '@metaplex-foundation/beet'
-import { PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
+import { PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction, TransactionInstruction } from '@solana/web3.js'
 import {
   createAddAuthorityInstruction,
   createAddCollectionInstruction,
@@ -145,7 +145,7 @@ export const removeAuthority = async (userWallet: PublicKey, authorityToRemove: 
 
 export const addCollection = async (userWallet: PublicKey, collectionNft: PublicKey, programId = VOTING_PID) => {
   const voteSessionInfo = getVotingSessionKey(programId)
-  const projectEmissionsInfo = getProjectEmissionsKey(collectionNft, programId)
+  const collectionPoolRewardsInfo = getProjectEmissionsKey(collectionNft, programId)
   const collectionNftMetadata = getNftMetadataKey(collectionNft)
   const instructions: TransactionInstruction[] = []
   instructions.push(
@@ -153,7 +153,7 @@ export const addCollection = async (userWallet: PublicKey, collectionNft: Public
       {
         authority: userWallet,
         voteSessionInfo,
-        projectEmissionsInfo,
+        collectionPoolRewardsInfo,
         collectionNft,
         collectionNftMetadata
       },
@@ -171,7 +171,7 @@ export const removeCollection = async (
   programId = VOTING_PID
 ) => {
   const voteSessionInfo = getVotingSessionKey(programId)
-  const projectEmissionsInfo = getProjectEmissionsKey(collectionNft, programId)
+  const collectionPoolRewardsInfo = getProjectEmissionsKey(collectionNft, programId)
   const collectionNftMetadata = getNftMetadataKey(collectionNft)
   const instructions: TransactionInstruction[] = []
   instructions.push(
@@ -179,7 +179,7 @@ export const removeCollection = async (
       {
         authority: userWallet,
         voteSessionInfo,
-        projectEmissionsInfo,
+        collectionPoolRewardsInfo,
         collectionNft,
         collectionNftMetadata
       },
@@ -264,18 +264,17 @@ export const allocateLiqMinRwds = async (
   programId = VOTING_PID
 ) => {
   const voteSessionInfo = getVotingSessionKey(programId)
-  const projectEmissionsInfo = getProjectEmissionsKey(collectionNft, programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createAllocateLiqMinRwdsInstruction(
       {
         payer,
         voteSessionInfo,
-        projectEmissionsInfo
+        collectionNft,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY
       },
       {
         projectId,
-        collectionNft
       },
       programId
     )

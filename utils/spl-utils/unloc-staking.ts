@@ -16,6 +16,8 @@ import {
   UpdatePoolConfigsInfo,
 } from "@unloc-dev/unloc-sdk-staking";
 import { getWalletTokenAccount } from "./common";
+import { LIQ_MINING_PID } from "./unloc-liq-mining";
+import { VOTING_PID } from "./unloc-voting";
 
 ///////////////
 // CONSTANTS //
@@ -72,11 +74,11 @@ export const getRewardsVaultKey = (programId: PublicKey = STAKING_PID) => {
 };
 export const getUpdatePoolConfigsKey = (
   proposalAuthorityWallet: PublicKey,
-  poolInfo: PublicKey,
+  stakingPoolInfo: PublicKey,
   programId: PublicKey = STAKING_PID
   ) => {
   return PublicKey.findProgramAddressSync(
-    [UNLOC_STAKING, POOL_UPDATE_CONFIGS, proposalAuthorityWallet.toBuffer(), poolInfo.toBuffer(), DATA_ACCOUNT],
+    [UNLOC_STAKING, POOL_UPDATE_CONFIGS, proposalAuthorityWallet.toBuffer(), stakingPoolInfo.toBuffer(), DATA_ACCOUNT],
     programId,
   )[0];
 };
@@ -105,9 +107,11 @@ export const initializeStakingPool = async (
   interestRateFraction: InterestRateFraction,
   scoreMultiplier: ScoreMultiplier,
   profileLevelMultiplier: FeeReductionLevels,
-  unstakePenalityBasisPoints: bignum
+  unstakePenalityBasisPoints: bignum,
+  votingProgram: PublicKey = VOTING_PID,
+  liqMinProgram: PublicKey = LIQ_MINING_PID
 ) => {
-  const poolInfo = getStakingPoolKey();
+  const stakingPoolInfo = getStakingPoolKey();
   const stakingVault = getStakingVaultKey();
   const rewardsVault = getRewardsVaultKey();
   const penalityDepositVault = getPenaltyDepositVaultKey();
@@ -117,7 +121,7 @@ export const initializeStakingPool = async (
     createInitializePoolInstruction(
       {
         payer: userWallet,
-        poolInfo,
+        stakingPoolInfo,
         stakingVault,
         tokenMint,
         rewardsVault,
@@ -134,6 +138,8 @@ export const initializeStakingPool = async (
           scoreMultiplier,
           profileLevelMultiplier,
           unstakePenalityBasisPoints,
+          votingProgram,
+          liqMinProgram
         }
       },
     ),
@@ -146,8 +152,8 @@ export const fundRewardTokens = async (
   userWallet: PublicKey,
   amount: bignum
 ) => {
-  const poolInfo = getStakingPoolKey();
-  const poolData = await PoolInfo.fromAccountAddress(connection, poolInfo);
+  const stakingPoolInfo = getStakingPoolKey();
+  const poolData = await PoolInfo.fromAccountAddress(connection, stakingPoolInfo);
   const stakingVault = getStakingVaultKey();
   const rewardsVault = getRewardsVaultKey();
   const funderTokenAccountToDebit = await getWalletTokenAccount(connection, userWallet, poolData.tokenMint);
@@ -155,7 +161,7 @@ export const fundRewardTokens = async (
   instructions.push(
     createFundRewardsVaultInstruction(
       {
-        poolInfo,
+        stakingPoolInfo,
         stakingVault,
         rewardsVault,
         tokenMint: poolData.tokenMint,
@@ -179,13 +185,13 @@ export const createUpdateProposal = async (
   unstakePenalityBasisPoints: bignum,
   pausePool: boolean
 ) => {
-  const poolInfo = getStakingPoolKey();
-  const updatePoolConfigsInfo = getUpdatePoolConfigsKey(userWallet, poolInfo);
+  const stakingPoolInfo = getStakingPoolKey();
+  const updatePoolConfigsInfo = getUpdatePoolConfigsKey(userWallet, stakingPoolInfo);
   const instructions: TransactionInstruction[] = [];
   instructions.push(
     createCreateUpdateProposalInstruction(
       {
-        poolInfo,
+        stakingPoolInfo,
         proposalAuthorityWallet: userWallet,
         updatePoolConfigsInfo,
       },
@@ -208,14 +214,14 @@ export const approveUpdateProposal = async (
   connection: Connection,
   userWallet: PublicKey,
 ) => {
-  const poolInfo = getStakingPoolKey();
-  const updatePoolConfigsInfo = getUpdatePoolConfigsKey(userWallet, poolInfo);
+  const stakingPoolInfo = getStakingPoolKey();
+  const updatePoolConfigsInfo = getUpdatePoolConfigsKey(userWallet, stakingPoolInfo);
   const updatePoolConfigsData = await UpdatePoolConfigsInfo.fromAccountAddress(connection, updatePoolConfigsInfo);
   const instructions: TransactionInstruction[] = [];
   instructions.push(
     createApproveUpdateProposalInstruction(
       {
-        poolInfo,
+        stakingPoolInfo,
         votingAuthorityWallet: userWallet,
         proposalAuthorityWallet: updatePoolConfigsData.proposalAuthorityWallet,
         updatePoolConfigsInfo,
@@ -229,13 +235,13 @@ export const approveUpdateProposal = async (
 export const closeUpdateProposal = async (
   userWallet: PublicKey,
 ) => {
-  const poolInfo = getStakingPoolKey();
-  const updatePoolConfigsInfo = getUpdatePoolConfigsKey(userWallet, poolInfo);
+  const stakingPoolInfo = getStakingPoolKey();
+  const updatePoolConfigsInfo = getUpdatePoolConfigsKey(userWallet, stakingPoolInfo);
   const instructions: TransactionInstruction[] = [];
   instructions.push(
     createCloseUpdateProposalInstruction(
       {
-        poolInfo,
+        stakingPoolInfo,
         updatePoolConfigsInfo,
         proposalAuthorityWallet: userWallet,
       }
