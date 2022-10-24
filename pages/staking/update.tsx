@@ -10,7 +10,7 @@ import toast from 'react-hot-toast'
 import { useAccount, useSendTransaction } from '@/hooks'
 import { compressAddress } from '@/utils'
 import { stakePoolParser } from '.'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { UpdateProposal } from '@/views/staking/update/UpdateProposal'
 import { toNumDenPair } from '@/views/staking/Initialize'
@@ -60,17 +60,15 @@ const Update: NextPage = () => {
       return
     }
 
-    console.log('onSubmit()', data)
-
     const interestRateFraction = data.interestRatesAndScoreMultipliers.reduce<any>(
-      (obj, item) => ({ ...obj, [item.accountType]: toNumDenPair(Number(item.interestRateMultiplier), 5) }),
+      (obj, item) => ({ ...obj, [item.accountType]: toNumDenPair(Number(item.interestRateMultiplier), 6) }),
       {}
     )
+    console.table(Object.entries(interestRateFraction))
     interestRateFraction.compoundingFrequency = data.compoundingFrequency
-    console.log(interestRateFraction)
 
     const scoreMultiplier = data.interestRatesAndScoreMultipliers.reduce<any>(
-      (obj, item) => ({ ...obj, [item.accountType]: toNumDenPair(Number(item.scoreMultiplier), 5) }),
+      (obj, item) => ({ ...obj, [item.accountType]: toNumDenPair(Number(item.scoreMultiplier), 6) }),
       {}
     )
 

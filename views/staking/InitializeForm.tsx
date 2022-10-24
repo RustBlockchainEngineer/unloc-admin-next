@@ -155,7 +155,7 @@ export const InitializeForm = ({
                   <div className='col-span-4'>
                     <input
                       type='number'
-                      step={0.0001}
+                      step={0.00001}
                       {...register(`interestRatesAndScoreMultipliers.${index}.interestRateMultiplier`, {
                         required: true,
                         min: 0
@@ -167,7 +167,7 @@ export const InitializeForm = ({
                   <div className='col-span-4'>
                     <input
                       type='number'
-                      step={0.01}
+                      step={0.00001}
                       {...register(`interestRatesAndScoreMultipliers.${index}.scoreMultiplier`, {
                         required: true,
                         min: 0

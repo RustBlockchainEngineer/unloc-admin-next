@@ -1,8 +1,6 @@
 import { bignum } from '@metaplex-foundation/beet'
-import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
 import {
-  AllowedStakingDurationMonths,
   createApproveUpdateProposalInstruction,
   createCloseUpdateProposalInstruction,
   createCreateUpdateProposalInstruction,
@@ -128,11 +126,16 @@ export const initializeStakingPool = async (
 
   return new Transaction().add(...instructions)
 }
-export const fundRewardTokens = async (connection: Connection, userWallet: PublicKey, amount: bignum) => {
-  const poolInfo = getStakingPoolKey()
+export const fundRewardTokens = async (
+  connection: Connection,
+  userWallet: PublicKey,
+  amount: bignum,
+  programId = STAKING_PID
+) => {
+  const poolInfo = getStakingPoolKey(programId)
   const poolData = await PoolInfo.fromAccountAddress(connection, poolInfo)
-  const stakingVault = getStakingVaultKey()
-  const rewardsVault = getRewardsVaultKey()
+  const stakingVault = getStakingVaultKey(programId)
+  const rewardsVault = getRewardsVaultKey(programId)
   const funderTokenAccountToDebit = await getWalletTokenAccount(connection, userWallet, poolData.tokenMint)
   const instructions: TransactionInstruction[] = []
   instructions.push(
@@ -186,6 +189,8 @@ export const createUpdateProposal = (
     )
   )
 
+  instructions[0].keys[0].isWritable = true
+
   return new Transaction().add(...instructions)
 }
 
@@ -217,6 +222,8 @@ export const closeUpdateProposal = (userWallet: PublicKey, programId = STAKING_P
       proposalAuthorityWallet: userWallet
     })
   )
+
+  instructions[0].keys[0].isWritable = true
 
   return new Transaction().add(...instructions)
 }
