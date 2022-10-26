@@ -1,11 +1,11 @@
 import { amountToUiAmount, numVal, val } from '@/utils/spl-utils'
 import { PlusCircleIcon } from '@heroicons/react/24/outline'
-import { VotingSessionInfo } from '@unloc-dev/unloc-sdk-voting'
+import { VoteSessionInfo } from '@unloc-dev/unloc-sdk-voting'
 import dayjs from 'dayjs'
 import Image from 'next/image'
 import UnlocToken from '../../public/unloc_token.png'
 
-export const EmissionConfigInfo = ({ info }: { info: VotingSessionInfo }) => {
+export const EmissionConfigInfo = ({ info }: { info: VoteSessionInfo }) => {
   return (
     <div className='py-6 px-6 md:py-4'>
       <h3 className='mb-6 text-lg font-medium'>Current emission config</h3>
@@ -28,7 +28,7 @@ export const EmissionConfigInfo = ({ info }: { info: VotingSessionInfo }) => {
             <div className='max-w-fit rounded-md border border-gray-500 px-4 py-3'>
               <dd className='text-xs text-gray-300'>Emissions</dd>
               <dt className='mt-2 flex items-center text-xl font-semibold'>
-                <p>{amountToUiAmount(info.emissions.rewards, 6).toLocaleString('en-us')}</p>
+                <p>{amountToUiAmount(info.emissions.totalRewards, 6).toLocaleString('en-us')}</p>
                 <div className='ml-1 mt-2 flex-shrink-0'>
                   <Image src={UnlocToken} height={24} width={24} alt='' className='rounded-full' />
                 </div>
@@ -46,18 +46,20 @@ export const EmissionConfigInfo = ({ info }: { info: VotingSessionInfo }) => {
             <div className='rounded-md border border-gray-500 px-4 py-3'>
               <dd className='text-xs text-gray-300'>Start time</dd>
               <dt className='mt-2 font-mono text-xl font-semibold'>
-                {dayjs.unix(numVal(info.emissions.start)).format('YYYY-MM-DD HH:mm:ssZ[Z]')}
+                {dayjs.unix(numVal(info.emissions.startTimestamp)).format('YYYY-MM-DD HH:mm:ssZ[Z]')}
               </dt>
             </div>
             <div className='rounded-md border border-gray-500 px-4 py-3'>
               <dd className='text-xs text-gray-300'>End time</dd>
               <dt className='mt-2 font-mono text-xl font-semibold'>
-                {dayjs.unix(numVal(info.emissions.end)).format('YYYY-MM-DD HH:mm:ssZ[Z]')}
+                {dayjs.unix(numVal(info.emissions.endTimestamp)).format('YYYY-MM-DD HH:mm:ssZ[Z]')}
               </dt>
             </div>
             <div className='max-w-fit rounded-md border border-gray-500 px-4 py-3'>
               <dd className='text-xs text-gray-300'>Updated allocations</dd>
-              <dt className='mt-2 text-xl font-semibold'>{info.emissions.allocationsUpdatedCount} / {info.projects.totalProjects}</dt>
+              <dt className='mt-2 text-xl font-semibold'>
+                {info.emissions.allocationsUpdatedCount} / {info.projects.totalProjects}
+              </dt>
             </div>
             <div className='max-w-fit rounded-md border border-gray-500 px-4 py-3'>
               <dd className='text-xs text-gray-300'>Last update</dd>

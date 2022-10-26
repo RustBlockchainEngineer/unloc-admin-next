@@ -6,7 +6,6 @@ import { compressAddress } from '@/utils'
 import { numVal, val } from '@/utils/spl-utils'
 import {
   addAuthority,
-  allocateLiqMinRwds,
   getVotingSessionKey,
   reallocSessionAccount,
   removeAuthority
@@ -16,7 +15,7 @@ import { ArrowPathIcon, ChevronDoubleRightIcon } from '@heroicons/react/20/solid
 import { PlusCircleIcon } from '@heroicons/react/24/outline'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
-import { VotingSessionInfo } from '@unloc-dev/unloc-sdk-voting'
+import { VoteSessionInfo } from '@unloc-dev/unloc-sdk-voting'
 import BN from 'bn.js'
 import dayjs from 'dayjs'
 import { FormEventHandler, Fragment, useState } from 'react'
@@ -35,7 +34,8 @@ export const VotingDashboard = () => {
   const { publicKey: wallet } = useWallet()
   const sendAndConfirm = useSendTransaction()
   const votingSessionKey = getVotingSessionKey(programs.votePubkey)
-  const { loading, info } = useAccount(votingSessionKey, (_, data) => VotingSessionInfo.fromAccountInfo(data)[0])
+  const { loading, info } = useAccount(votingSessionKey, (_, data) => VoteSessionInfo.fromAccountInfo(data)[0])
+  const initialiser58 = info?.initialiserWallet.toBase58() || ''
 
   const [open, setOpen] = useState(false)
   const [runningAllocate, setRunningAllocate] = useState(false)
@@ -112,46 +112,46 @@ export const VotingDashboard = () => {
     })
   }
 
-  const onAllocateRewards = async () => {
-    if (!wallet) {
-      toast.error('Connect your wallet')
-      return
-    }
+  // const onAllocateRewards = async () => {
+  //   if (!wallet) {
+  //     toast.error('Connect your wallet')
+  //     return
+  //   }
 
-    setRunningAllocate(true)
-    try {
-      const emissions = info.emissions
+  //   setRunningAllocate(true)
+  //   try {
+  //     const emissions = info.emissions
 
-      if (emissions.allocationsUpdatedCount === info.projects.totalProjects) {
-        console.log('All is already allocated.')
-      }
+  //     if (emissions.allocationsUpdatedCount === info.projects.totalProjects) {
+  //       console.log('All is already allocated.')
+  //     }
 
-      let allocatedCount = 0
-      for (const project of info.projects.projects) {
-        if (project.active && project.allocationUpdatedAt < emissions.udpatedAt) {
-          try {
-            const tx = await allocateLiqMinRwds(wallet, project.id, project.collectionNft, programs.votePubkey)
+  //     let allocatedCount = 0
+  //     for (const project of info.projects.projects) {
+  //       if (project.active && project.allocationUpdatedAt < emissions.udpatedAt) {
+  //         try {
+  //           const tx = await allocateLiqMinRwds(wallet, project.id, project.collectionNft, programs.votePubkey)
 
-            const result = await sendAndConfirm(tx, 'finalized', false)
-            if (!result.result.value.err) {
-              allocatedCount++
-              toast.success(`Transaction confirmed, count: ${allocatedCount}.`)
-            } else {
-              toast.error(`Failed for this collectionNft: ${project.collectionNft.toString()}`)
-              console.log('Failed for this collectionNft: ', project.collectionNft.toString(), result.result.value.err)
-            }
-          } catch (err) {
-            toast.error(`Failed for this collectionNft: ${project.collectionNft.toString()}`)
-            console.log('Failed for this collectionNft: ', project.collectionNft.toString(), err)
-          }
-        }
-      }
-    } catch (err) {
-      console.log('allocateLiqMinRwds error: ', err)
-    } finally {
-      setRunningAllocate(false)
-    }
-  }
+  //           const result = await sendAndConfirm(tx, 'finalized', false)
+  //           if (!result.result.value.err) {
+  //             allocatedCount++
+  //             toast.success(`Transaction confirmed, count: ${allocatedCount}.`)
+  //           } else {
+  //             toast.error(`Failed for this collectionNft: ${project.collectionNft.toString()}`)
+  //             console.log('Failed for this collectionNft: ', project.collectionNft.toString(), result.result.value.err)
+  //           }
+  //         } catch (err) {
+  //           toast.error(`Failed for this collectionNft: ${project.collectionNft.toString()}`)
+  //           console.log('Failed for this collectionNft: ', project.collectionNft.toString(), err)
+  //         }
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.log('allocateLiqMinRwds error: ', err)
+  //   } finally {
+  //     setRunningAllocate(false)
+  //   }
+  // }
 
   const reallocPercent = ((info?.projects.projects.length / info?.projects.currentMaxProjectsPossible) * 100).toFixed(0)
   const lastFiveAddedCollections = info.projects.projects.slice(-5).reverse()
@@ -176,15 +176,15 @@ export const VotingDashboard = () => {
                     <li className='py-4'>
                       <div className='flex items-center space-x-4'>
                         <div className='flex-shrink-0'>
-                          <Jdenticon size={'32px'} value={info?.initialiser.toBase58()} />
+                          <Jdenticon size={'32px'} value={initialiser58} />
                         </div>
                         <div className='min-w-0 flex-1'>
-                          <Copyable content={info.initialiser.toBase58()}>
+                          <Copyable content={initialiser58}>
                             <p className='truncate font-mono text-sm text-gray-50'>
-                              {compressAddress(4, info.initialiser.toBase58())}
+                              {compressAddress(4, initialiser58)}
                             </p>
                           </Copyable>
-                          <p className='truncate text-sm text-gray-400'>{'@' + info.initialiser.toBase58()}</p>
+                          <p className='truncate text-sm text-gray-400'>{'@' + initialiser58}</p>
                         </div>
                         <div>
                           <button
@@ -369,25 +369,25 @@ export const VotingDashboard = () => {
                   <div className='flex items-center justify-between'>
                     <h3 className='mb-6 text-lg font-medium'>Latest voting session</h3>
 
-                    {val(info.session.startTime).gt(new BN(Math.round(Date.now() / 1000))) && (
+                    {val(info.voting.startTimestamp).gt(new BN(Math.round(Date.now() / 1000))) && (
                       <span className='inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800'>
                         Not yet started
                       </span>
                     )}
 
-                    {val(info.session.endTime).gt(new BN(Math.round(Date.now() / 1000))) && (
+                    {val(info.voting.endTimestamp).gt(new BN(Math.round(Date.now() / 1000))) && (
                       <span className='inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800'>
                         Ongoing
                       </span>
                     )}
 
-                    {val(info.session.endTime).lte(new BN(Math.round(Date.now() / 1000))) && (
+                    {val(info.voting.endTimestamp).lte(new BN(Math.round(Date.now() / 1000))) && (
                       <span className='inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800'>
                         Ended
                       </span>
                     )}
                   </div>
-                  {val(info.session.sessionCount).eqn(0) ? (
+                  {val(info.voting.sessionCount).eqn(0) ? (
                     <div className='flex justify-center pt-6'>
                       <button
                         type='button'
@@ -403,7 +403,7 @@ export const VotingDashboard = () => {
                     <div>
                       <div className='mb-4 w-full border-b border-gray-600 pb-4'>
                         <span className='text-gray-200'>Session</span>
-                        <span className='font-bold text-gray-50'> #{info.session.sessionCount.toString()}</span>
+                        <span className='font-bold text-gray-50'> #{info.voting.sessionCount.toString()}</span>
                       </div>
                       {/* <div className='my-4'>
                       <p className='text-sm text-gray-300'>Progress</p>
@@ -422,18 +422,18 @@ export const VotingDashboard = () => {
                         <div className='rounded-md border border-gray-500 px-4 py-2'>
                           <dd className='text-xs text-gray-300'>Start time</dd>
                           <dt className='mt-1 font-mono text-lg font-semibold leading-tight'>
-                            {dayjs.unix(numVal(info.session.startTime)).format('YYYY-MM-DD HH:mm')}
+                            {dayjs.unix(numVal(info.voting.startTimestamp)).format('YYYY-MM-DD HH:mm')}
                           </dt>
                         </div>
                         <div className='rounded-md border border-gray-500 px-4 py-2'>
                           <dd className='text-xs text-gray-300'>End time</dd>
                           <dt className='mt-1 font-mono text-lg font-semibold leading-tight'>
-                            {dayjs.unix(numVal(info.session.endTime)).format('YYYY-MM-DD HH:mm')}
+                            {dayjs.unix(numVal(info.voting.endTimestamp)).format('YYYY-MM-DD HH:mm')}
                           </dt>
                         </div>
                         <div className='rounded-md border border-gray-500 px-4 py-2'>
                           <dd className='text-xs text-gray-300'>Started</dd>
-                          <dt className='mt-1 font-mono text-base  leading-tight'>{String(info.session.started)}</dt>
+                          <dt className='mt-1 font-mono text-base  leading-tight'>{String(info.voting.started)}</dt>
                         </div>
                       </dl>
                     </div>
@@ -473,7 +473,7 @@ export const VotingDashboard = () => {
                 <button
                   className='inline-flex items-center rounded-md bg-pink-600 px-5 py-2 hover:bg-pink-700'
                   type='button'
-                  onClick={onAllocateRewards}
+                  // onClick={onAllocateRewards}
                 >
                   {runningAllocate && <ArrowPathIcon className='-ml-1 mr-2 h-5 w-5 animate-spin' />}
                   {runningAllocate ? 'Running' : 'Start'}

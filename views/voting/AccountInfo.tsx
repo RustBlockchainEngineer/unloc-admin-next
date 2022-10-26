@@ -3,12 +3,12 @@ import { useTokenAccount } from '@/hooks'
 import { compressAddress } from '@/utils'
 import { amountToUiAmount } from '@/utils/spl-utils'
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid'
-import { VotingSessionInfo } from '@unloc-dev/unloc-sdk-voting'
+import { VoteSessionInfo } from '@unloc-dev/unloc-sdk-voting'
 import Image from 'next/image'
 import UnlocToken from '../../public/unloc_token.png'
 
-export const AccountInfo = ({ info }: { info: VotingSessionInfo }) => {
-  const { loading, info: vaultInfo } = useTokenAccount(info?.liqMinRwdsVault)
+export const AccountInfo = ({ info }: { info: VoteSessionInfo }) => {
+  const { loading, info: vaultInfo } = useTokenAccount(info?.nextEmissionsRewardsVault)
 
   return (
     <>

@@ -1,19 +1,19 @@
 import { bignum } from '@metaplex-foundation/beet'
+import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
 import {
   createAddAuthorityInstruction,
   createAddCollectionInstruction,
-  createAllocateLiqMinRwdsInstruction,
   createInitializeVotingSessionInstruction,
   createReallocSessionAccountInstruction,
   createRemoveAuthorityInstruction,
   createRemoveCollectionInstruction,
   createSetEmissionsInstruction,
   createSetVotingSessionTimeInstruction,
-  PROGRAM_ID
+  PROGRAM_ID,
 } from '@unloc-dev/unloc-sdk-voting'
 import { UNLOC_MINT } from './unloc-constants'
-import { LIQ_MINING_PID } from './unloc-liq-mining'
+import { getCollectionLoanRewardsInfo, LIQ_MINING_PID } from './unloc-liq-mining'
 import { STAKING_PID } from './unloc-staking'
 
 ///////////////
@@ -23,36 +23,28 @@ export const VOTING_PID: PublicKey = PROGRAM_ID
 export const BPF_LOADER_UPGRADEABLE_PROGRAM_ID = new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111')
 export const METAPLEX_PID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s')
 
-export const UNLOC_VOTING = Buffer.from('unloc-voting')
-export const UNLOC_LIQ_MIN_RWDS = Buffer.from('unloc-liq-min-rwds')
-export const VOTING_SESSION = Buffer.from('voting-session-info')
-export const PROJECT_INFO = Buffer.from('project-info')
-export const USER_STAKE_INFO = Buffer.from('user-stake-info')
-export const UNLOC_SCORE = Buffer.from('unloc-score')
-export const STAKING_POOL = Buffer.from('staking-pool')
-export const DATA_ACCOUNT = Buffer.from('data-account')
-export const TOKEN_ACCOUNT = Buffer.from('token-account')
-export const LIQ_MIN_RWDS_VAULT = Buffer.from('liq-min-rwds-vault')
-export const PROJECT_EMISSIONS = Buffer.from('project-emissions-info')
-export const UNLOC_STAKING = Buffer.from('unloc-staking')
+const UNLOC = Buffer.from('unloc')
+const DATA_ACCOUNT = Buffer.from('dataAccount')
+const TOKEN_ACCOUNT = Buffer.from('tokenAccount')
+const VOTING_PROGRAM = Buffer.from('votingProgram')
+const VOTE_SESSION_INFO = Buffer.from('voteSessionInfo')
+const USER_VOTE_CHOICES_INFO = Buffer.from('userVoteChoicesInfo')
+const SESSION_TOTAL_EMISSIONS_VAULT = Buffer.from('sessionTotalEmissionsVault')
 
 /////////////////
 // PDA helpers //
 /////////////////
 export const getVotingSessionKey = (programId: PublicKey = VOTING_PID) => {
-  return PublicKey.findProgramAddressSync([UNLOC_VOTING, VOTING_SESSION, DATA_ACCOUNT], programId)[0]
+  return PublicKey.findProgramAddressSync([UNLOC, VOTING_PROGRAM, VOTE_SESSION_INFO, DATA_ACCOUNT], programId)[0]
+}
+export const getNextEmissionsRewardVault = (programId: PublicKey = VOTING_PID) => {
+  return PublicKey.findProgramAddressSync(
+    [UNLOC, VOTING_PROGRAM, SESSION_TOTAL_EMISSIONS_VAULT, TOKEN_ACCOUNT],
+    programId
+  )[0]
 }
 export const getVotingProgramDataKey = (programId: PublicKey = VOTING_PID) => {
   return PublicKey.findProgramAddressSync([programId.toBytes()], BPF_LOADER_UPGRADEABLE_PROGRAM_ID)[0]
-}
-export const getLiqMinRwdsVaultKey = (programId: PublicKey = VOTING_PID) => {
-  return PublicKey.findProgramAddressSync([UNLOC_LIQ_MIN_RWDS, LIQ_MIN_RWDS_VAULT, TOKEN_ACCOUNT], programId)[0]
-}
-export const getProjectEmissionsKey = (collectionNft: PublicKey, programId: PublicKey = VOTING_PID) => {
-  return PublicKey.findProgramAddressSync(
-    [UNLOC_VOTING, PROJECT_EMISSIONS, collectionNft.toBuffer(), DATA_ACCOUNT],
-    programId
-  )[0]
 }
 export const getNftMetadataKey = (nftMint: PublicKey) => {
   return PublicKey.findProgramAddressSync(
@@ -60,27 +52,29 @@ export const getNftMetadataKey = (nftMint: PublicKey) => {
     METAPLEX_PID
   )[0]
 }
+
 /////////////////////////
 // Instruction helpers //
 /////////////////////////
 export const initializeVotingSession = async (
   userWallet: PublicKey,
+  unlocTokenMint: PublicKey = UNLOC_MINT,
   stakingProgram: PublicKey = STAKING_PID,
   liqMinProgram: PublicKey = LIQ_MINING_PID,
-  liqMinRwdsMint: PublicKey = UNLOC_MINT,
   programId: PublicKey = VOTING_PID
 ) => {
   const voteSessionInfo = getVotingSessionKey(programId)
-  const liqMinRwdsVault = getLiqMinRwdsVaultKey(programId)
+  const nextEmissionsRewardsVault = getNextEmissionsRewardVault(programId)
   const programData = getVotingProgramDataKey(programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createInitializeVotingSessionInstruction(
       {
-        initialiser: userWallet,
+        initialiserWallet: userWallet,
         voteSessionInfo,
-        liqMinRwdsMint,
-        liqMinRwdsVault,
+        unlocTokenMint,
+        nextEmissionsRewardsVault,
+
         program: programId,
         programData
       },
@@ -109,15 +103,15 @@ export const reallocSessionAccount = async (userWallet: PublicKey) => {
   return new Transaction().add(...instructions)
 }
 
-export const addAuthority = async (userWallet: PublicKey, newAuthority: PublicKey, programId = VOTING_PID) => {
+export const addAuthority = async (userWallet: PublicKey, newAuthorityWallet: PublicKey, programId = VOTING_PID) => {
   const voteSessionInfo = getVotingSessionKey(programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createAddAuthorityInstruction(
       {
-        initialiser: userWallet,
-        voteSessionInfo,
-        newAuthority
+        initialiserWallet: userWallet,
+        newAuthorityWallet,
+        voteSessionInfo
       },
       programId
     )
@@ -126,15 +120,19 @@ export const addAuthority = async (userWallet: PublicKey, newAuthority: PublicKe
   return new Transaction().add(...instructions)
 }
 
-export const removeAuthority = async (userWallet: PublicKey, authorityToRemove: PublicKey, programId = PROGRAM_ID) => {
+export const removeAuthority = async (
+  userWallet: PublicKey,
+  authorityWalletToRemove: PublicKey,
+  programId = PROGRAM_ID
+) => {
   const voteSessionInfo = getVotingSessionKey(programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createRemoveAuthorityInstruction(
       {
-        initialiser: userWallet,
+        initialiserWallet: userWallet,
         voteSessionInfo,
-        authorityToRemove
+        authorityWalletToRemove
       },
       programId
     )
@@ -143,19 +141,25 @@ export const removeAuthority = async (userWallet: PublicKey, authorityToRemove: 
   return new Transaction().add(...instructions)
 }
 
-export const addCollection = async (userWallet: PublicKey, collectionNft: PublicKey, programId = VOTING_PID) => {
+export const addCollection = async (
+  userWallet: PublicKey,
+  collectionNft: PublicKey,
+  liqMinProgram = LIQ_MINING_PID,
+  programId = VOTING_PID
+) => {
   const voteSessionInfo = getVotingSessionKey(programId)
-  const projectEmissionsInfo = getProjectEmissionsKey(collectionNft, programId)
   const collectionNftMetadata = getNftMetadataKey(collectionNft)
+  const collectionPoolRewardsInfo = getCollectionLoanRewardsInfo(collectionNft, liqMinProgram)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createAddCollectionInstruction(
       {
         authority: userWallet,
         voteSessionInfo,
-        projectEmissionsInfo,
+        collectionPoolRewardsInfo,
         collectionNft,
-        collectionNftMetadata
+        collectionNftMetadata,
+        liqMinProgram
       },
       programId
     )
@@ -168,18 +172,19 @@ export const removeCollection = async (
   userWallet: PublicKey,
   collectionNft: PublicKey,
   projectId: number,
+  liqMinProgram = LIQ_MINING_PID,
   programId = VOTING_PID
 ) => {
   const voteSessionInfo = getVotingSessionKey(programId)
-  const projectEmissionsInfo = getProjectEmissionsKey(collectionNft, programId)
   const collectionNftMetadata = getNftMetadataKey(collectionNft)
+  const collectionPoolRewardsInfo = getCollectionLoanRewardsInfo(collectionNft, liqMinProgram)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createRemoveCollectionInstruction(
       {
         authority: userWallet,
         voteSessionInfo,
-        projectEmissionsInfo,
+        collectionPoolRewardsInfo,
         collectionNft,
         collectionNftMetadata
       },
@@ -193,10 +198,10 @@ export const removeCollection = async (
   return new Transaction().add(...instructions)
 }
 
-export const setVotingSessionTime = async (
+export const startVotingSession = async (
   userWallet: PublicKey,
-  startTime: bignum,
-  endTime: bignum,
+  startTimestamp: bignum,
+  endTimestamp: bignum,
   programId = VOTING_PID
 ) => {
   const voteSessionInfo = getVotingSessionKey(programId)
@@ -208,8 +213,8 @@ export const setVotingSessionTime = async (
         voteSessionInfo
       },
       {
-        startTime,
-        endTime
+        startTimestamp,
+        endTimestamp
       },
       programId
     )
@@ -220,20 +225,27 @@ export const setVotingSessionTime = async (
 
 export const setEmissions = async (
   userWallet: PublicKey,
+
   rewardsAmount: bignum,
   startTimestamp: bignum,
   endTimestamp: bignum,
   lenderShareBp: number,
   borrowerShareBp: number,
+  rewardsMint = UNLOC_MINT,
   programId = VOTING_PID
 ) => {
   const voteSessionInfo = getVotingSessionKey(programId)
+  const authorityUnlocAtaToDebit = getAssociatedTokenAddressSync(rewardsMint, userWallet)
+  const nextEmissionsRewardsVault = getNextEmissionsRewardVault(programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createSetEmissionsInstruction(
       {
         authority: userWallet,
-        voteSessionInfo
+        authorityUnlocAtaToDebit,
+        voteSessionInfo,
+        rewardsMint,
+        nextEmissionsRewardsVault
       },
       {
         args: {
@@ -251,31 +263,14 @@ export const setEmissions = async (
   return new Transaction().add(...instructions)
 }
 
-// Need to call for every collection_nft stored in voting_session_info.projects
-// Can be called by anyone/crank. Need to call once voting is over and set_emissions is executed
-// VotingSessionInfo.emissions.allocations_updated_count == VotingSessionInfo.projects.total_projects will be true if we are done with all allocations
-// ProjectEmmisionsInfo.last_updated_at > total_emissions_updated_at will be true for a collection whose data is already updatd using allocate_liq_min_rwds
-
-// I think it's enough by calling often in the backend
-export const allocateLiqMinRwds = async (
-  payer: PublicKey,
-  projectId: number,
-  collectionNft: PublicKey,
-  programId = VOTING_PID
-) => {
+export const reallocVotingSession = async (payer: PublicKey, programId = VOTING_PID) => {
   const voteSessionInfo = getVotingSessionKey(programId)
-  const projectEmissionsInfo = getProjectEmissionsKey(collectionNft, programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
-    createAllocateLiqMinRwdsInstruction(
+    createReallocSessionAccountInstruction(
       {
         payer,
-        voteSessionInfo,
-        projectEmissionsInfo
-      },
-      {
-        projectId,
-        collectionNft
+        voteSessionInfo
       },
       programId
     )
@@ -283,3 +278,36 @@ export const allocateLiqMinRwds = async (
 
   return new Transaction().add(...instructions)
 }
+
+// Need to call for every collection_nft stored in voting_session_info.projects
+// Can be called by anyone/crank. Need to call once voting is over and set_emissions is executed
+// VoteSessionInfo.emissions.allocations_updated_count == VoteSessionInfo.projects.total_projects will be true if we are done with all allocations
+// ProjectEmmisionsInfo.last_updated_at > total_emissions_updated_at will be true for a collection whose data is already updatd using allocate_liq_min_rwds
+
+// I think it's enough by calling often in the backend
+// export const allocateLiqMinRwds = async (
+//   payer: PublicKey,
+//   projectId: number,
+//   collectionNft: PublicKey,
+//   programId = VOTING_PID
+// ) => {
+//   const voteSessionInfo = getVotingSessionKey(programId)
+//   const projectEmissionsInfo = getProjectEmissionsKey(collectionNft, programId)
+//   const instructions: TransactionInstruction[] = []
+//   instructions.push(
+//     createAllocateLiqMinRwdsInstruction(
+//       {
+//         payer,
+//         voteSessionInfo,
+//         projectEmissionsInfo
+//       },
+//       {
+//         projectId,
+//         collectionNft
+//       },
+//       programId
+//     )
+//   )
+
+//   return new Transaction().add(...instructions)
+// }

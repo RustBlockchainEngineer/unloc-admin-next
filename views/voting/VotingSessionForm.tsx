@@ -1,7 +1,7 @@
 import { useSendTransaction } from '@/hooks'
 import { useStore } from '@/stores'
 import { compressAddress } from '@/utils'
-import { setVotingSessionTime } from '@/utils/spl-utils/unloc-voting'
+import { startVotingSession } from '@/utils/spl-utils/unloc-voting'
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useForm } from 'react-hook-form'
@@ -24,7 +24,7 @@ export const VotingSessionForm = () => {
       return
     }
 
-    const tx = await setVotingSessionTime(wallet, data.startTime, data.endTime, programs.votePubkey)
+    const tx = await startVotingSession(wallet, data.startTime, data.endTime, programs.votePubkey)
 
     toast.promise(sendAndConfirm(tx, 'confirmed', false), {
       loading: 'Confirming...',
