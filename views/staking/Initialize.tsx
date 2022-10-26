@@ -9,7 +9,7 @@ import { Transition } from '@headlessui/react'
 import { DocumentPlusIcon } from '@heroicons/react/24/solid'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
-import { PoolInfo } from '@unloc-dev/unloc-sdk-staking'
+import { StakingPoolInfo } from '@unloc-dev/unloc-sdk-staking'
 import { BN } from 'bn.js'
 import { observer } from 'mobx-react-lite'
 import toast from 'react-hot-toast'
@@ -27,7 +27,7 @@ export const StakingInitialize = observer(() => {
   const { publicKey: wallet } = useWallet()
   const stakePool = getStakingPoolKey(programs.stakePubkey)
   const sendAndConfirm = useSendTransaction()
-  const { loading, account, info: poolInfo } = useAccount<PoolInfo>(stakePool, stakePoolParser, true)
+  const { loading, account, info: poolInfo } = useAccount<StakingPoolInfo>(stakePool, stakePoolParser, true)
   console.log(stakePool.toBase58())
 
   const onSubmit = async (data: FormValues) => {
@@ -65,7 +65,7 @@ export const StakingInitialize = observer(() => {
 
     const unstakePenalityBasisPoints = new BN(data.unstakePenalityBasisPoints ?? 0)
     const tx = await initializeStakingPool(
-      wallet!,
+      wallet,
       UNLOC_MINT,
       programs.stakePubkey,
       numAuthorities,
@@ -74,7 +74,9 @@ export const StakingInitialize = observer(() => {
       interestRateFraction,
       scoreMultiplier,
       profileLevelMultiplier,
-      unstakePenalityBasisPoints
+      unstakePenalityBasisPoints,
+      programs.votePubkey,
+      programs.liqMinPubkey
     )
 
     toast.promise(sendAndConfirm(tx, 'confirmed', true), {

@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js'
 import { NextPage } from 'next'
-import { FeeReductionLevels, PoolInfo, UpdatePoolConfigsInfo } from '@unloc-dev/unloc-sdk-staking'
+import { FeeReductionLevels, StakingPoolInfo, UpdatePoolConfigsInfo } from '@unloc-dev/unloc-sdk-staking'
 import { useStore } from '@/stores'
 import { createUpdateProposal, getStakingPoolKey, getUpdatePoolConfigsKey } from '@/utils/spl-utils/unloc-staking'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
@@ -22,7 +22,7 @@ const Update: NextPage = () => {
   const sendAndConfirm = useSendTransaction()
 
   const stakePool = getStakingPoolKey(programs.stakePubkey)
-  const { info: poolInfo } = useAccount<PoolInfo>(stakePool, stakePoolParser, true)
+  const { info: poolInfo } = useAccount<StakingPoolInfo>(stakePool, stakePoolParser, true)
   const [updatePoolConfigs, setUpdatePoolConfigs] = useState<UpdatePoolConfigsInfo[]>([])
 
   useEffect(() => {

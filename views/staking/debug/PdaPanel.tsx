@@ -18,7 +18,7 @@ export const PdaPanel = () => {
     if (!selectedAccount) return null
     let seeds = []
     switch (selectedAccount) {
-      case 'PoolInfo':
+      case 'StakingPoolInfo':
         seeds = [
           {
             name: 'UNLOC_STAKING',
@@ -77,7 +77,7 @@ export const PdaPanel = () => {
           {
             name: 'Pool info',
             type: 'Variable',
-            description: 'PoolInfo PDA.'
+            description: 'StakingPoolInfo PDA.'
           },
           {
             name: 'DATA_ACCOUNT',
@@ -118,7 +118,7 @@ export const PdaPanel = () => {
           {
             name: 'Pool info',
             type: 'Variable',
-            description: 'PoolInfo PDA.'
+            description: 'StakingPoolInfo PDA.'
           },
           {
             name: 'DATA_ACCOUNT',

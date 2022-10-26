@@ -8,10 +8,10 @@ export const initialValues = {
   loan: '6oVXrGCdtnTUR6xCvn2Z3f2CYaiboAGar1DKxzeX8QYh',
   stake: '65SDRmYzcAwHiSRyuij6f8LmHAwJ98fwfUnxkog17rbP',
   vote: 'c1hkB5vKgt98WWzEd1xEEYQMZ9evCy2n6gLzj6PFgQk',
-  buyback: '37TgoUgxSshhJmhNEAQMmAWF7XRhXEaY5HxcTZ6eYs6r'
+  liqMin: 'LiqQwAR3c2Hze5eXEcvTC25cgpUuKGJrmpWpE952Nx3'
 }
 
-export const programs = ['loan', 'stake', 'vote', 'buyback'] as const
+export const programs = ['loan', 'stake', 'vote', 'liqMin'] as const
 export type ProgramName = typeof programs[number]
 
 export type ProgramType = {
@@ -33,7 +33,7 @@ export class ProgramStore implements IProgramStore {
   loan = initialValues.loan
   stake = initialValues.stake
   vote = initialValues.vote
-  buyback = initialValues.buyback
+  liqMin = initialValues.liqMin
   loanGlobalState?: GlobalState
   loanGlobalStatePromiseState?: IPromiseBasedObservable<void>
   constructor(store: RootStore, options?: { readFromStorage?: boolean }) {
@@ -53,8 +53,8 @@ export class ProgramStore implements IProgramStore {
   get votePubkey() {
     return new PublicKey(this.vote)
   }
-  get buybackPubkey() {
-    return new PublicKey(this.buyback)
+  get liqMinPubkey() {
+    return new PublicKey(this.liqMin)
   }
 
   setLoan(address: string): void {
@@ -72,8 +72,8 @@ export class ProgramStore implements IProgramStore {
     window.localStorage.setItem('voteAddress', address)
   }
 
-  setBuyback(address: string): void {
-    this.buyback = address
+  setLiqMin(address: string): void {
+    this.liqMin = address
     window.localStorage.setItem('buybackAddress', address)
   }
 
@@ -83,7 +83,7 @@ export class ProgramStore implements IProgramStore {
       this.loan = window.localStorage.getItem('loanAddress') || initialValues.loan
       this.stake = window.localStorage.getItem('stakeAddress') || initialValues.stake
       this.vote = window.localStorage.getItem('voteAddress') || initialValues.vote
-      this.buyback = window.localStorage.getItem('buybackAddress') || initialValues.buyback
+      this.liqMin = window.localStorage.getItem('buybackAddress') || initialValues.liqMin
     })
   }
 

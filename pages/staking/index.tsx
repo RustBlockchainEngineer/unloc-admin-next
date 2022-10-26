@@ -3,10 +3,10 @@ import { AccountInfo, PublicKey } from '@solana/web3.js'
 import { NextPage } from 'next'
 import dynamic from 'next/dynamic'
 import { StakingInitialize } from '@/views/staking/Initialize'
-import { PoolInfo } from '@unloc-dev/unloc-sdk-staking'
+import { StakingPoolInfo } from '@unloc-dev/unloc-sdk-staking'
 
-export const stakePoolParser: TypedAccountParser<PoolInfo> = (_: PublicKey, data: AccountInfo<Buffer>) => {
-  return PoolInfo.fromAccountInfo(data)[0]
+export const stakePoolParser: TypedAccountParser<StakingPoolInfo> = (_: PublicKey, data: AccountInfo<Buffer>) => {
+  return StakingPoolInfo.fromAccountInfo(data)[0]
 }
 
 const DynamicInitializeView = dynamic<{}>(() => Promise.resolve(StakingInitialize), {

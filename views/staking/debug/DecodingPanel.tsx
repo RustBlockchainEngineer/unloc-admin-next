@@ -10,7 +10,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter'
 import { AccountSelector } from '../../../components/AccountSelector'
 
 import { useStore } from '@/stores'
-import { accountProviders, PoolInfo } from '@unloc-dev/unloc-sdk-staking'
+import { accountProviders, StakingPoolInfo } from '@unloc-dev/unloc-sdk-staking'
 import { observer } from 'mobx-react-lite'
 import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 import { FilterOption } from './Filter'
@@ -62,7 +62,7 @@ export const DecodingPanelView = observer(() => {
         setData(data)
       } else {
         const discriminator = accountDiscriminator(selectedAccount)
-        const query = PoolInfo.gpaBuilder(programs.stakePubkey).addFilter('accountDiscriminator', [...discriminator])
+        const query = StakingPoolInfo.gpaBuilder(programs.stakePubkey).addFilter('accountDiscriminator', [...discriminator])
         const data = (await query.run(connection)).map(({ account }) => selectedProvider.fromAccountInfo(account)[0])
         setData(data)
       }

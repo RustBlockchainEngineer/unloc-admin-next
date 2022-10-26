@@ -1,6 +1,6 @@
 import { useAccount } from '@/hooks'
 import { getStakingPoolKey } from '@/utils/spl-utils/unloc-staking'
-import { PoolInfo } from '@unloc-dev/unloc-sdk-staking'
+import { StakingPoolInfo } from '@unloc-dev/unloc-sdk-staking'
 import { NextPage } from 'next'
 import { stakePoolParser } from '.'
 import { times } from 'lodash-es'
@@ -9,7 +9,7 @@ import { useStore } from '@/stores'
 const Stats: NextPage = () => {
   const { programs } = useStore()
   const stakePool = getStakingPoolKey(programs.stakePubkey)
-  const { loading, info } = useAccount<PoolInfo>(stakePool, stakePoolParser, true)
+  const { loading, info } = useAccount<StakingPoolInfo>(stakePool, stakePoolParser, true)
 
   if (loading || !info) {
     return (

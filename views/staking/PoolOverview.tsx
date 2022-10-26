@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { AddressActions } from '@/components/common/AddressActions'
 import { amountToUiAmount, numVal } from '@/utils/spl-utils'
 import { InformationIcon } from '@/components/common'
-import { PoolInfo, CompoundingFrequency, NumDenPair } from '@unloc-dev/unloc-sdk-staking'
+import { StakingPoolInfo, CompoundingFrequency, NumDenPair } from '@unloc-dev/unloc-sdk-staking'
 import { Dialog } from '@headlessui/react'
 import { FundPool } from './FundPool'
 import { Jdenticon } from '@/components/common/JdentIcon'
@@ -32,7 +32,7 @@ const rewardVaultDetails = [
 ]
 
 export type PoolOverviewProps = {
-  poolInfo: PoolInfo
+  poolInfo: StakingPoolInfo
   poolAddress: PublicKey
 }
 
@@ -41,8 +41,8 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
   const sendAndConfirm = useSendTransaction()
   const poolPubkey58 = poolAddress.toBase58()
   const [open, setIsOpen] = useState(false)
-  const { info: rewardVaultInfo } = useTokenAccount(poolInfo.rewardsVault)
-  const { info: stakingVaultInfo } = useTokenAccount(poolInfo.stakingVault)
+  const { info: rewardVaultInfo } = useTokenAccount(poolInfo.stakingRewardsVault)
+  const { info: stakingVaultInfo } = useTokenAccount(poolInfo.stakingDepositsVault)
   const { info: penaltyVaultInfo } = useTokenAccount(poolInfo.penalityDepositVault)
 
   const onPause = async () => {
@@ -211,7 +211,7 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
                       <dt className='truncate text-sm font-medium text-gray-300'>Address</dt>
                       <dd className='mt-1'>
                         <AddressActions
-                          address={poolInfo.stakingVault}
+                          address={poolInfo.stakingDepositsVault}
                           className='text-md flex items-center gap-x-2 font-semibold'
                         />
                       </dd>
@@ -249,7 +249,7 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
                       <dt className='truncate text-sm font-medium text-gray-300'>Address</dt>
                       <dd className='mt-1'>
                         <AddressActions
-                          address={poolInfo.rewardsVault}
+                          address={poolInfo.stakingRewardsVault}
                           className='flex items-center gap-x-2 text-base font-semibold'
                         />
                       </dd>
