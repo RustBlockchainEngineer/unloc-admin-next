@@ -57,7 +57,7 @@ export const VotingInitialize = observer(() => {
       return
     }
 
-    toast.promise(sendAndConfirm(tx, 'confirmed', false), {
+    toast.promise(sendAndConfirm(tx), {
       loading: 'Confirming...',
       error: (e) => {
         console.log(e)

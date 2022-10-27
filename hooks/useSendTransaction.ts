@@ -4,6 +4,11 @@ import { WalletNotConnectedError } from '@solana/wallet-adapter-base'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { Commitment, RpcResponseAndContext, SignatureResult, Transaction } from '@solana/web3.js'
 
+type SendTransactionOptions = {
+  commitment?: Commitment
+  skipPreflight?: boolean
+}
+
 type ReturnType = {
   signature: string
   result: RpcResponseAndContext<SignatureResult>
@@ -11,14 +16,13 @@ type ReturnType = {
 
 export const useSendTransaction = (): ((
   transaction: Transaction,
-  commitment?: Commitment,
-  skipPreflight?: boolean
+  opts?: SendTransactionOptions
 ) => Promise<ReturnType>) => {
   const { connection } = useConnection()
   const { publicKey, sendTransaction } = useWallet()
 
   const sendAndConfirm = useCallback(
-    async (transaction: Transaction, commitment?: Commitment, skipPreflight?: boolean) => {
+    async (transaction: Transaction, opts?: SendTransactionOptions) => {
       if (!publicKey) throw new WalletNotConnectedError()
 
       const {
@@ -28,14 +32,14 @@ export const useSendTransaction = (): ((
 
       const signature = await sendTransaction(transaction, connection, {
         minContextSlot,
-        skipPreflight
+        skipPreflight: opts?.skipPreflight
       })
 
       console.log(signature)
 
       const result = await connection.confirmTransaction(
         { blockhash, lastValidBlockHeight, signature },
-        commitment
+        opts?.commitment
       )
 
       return { signature, result }

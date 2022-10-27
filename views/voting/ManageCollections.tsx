@@ -44,7 +44,7 @@ export const ManageCollections = ({ projectsData }: { projectsData: ProjectData[
 
     const tx = await addCollection(wallet, collectionNft, programs.votePubkey)
 
-    toast.promise(sendAndConfirm(tx, 'confirmed', false), {
+    toast.promise(sendAndConfirm(tx), {
       loading: 'Confirming...',
       error: (e) => (
         <div>
@@ -64,7 +64,7 @@ export const ManageCollections = ({ projectsData }: { projectsData: ProjectData[
 
     const tx = await removeCollection(wallet, collectionNft, projectId, programs.votePubkey)
 
-    toast.promise(sendAndConfirm(tx, 'confirmed', true), {
+    toast.promise(sendAndConfirm(tx, { skipPreflight: true }), {
       loading: 'Confirming...',
       error: (e) => (
         <div>

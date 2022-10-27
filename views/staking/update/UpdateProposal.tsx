@@ -20,7 +20,7 @@ export const UpdateProposal = ({ config }: { config: UpdatePoolConfigsInfo }) =>
     }
 
     const tx = closeUpdateProposal(wallet)
-    toast.promise(sendAndConfirm(tx, 'confirmed', false), {
+    toast.promise(sendAndConfirm(tx), {
       loading: 'Confirming...',
       error: (e) => (
         <div>

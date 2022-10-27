@@ -84,7 +84,7 @@ export const StakingInitialize = observer(() => {
     let txid = ''
     try {
       setIsConfirming(true)
-      const { signature, result } = await sendAndConfirm(tx, 'confirmed', true)
+      const { signature, result } = await sendAndConfirm(tx, { skipPreflight: true })
       txid = signature
       if (result.value.err) {
         if (result.value.err?.toString()) throw Error('Initialize transaction failed.', { cause: result.value.err })

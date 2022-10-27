@@ -48,7 +48,7 @@ export const FundPool = () => {
       const fundAmount = uiAmountToAmount(uiFundAmount, 6)
       const tx = await fundRewardTokens(connection, publicKey, fundAmount)
 
-      toast.promise(sendAndConfirm(tx, 'confirmed', true), {
+      toast.promise(sendAndConfirm(tx, { skipPreflight: true }), {
         loading: 'Confirming...',
         error: (e) => (
           <div>

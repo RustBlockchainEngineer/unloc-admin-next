@@ -26,7 +26,7 @@ export const VotingSessionForm = () => {
 
     const tx = await setVotingSessionTime(wallet, data.startTime, data.endTime, programs.votePubkey)
 
-    toast.promise(sendAndConfirm(tx, 'confirmed', false), {
+    toast.promise(sendAndConfirm(tx), {
       loading: 'Confirming...',
       error: (e) => (
         <div>

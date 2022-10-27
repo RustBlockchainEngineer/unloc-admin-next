@@ -64,7 +64,7 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
 
     let txid = ''
     try {
-      const { result, signature } = await sendAndConfirm(tx, 'confirmed', false)
+      const { result, signature } = await sendAndConfirm(tx)
       txid = signature
       if (result.value.err) {
         throw Error('Pause/Unpause transaction failed', { cause: result.value.err })
@@ -99,7 +99,7 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
       })
     }
 
-    toast.promise(sendAndConfirm(tx, 'confirmed', true), {
+    toast.promise(sendAndConfirm(tx, { skipPreflight: true }), {
       loading: 'Confirming...',
       error: (e) => (
         <div>

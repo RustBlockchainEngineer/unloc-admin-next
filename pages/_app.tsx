@@ -85,7 +85,7 @@ const App = ({ Component, pageProps }: AppProps): ReactNode => {
           }
         }}
       />
-      <WalletProvider wallets={wallets} onError={onError}>
+      <WalletProvider wallets={wallets}>
         <WalletModalProvider>
           <AccountProvider commitment='confirmed'>
             <AdminContext.Provider value={{ isAdmin, setIsAdmin }}>

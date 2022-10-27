@@ -47,7 +47,7 @@ export const LoanClaimExpiredCollateral = observer(() => {
     )
 
     tx.sign(...signers)
-    toast.promise(sendAndConfirm(tx, 'confirmed', true), {
+    toast.promise(sendAndConfirm(tx, { skipPreflight: true }), {
       loading: 'Confirming...',
       error: (e) => (
         <div>

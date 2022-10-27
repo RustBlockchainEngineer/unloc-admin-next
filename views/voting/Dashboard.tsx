@@ -61,7 +61,7 @@ export const VotingDashboard = () => {
     }
     const tx = await addAuthority(wallet, newAuthority, programs.votePubkey)
 
-    toast.promise(sendAndConfirm(tx, 'confirmed', true), {
+    toast.promise(sendAndConfirm(tx, { skipPreflight: true }), {
       loading: 'Confirming...',
       error: (e) => (
         <div>
@@ -81,7 +81,7 @@ export const VotingDashboard = () => {
 
     const tx = await reallocSessionAccount(wallet)
 
-    toast.promise(sendAndConfirm(tx, 'confirmed', false), {
+    toast.promise(sendAndConfirm(tx), {
       loading: 'Confirming...',
       error: (e) => (
         <div>
@@ -100,7 +100,7 @@ export const VotingDashboard = () => {
     }
     const tx = await removeAuthority(wallet, authority, programs.votePubkey)
 
-    toast.promise(sendAndConfirm(tx, 'confirmed', false), {
+    toast.promise(sendAndConfirm(tx), {
       loading: 'Confirming...',
       error: (e) => (
         <div>
