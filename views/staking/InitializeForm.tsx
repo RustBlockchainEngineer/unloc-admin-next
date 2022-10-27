@@ -1,16 +1,20 @@
 import { isPublicKey } from '@/utils/spl-utils/common'
 import { UNLOC_MINT } from '@/utils/spl-utils/unloc-constants'
+import { ArrowPathIcon } from '@heroicons/react/20/solid'
+import { MinusIcon, PlusCircleIcon } from '@heroicons/react/24/solid'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { CompoundingFrequency } from '@unloc-dev/unloc-sdk-staking'
 import clsx from 'clsx'
-import { useForm, useFieldArray } from 'react-hook-form'
-import { useWallet } from '@solana/wallet-adapter-react'
+import { Fragment } from 'react'
+import { useFieldArray, useForm } from 'react-hook-form'
 
 export type FormValues = {
   tokenMint: string | null
   compoundingFrequency: CompoundingFrequency | null
-  numAuthorities: 1 | 2 | 3 | 4 | 5
+  authorityWallets: {
+    address: string
+  }[]
   requiredApprovals: 1 | 2 | 3 | 4 | 5
-  authorityWallet: string
   interestRatesAndScoreMultipliers: {
     accountName: string
     accountType: 'rldm2412' | 'rldm126' | 'rldm63' | 'rldm31' | 'rldm10' | 'flexi' | 'liqMin'
@@ -28,10 +32,12 @@ export type FormValues = {
 
 export const InitializeForm = ({
   onSubmit,
-  isProposal
+  isProposal,
+  isLoading
 }: {
   onSubmit: (data: FormValues) => Promise<void>
   isProposal: boolean
+  isLoading?: boolean
 }) => {
   const { publicKey: wallet } = useWallet()
   const {
@@ -62,10 +68,24 @@ export const InitializeForm = ({
     }
   })
 
+  const {
+    fields: authorityWalletsFields,
+    append,
+    remove
+  } = useFieldArray({
+    name: 'authorityWallets',
+    control,
+    rules: {
+      required: true,
+      minLength: 1,
+      maxLength: 5
+    }
+  })
+
   const handleLoadDefaults = () => {
     const resetValues = { ...DEFAULT_VALUES }
     if (wallet) {
-      resetValues.authorityWallet = wallet.toBase58()
+      resetValues.authorityWallets = [{ address: wallet.toBase58() }]
     }
     reset(resetValues)
   }
@@ -127,7 +147,7 @@ export const InitializeForm = ({
             disabled={true}
             id='unstakePenalityBasisPoints'
             {...register('unstakePenalityBasisPoints', { min: 0, required: true })}
-            className='mt-1 h-[38px] block w-full rounded-md py-1 px-3 text-gray-900'
+            className='mt-1 block h-[38px] w-full rounded-md py-1 px-3 text-gray-900'
           />
         </div>
       </div>
@@ -241,56 +261,89 @@ export const InitializeForm = ({
             <label className='font-semibold text-gray-50'>Authorities</label>
           </div>
 
-          <div className='mb-6 grid grid-cols-1  gap-x-6 sm:grid-cols-2'>
+          <div className='mb-6 grid grid-cols-1 gap-x-6 sm:grid-cols-2'>
             <div className='sm:col-span-1'>
-              <label htmlFor='authority_count' className='text-sm text-gray-50'>
-                # of authorities
-              </label>
-              <input
-                id='authority_count'
-                type='number'
-                {...register('numAuthorities', { min: 1, max: 5, required: true, pattern: /[12345]$/i })}
-                disabled={true}
-                className='h-8 w-full rounded-md text-gray-900'
-              />
-            </div>
-
-            <div className='sm:col-span-1'>
-              <label htmlFor='approval_count' className='text-sm text-gray-50'>
+              <label htmlFor='approval_count' className='mb-1 block text-sm text-gray-50'>
                 Required approvals
               </label>
               <input
                 type='number'
-                disabled={true}
                 id='approval_count'
                 {...register('requiredApprovals', { min: 1, max: 5, required: true })}
-                className='h-8 w-full rounded-md text-gray-900'
+                className='block h-8 w-24 rounded-md text-gray-900'
               />
             </div>
           </div>
-          <input
-            type='text'
-            {...register('authorityWallet', {
-              required: true,
-              validate: {
-                pubkey: (value) => isPublicKey(value) || 'Not a valid pubkey'
-              }
-            })}
-            className='h-8 w-full rounded-md text-gray-900 shadow placeholder:text-sm'
-            placeholder='Authority address'
-          />
-          {errors?.authorityWallet && <p className='mt-2 text-sm text-red-500'>{errors.authorityWallet?.message}</p>}
+          {authorityWalletsFields.length === 0 && (
+            <button
+              type='button'
+              onClick={() => append({ address: '' }, { shouldFocus: true })}
+              className='rounded-md border border-gray-300 bg-transparent px-2 py-1 text-gray-50'
+            >
+              Add an authority
+            </button>
+          )}
+          {authorityWalletsFields.map((field, idx) => (
+            <Fragment key={field.id}>
+              <div key={field.id} className='my-1 flex rounded-md shadow-sm'>
+                <span className='inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-50 px-3 text-gray-500 sm:text-sm'>
+                  #{idx + 1}
+                </span>
+                <input
+                  {...register(`authorityWallets.${idx}.address`, {
+                    required: true,
+                    validate: (value) => isPublicKey(value) || 'Not a valid pubkey'
+                  })}
+                  key={field.id}
+                  type='string'
+                  className='block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 px-3 py-2 text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm'
+                  placeholder='Authority address'
+                />
+                {idx !== 0 && (
+                  <button
+                    type='button'
+                    onClick={() => remove(idx)}
+                    className='ml-3 inline-flex items-center rounded-md bg-red-600 px-2 py-1 hover:bg-red-700'
+                  >
+                    <MinusIcon className='h-5 w-5 text-white' />
+                  </button>
+                )}
+              </div>
+              {errors?.authorityWallets?.[idx]?.address && (
+                <p className='mt-2 text-sm text-red-500'>{errors.authorityWallets[idx]?.address?.message}</p>
+              )}
+            </Fragment>
+          ))}
+          {authorityWalletsFields.length !== 5 && (
+            <button
+              type='button'
+              onClick={() => append({ address: '' })}
+              className='my-2 inline-flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 py-2 text-center hover:bg-indigo-700'
+            >
+              <PlusCircleIcon className='mr-1 h-6 w-6 text-white' />
+              Add an authority
+            </button>
+          )}
         </div>
       )}
       <div>
         <button
           type='submit'
+          disabled={isLoading}
           className={clsx(
-            'my-4 block w-full rounded-lg bg-pink-700 py-2 px-4 text-base text-gray-50 shadow-md',
-            'hover:bg-pink-800 focus:outline-none focus:ring-4'
+            'my-4 inline-flex w-full items-center justify-center text-lg rounded-md border border-transparent bg-pink-600 py-3 px-4 text-gray-50 shadow-md focus:outline-none',
+            'hover:bg-pink-700 focus:outline-none focus:ring-4',
+            'disabled:pointer-events-none disabled:bg-pink-500'
           )}
         >
-          Submit
+          {isLoading ? (
+            <>
+              <ArrowPathIcon className='mr-1 h-5 w-5 animate-spin' />
+              Confirming
+            </>
+          ) : (
+            <>Submit</>
+          )}
         </button>
       </div>
     </form>
@@ -299,9 +352,7 @@ export const InitializeForm = ({
 
 const INITIAL_VALUES: FormValues = {
   tokenMint: null,
-  numAuthorities: 1,
   requiredApprovals: 1,
-  authorityWallet: '',
   compoundingFrequency: CompoundingFrequency.Daily,
   interestRatesAndScoreMultipliers: [
     {
@@ -385,14 +436,13 @@ const INITIAL_VALUES: FormValues = {
       feeReductionBasisPoints: null
     }
   ],
-  unstakePenalityBasisPoints: 5000
+  unstakePenalityBasisPoints: 5000,
+  authorityWallets: [{ address: 'address' }]
 }
 
 const DEFAULT_VALUES: FormValues = {
   tokenMint: UNLOC_MINT.toBase58(),
-  numAuthorities: 1,
   requiredApprovals: 1,
-  authorityWallet: '',
   compoundingFrequency: CompoundingFrequency.Daily,
   profileLevelBenefits: [
     {
@@ -443,38 +493,39 @@ const DEFAULT_VALUES: FormValues = {
       accountName: 'Liq. mining account',
       accountType: 'liqMin',
       interestRateMultiplier: 0.1,
-      scoreMultiplier: 1.5
+      scoreMultiplier: 0.00015
     },
     {
       accountType: 'rldm10',
       accountName: '1-0 months',
       interestRateMultiplier: 0.05,
-      scoreMultiplier: 1.2
+      scoreMultiplier: 0.00012
     },
     {
       accountType: 'rldm31',
       accountName: '3-1 months',
       interestRateMultiplier: 0.15,
-      scoreMultiplier: 2
+      scoreMultiplier: 0.0002
     },
     {
       accountType: 'rldm63',
       accountName: '6-3 months',
       interestRateMultiplier: 0.3,
-      scoreMultiplier: 4
+      scoreMultiplier: 0.0004
     },
     {
       accountType: 'rldm126',
       accountName: '12-6 months',
       interestRateMultiplier: 0.5,
-      scoreMultiplier: 6
+      scoreMultiplier: 0.0006
     },
     {
       accountType: 'rldm2412',
       accountName: '24-12 months',
       interestRateMultiplier: 0.8,
-      scoreMultiplier: 8
+      scoreMultiplier: 0.0008
     }
   ],
-  unstakePenalityBasisPoints: 5000
+  unstakePenalityBasisPoints: 5000,
+  authorityWallets: [{ address: '' }]
 }

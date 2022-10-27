@@ -81,7 +81,7 @@ export const getPenaltyDepositVaultKey = (programId: PublicKey = STAKING_PID) =>
 };
 export const getProgramDataKey = (programId: PublicKey = STAKING_PID) => {
   return PublicKey.findProgramAddressSync(
-    [STAKING_PID.toBytes()],
+    [programId.toBytes()],
     BPF_LOADER_UPGRADEABLE_PROGRAM_ID,
   )[0];
 };

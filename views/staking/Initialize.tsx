@@ -1,17 +1,19 @@
 import { InformationIcon } from '@/components/common'
+import { notify } from '@/components/Notification'
 import { useAccount, useSendTransaction } from '@/hooks'
 import { stakePoolParser } from '@/pages/staking'
 import { useStore } from '@/stores'
-import { compressAddress } from '@/utils'
+import { tryGetErrorCodeFromMessage } from '@/utils/spl-utils'
 import { UNLOC_MINT } from '@/utils/spl-utils/unloc-constants'
 import { getStakingPoolKey, initializeStakingPool } from '@/utils/spl-utils/unloc-staking'
 import { Transition } from '@headlessui/react'
 import { DocumentPlusIcon } from '@heroicons/react/24/solid'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { PublicKey } from '@solana/web3.js'
-import { StakingPoolInfo } from '@unloc-dev/unloc-sdk-staking'
+import { errorFromCode, StakingPoolInfo } from '@unloc-dev/unloc-sdk-staking'
 import { BN } from 'bn.js'
 import { observer } from 'mobx-react-lite'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { FormValues, InitializeForm } from './InitializeForm'
 import { PoolOverview } from './PoolOverview'
@@ -28,7 +30,7 @@ export const StakingInitialize = observer(() => {
   const stakePool = getStakingPoolKey(programs.stakePubkey)
   const sendAndConfirm = useSendTransaction()
   const { loading, account, info: poolInfo } = useAccount<StakingPoolInfo>(stakePool, stakePoolParser, true)
-  console.log(stakePool.toBase58())
+  const [isConfirming, setIsConfirming] = useState(false)
 
   const onSubmit = async (data: FormValues) => {
     if (!wallet) {
@@ -37,8 +39,8 @@ export const StakingInitialize = observer(() => {
     }
 
     console.log('onSubmit()', data)
-    const numAuthorities = data.numAuthorities
-    const authorityWallets = [new PublicKey(data.authorityWallet)]
+    const numAuthorities = data.authorityWallets.length
+    const authorityWallets = data.authorityWallets.map(({ address }) => new PublicKey(address))
     const numApprovalsNeededForUpdate = data.requiredApprovals
 
     const interestRateFraction = data.interestRatesAndScoreMultipliers.reduce<any>(
@@ -79,16 +81,49 @@ export const StakingInitialize = observer(() => {
       programs.liqMinPubkey
     )
 
-    toast.promise(sendAndConfirm(tx, 'confirmed', true), {
-      loading: 'Confirming...',
-      error: (e) => (
-        <div>
-          <p>There was an error confirming your transaction</p>
-          <p>{e.message}</p>
-        </div>
-      ),
-      success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
-    })
+    let txid = ''
+    try {
+      setIsConfirming(true)
+      const { signature, result } = await sendAndConfirm(tx, 'confirmed', true)
+      txid = signature
+      if (result.value.err) {
+        if (result.value.err?.toString()) throw Error('Initialize transaction failed.', { cause: result.value.err })
+      }
+      notify({
+        type: 'success',
+        title: 'Staking initialized.',
+        txid
+      })
+    } catch (err: any) {
+      console.log({ err })
+      const code = tryGetErrorCodeFromMessage(err?.message || '')
+      const decodedError = code ? errorFromCode(code) : undefined
+      notify({
+        type: 'error',
+        title: 'Initialize staking failed',
+        txid,
+        description: (
+          <span className='break-words'>
+            {decodedError ? (
+              <>
+                <span className='block'>
+                  Decoded error: <span className='font-medium text-orange-300'>{decodedError.name}</span>
+                </span>
+                <span className='block'>{decodedError.message}</span>
+              </>
+            ) : err?.message ? (
+              <>
+                <span className='block break-words'>{err.message}</span>
+              </>
+            ) : (
+              'Unknown error, check the console for more details'
+            )}
+          </span>
+        )
+      })
+    } finally {
+      setIsConfirming(false)
+    }
   }
 
   return (
@@ -102,7 +137,7 @@ export const StakingInitialize = observer(() => {
               <InformationIcon info={initializeInfo} />
             </p>
           </div>
-          <InitializeForm onSubmit={onSubmit} isProposal={false} />
+          <InitializeForm onSubmit={onSubmit} isProposal={false} isLoading={isConfirming} />
         </div>
       )}
 

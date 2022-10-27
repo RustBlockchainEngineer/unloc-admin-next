@@ -3,9 +3,9 @@ import { PublicKey } from '@solana/web3.js'
 import tokenLogo from '/public/unloc_token.png'
 import Image from 'next/image'
 import { AddressActions } from '@/components/common/AddressActions'
-import { amountToUiAmount, numVal } from '@/utils/spl-utils'
+import { amountToUiAmount, numVal, tryGetErrorCodeFromMessage } from '@/utils/spl-utils'
 import { InformationIcon } from '@/components/common'
-import { StakingPoolInfo, CompoundingFrequency, NumDenPair } from '@unloc-dev/unloc-sdk-staking'
+import { StakingPoolInfo, CompoundingFrequency, NumDenPair, errorFromCode } from '@unloc-dev/unloc-sdk-staking'
 import { Dialog } from '@headlessui/react'
 import { FundPool } from './FundPool'
 import { Jdenticon } from '@/components/common/JdentIcon'
@@ -18,6 +18,7 @@ import { useState } from 'react'
 import { CheckIcon, NoSymbolIcon } from '@heroicons/react/20/solid'
 import { createUpdateProposal } from '@/utils/spl-utils/unloc-staking'
 import toast from 'react-hot-toast'
+import { notify } from '@/components/Notification'
 
 const stateDetails = [
   'Once the state account is initialized, other instructions related to managing the staking contract can be called.',
@@ -47,7 +48,7 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
 
   const onPause = async () => {
     if (!wallet) {
-      toast.error('Connect your wallet')
+      notify({ type: 'error', description: 'Connect your wallet' })
       return
     }
     const { interestRateFraction, scoreMultiplier, profileLevelMultiplier, unstakePenalityBasisPoints, paused } =
@@ -60,6 +61,43 @@ export const PoolOverview = ({ poolInfo, poolAddress }: PoolOverviewProps) => {
       unstakePenalityBasisPoints,
       !paused
     )
+
+    let txid = ''
+    try {
+      const { result, signature } = await sendAndConfirm(tx, 'confirmed', false)
+      txid = signature
+      if (result.value.err) {
+        throw Error('Pause/Unpause transaction failed', { cause: result.value.err })
+      }
+      notify({ type: 'success', title: `${paused ? 'Unpause' : 'Pause'} successful`, txid })
+    } catch (err: any) {
+      console.log({ err })
+      const code = tryGetErrorCodeFromMessage(err?.message || '')
+      const decodedError = code ? errorFromCode(code) : undefined
+      notify({
+        type: 'error',
+        title: 'Initialize staking failed',
+        txid,
+        description: (
+          <span className='break-words'>
+            {decodedError ? (
+              <>
+                <span className='block'>
+                  Decoded error: <span className='font-medium text-orange-300'>{decodedError.name}</span>
+                </span>
+                <span className='block'>{decodedError.message}</span>
+              </>
+            ) : err?.message ? (
+              <>
+                <span className='block break-words'>{err.message}</span>
+              </>
+            ) : (
+              'Unknown error, check the console for more details'
+            )}
+          </span>
+        )
+      })
+    }
 
     toast.promise(sendAndConfirm(tx, 'confirmed', true), {
       loading: 'Confirming...',
