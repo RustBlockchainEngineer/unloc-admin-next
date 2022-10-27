@@ -1,8 +1,9 @@
 import { bignum } from '@metaplex-foundation/beet'
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
-import { Connection, PublicKey } from '@solana/web3.js'
+import { AccountLayout, createInitializeAccountInstruction, getMinimumBalanceForRentExemptAccount, TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import { Connection, Keypair, PublicKey, SystemProgram, TransactionInstruction } from '@solana/web3.js'
 import { BN } from 'bn.js'
 import { sha256 } from 'js-sha256'
+import { PROGRAM_ID as TOKEN_META_PID } from '@metaplex-foundation/mpl-token-metadata';
 
 export const amountToUiAmount = (amount: BigInt | bignum, mintDecimals: number) => {
   amount = typeof amount === 'bigint' ? amount : BigInt(amount.toString())
@@ -87,4 +88,43 @@ export function isPublicKey(value: any) {
   } catch {
     return false
   }
+}
+
+export const addTokenAccountInstruction = async (
+  connection: Connection,
+  mint: PublicKey,
+  owner: PublicKey,
+  instructions: TransactionInstruction[],
+  signer: PublicKey,
+  signers: Keypair[],
+  rent: number = 0
+) => {
+  const newKeypair = Keypair.generate()
+  const rentForTokenAccount = await getMinimumBalanceForRentExemptAccount(connection)
+  instructions.push(
+    SystemProgram.createAccount({
+      fromPubkey: signer,
+      newAccountPubkey: newKeypair.publicKey,
+      lamports: rent > 0 ? rent : rentForTokenAccount,
+      space: AccountLayout.span,
+      programId: TOKEN_PROGRAM_ID
+    })
+  )
+  const instruction = createInitializeAccountInstruction( newKeypair.publicKey, mint, owner, TOKEN_PROGRAM_ID)
+  instructions.push(instruction)
+  signers.push(newKeypair)
+  return newKeypair.publicKey
+}
+
+export const getEditionKey = (nftMint: PublicKey) => {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from('metadata'), TOKEN_META_PID.toBuffer(), nftMint.toBuffer(), Buffer.from('edition')],
+    TOKEN_META_PID
+  )[0]
+};
+export const getNftMetadataKey = (nftMint: PublicKey) => {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from('metadata'), TOKEN_META_PID.toBuffer(), nftMint.toBuffer()],
+    TOKEN_META_PID
+  )[0]
 }

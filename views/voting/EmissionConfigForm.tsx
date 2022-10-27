@@ -4,7 +4,7 @@ import { compressAddress } from '@/utils'
 import { WalletIcon } from '@heroicons/react/20/solid'
 import { setEmissions } from '@/utils/spl-utils/unloc-voting'
 import { BN } from '@project-serum/anchor'
-import { useWallet } from '@solana/wallet-adapter-react'
+import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { useForm } from 'react-hook-form'
 
 import toast from 'react-hot-toast'
@@ -19,6 +19,7 @@ type EmissionsFormData = {
 export const EmissionConfigForm = () => {
   const { programs } = useStore()
   const { publicKey: wallet } = useWallet()
+  const { connection } = useConnection()
   const sendAndConfirm = useSendTransaction()
   const { register, watch, handleSubmit, setValue, setFocus } = useForm<EmissionsFormData>({
     defaultValues: {
@@ -40,6 +41,7 @@ export const EmissionConfigForm = () => {
     const borrowerShareBp = (100 - data.lenderPercentage) * 100
 
     const tx = await setEmissions(
+      connection,
       wallet,
       rewardAmount,
       startTime,
