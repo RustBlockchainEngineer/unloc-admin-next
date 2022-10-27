@@ -67,7 +67,6 @@ export const StakingInitialize = observer(() => {
     const tx = await initializeStakingPool(
       wallet,
       UNLOC_MINT,
-      programs.stakePubkey,
       numAuthorities,
       authorityWallets,
       numApprovalsNeededForUpdate,
@@ -75,6 +74,7 @@ export const StakingInitialize = observer(() => {
       scoreMultiplier,
       profileLevelMultiplier,
       unstakePenalityBasisPoints,
+      programs.stakePubkey,
       programs.votePubkey,
       programs.liqMinPubkey
     )

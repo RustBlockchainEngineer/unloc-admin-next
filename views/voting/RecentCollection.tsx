@@ -2,12 +2,12 @@ import { Copyable } from '@/components/common'
 import { Jdenticon } from '@/components/common/JdentIcon'
 import { useAccount } from '@/hooks'
 import { compressAddress, removeNulChars } from '@/utils'
-import { getNftMetadataKey } from '@/utils/spl-utils/unloc-voting'
 import { ProjectData } from '@unloc-dev/unloc-sdk-voting'
 import { Metadata } from '@metaplex-foundation/mpl-token-metadata'
 import { useMemo } from 'react'
 import useSWRImmutable from 'swr/immutable'
 import Image from 'next/image'
+import { getNftMetadataKey } from '@/utils/spl-utils/common'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
