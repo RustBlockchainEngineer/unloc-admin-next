@@ -32,7 +32,7 @@ export const VotingInitialize = observer(() => {
   const handleFillDefault = () => {
     const defaults: FormData = {
       stakingPid: programs.stake,
-      liquidityMiningPid: 'TkpSRsB8yB2qRETXLuPxuZ6Fkg2vuJnmfsQiJLfVpmG',
+      liquidityMiningPid: programs.liqMin,
       liquidityMiningRewardsMint: UNLOC_MINT.toBase58()
     }
     reset(defaults)
