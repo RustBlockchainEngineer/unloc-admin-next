@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js'
 import { NextPage } from 'next'
-import { FeeReductionLevels, StakingPoolInfo, UpdatePoolConfigsInfo } from '@unloc-dev/unloc-sdk-staking'
+import { errorFromCode, FeeReductionLevels, StakingPoolInfo, UpdatePoolConfigsInfo } from '@unloc-dev/unloc-sdk-staking'
 import { useStore } from '@/stores'
 import { createUpdateProposal, getStakingPoolKey, getUpdatePoolConfigsKey } from '@/utils/spl-utils/unloc-staking'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
@@ -14,6 +14,8 @@ import { useEffect, useState } from 'react'
 
 import { UpdateProposal } from '@/views/staking/update/UpdateProposal'
 import { toNumDenPair } from '@/views/staking/Initialize'
+import { notify } from '@/components/Notification'
+import { tryGetErrorCodeFromMessage } from '@/utils/spl-utils'
 
 const Update: NextPage = () => {
   const { connection } = useConnection()
@@ -94,16 +96,47 @@ const Update: NextPage = () => {
       programs.stakePubkey
     )
 
-    toast.promise(sendAndConfirm(tx), {
-      loading: 'Confirming...',
-      error: (e) => (
-        <div>
-          <p>There was an error confirming your transaction</p>
-          <p>{e.message}</p>
-        </div>
-      ),
-      success: (e: any) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
-    })
+    let txid = ''
+    try {
+      const { signature, result } = await sendAndConfirm(tx)
+      txid = signature
+      if (result.value.err) {
+        if (result.value.err?.toString())
+          throw Error('Failed to create an update proposal.', { cause: result.value.err })
+      }
+      notify({
+        type: 'success',
+        title: 'Create update proposal success',
+        txid
+      })
+    } catch (err: any) {
+      console.log({ err })
+      const code = tryGetErrorCodeFromMessage(err?.message || '')
+      const decodedError = code ? errorFromCode(code) : undefined
+      notify({
+        type: 'error',
+        title: 'Create update proposal failed',
+        txid,
+        description: (
+          <span className='break-words'>
+            {decodedError ? (
+              <>
+                <span className='block'>
+                  Decoded error: <span className='font-medium text-orange-300'>{decodedError.name}</span>
+                </span>
+                <span className='block'>{decodedError.message}</span>
+              </>
+            ) : err?.message ? (
+              <>
+                <span className='block break-words'>{err.message}</span>
+              </>
+            ) : (
+              'Unknown error, check the console for more details'
+            )}
+          </span>
+        )
+      })
+    }
   }
 
   return (

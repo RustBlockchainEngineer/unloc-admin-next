@@ -1,11 +1,13 @@
+import { notify } from '@/components/Notification'
 import { useSendTransaction, useTokenAccount } from '@/hooks'
 import { compressAddress } from '@/utils'
-import { amountToUiAmount, uiAmountToAmount } from '@/utils/spl-utils'
+import { amountToUiAmount, tryGetErrorCodeFromMessage, uiAmountToAmount } from '@/utils/spl-utils'
 import { UNLOC_MINT } from '@/utils/spl-utils/unloc-constants'
 import { fundRewardTokens } from '@/utils/spl-utils/unloc-staking'
 import { WalletIcon } from '@heroicons/react/20/solid'
 import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
+import { errorFromCode } from '@unloc-dev/unloc-sdk-staking'
 import clsx from 'clsx'
 import { useState, ChangeEvent, useCallback, SyntheticEvent, useRef } from 'react'
 import toast from 'react-hot-toast'
@@ -48,16 +50,46 @@ export const FundPool = () => {
       const fundAmount = uiAmountToAmount(uiFundAmount, 6)
       const tx = await fundRewardTokens(connection, publicKey, fundAmount)
 
-      toast.promise(sendAndConfirm(tx, { skipPreflight: true }), {
-        loading: 'Confirming...',
-        error: (e) => (
-          <div>
-            <p>There was an error confirming your transaction</p>
-            <p>{e.message}</p>
-          </div>
-        ),
-        success: (e) => `Transaction ${compressAddress(6, e.signature)} confirmed.`
-      })
+      let txid = ''
+      try {
+        const { signature, result } = await sendAndConfirm(tx)
+        txid = signature
+        if (result.value.err) {
+          if (result.value.err?.toString()) throw Error('Funding failed', { cause: result.value.err })
+        }
+        notify({
+          type: 'success',
+          title: 'Reward token fund success',
+          txid
+        })
+      } catch (err: any) {
+        console.log({ err })
+        const code = tryGetErrorCodeFromMessage(err?.message || '')
+        const decodedError = code ? errorFromCode(code) : undefined
+        notify({
+          type: 'error',
+          title: 'Failed to fund reward tokens',
+          txid,
+          description: (
+            <span className='break-words'>
+              {decodedError ? (
+                <>
+                  <span className='block'>
+                    Decoded error: <span className='font-medium text-orange-300'>{decodedError.name}</span>
+                  </span>
+                  <span className='block'>{decodedError.message}</span>
+                </>
+              ) : err?.message ? (
+                <>
+                  <span className='block break-words'>{err.message}</span>
+                </>
+              ) : (
+                'Unknown error, check the console for more details'
+              )}
+            </span>
+          )
+        })
+      }
     },
     [publicKey, ata, uiFundAmount, connection, sendAndConfirm]
   )
