@@ -1,5 +1,5 @@
-import { PROGRAM_ID as TOKEN_META_PID } from '@metaplex-foundation/mpl-token-metadata';
-import { Connection, Keypair, PublicKey, SYSVAR_CLOCK_PUBKEY, Transaction, TransactionInstruction} from '@solana/web3.js'
+import { Metadata, PROGRAM_ID as TOKEN_META_PID } from '@metaplex-foundation/mpl-token-metadata';
+import { Connection, Keypair, PublicKey, SYSVAR_CLOCK_PUBKEY, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction, TransactionInstruction} from '@solana/web3.js'
 import {
   createClaimExpiredCollateralInstruction,
   createUpdateGlobalStateInstruction,
@@ -12,6 +12,7 @@ import { createCreateGlobalStateInstruction } from '@unloc-dev/unloc-sdk-loan';
 import BN from 'bn.js';
 import { addTokenAccountInstruction, getEditionKey, getWalletTokenAccount } from './common';
 import { BPF_LOADER_UPGRADEABLE_PROGRAM_ID } from './unloc-constants';
+import { getCollectionLoanLiqMinEmissionsInfoKey, getCollectionLoanLiqMinEmissionsVaultKey, getLoanSubofferRewardsInfoKey, LIQ_MINING_PID } from './unloc-liq-mining';
 
 ///////////////
 // CONSTANTS //
@@ -135,7 +136,8 @@ export const claimExpiredCollateral = async (
   signer: PublicKey,
   subOffer: PublicKey,
   signers: Keypair[] = [],
-  programId = LOAN_PID
+  programId = LOAN_PID,
+  liqMinProgram = LIQ_MINING_PID
 ) => {
   const instructions: TransactionInstruction[] = []
   const globalState = getLoanGlobalStateKey(programId)
@@ -151,7 +153,14 @@ export const claimExpiredCollateral = async (
   }
   let borrowerNftVault = await getWalletTokenAccount(connection, offerData.borrower, nftMint)
   const edition = getEditionKey(nftMint);
-  const metadataProgram = TOKEN_META_PID
+  const metadataProgram = TOKEN_META_PID;
+  
+  const lender = subOfferData.lender;
+  const metadata = await Metadata.fromAccountAddress(connection, nftMint);
+  const collectionNft = metadata.collection!.key;
+  const collectionLoanLiqMinEmissionsInfo = getCollectionLoanLiqMinEmissionsInfoKey(collectionNft, liqMinProgram)
+  const collectionLoanLiqMinEmissionsVault = getCollectionLoanLiqMinEmissionsVaultKey(collectionNft, liqMinProgram)
+  const activeSubofferLoanRewardsInfo = getLoanSubofferRewardsInfoKey(subOffer, liqMinProgram)
   instructions.push(
     createClaimExpiredCollateralInstruction({
       superOwner: signer,
@@ -164,7 +173,16 @@ export const claimExpiredCollateral = async (
       nftMint,
       edition,
       metadataProgram,
-      clock: SYSVAR_CLOCK_PUBKEY
+      clock: SYSVAR_CLOCK_PUBKEY,
+
+      lender,
+      collectionLoanLiqMinEmissionsInfo,
+      activeSubofferLoanRewardsInfo,
+      collectionLoanLiqMinEmissionsVault,
+      collectionNft,
+      instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY,
+      loanProgram: programId,
+      liqMinProgram,
     },
     programId
     )
