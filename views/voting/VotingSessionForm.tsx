@@ -76,6 +76,13 @@ export const VotingSessionForm = () => {
             <div className='space-x-1'>
               <button
                 type='button'
+                onClick={() => setValue('endTime', Math.round(Date.now() / 1000 + 20 * 60))}
+                className='inline-flex rounded-sm border border-gray-600 bg-transparent px-2 py-0.5 text-sm text-gray-50'
+              >
+                Now + 20 min
+              </button>
+              <button
+                type='button'
                 onClick={() => setValue('endTime', Math.round(Date.now() / 1000 + 60 * 60))}
                 className='inline-flex rounded-sm border border-gray-600 bg-transparent px-2 py-0.5 text-sm text-gray-50'
               >
