@@ -21,7 +21,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@unloc-dev/unloc-loan-solita": "^2.0.0",
     "@unloc-dev/unloc-sdk-liquidity-mining": "^0.1.28",
-    "@unloc-dev/unloc-sdk-loan": "0.1.26",
+    "@unloc-dev/unloc-sdk-loan": "^0.1.28",
     "@unloc-dev/unloc-sdk-staking": "^0.1.28",
     "@unloc-dev/unloc-sdk-voting": "^0.1.28",
     "@unloc-dev/unloc-voting-solita": "1.0.1",
