@@ -1,9 +1,10 @@
 import { bignum } from '@metaplex-foundation/beet'
 import { getAssociatedTokenAddressSync } from '@solana/spl-token'
-import { Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
+import { Connection, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction, TransactionInstruction } from '@solana/web3.js'
 import {
   createAddAuthorityInstruction,
   createAddCollectionInstruction,
+  createAllocateLiqMinRwdsInstruction,
   createInitializeVotingSessionInstruction,
   createReallocSessionAccountInstruction,
   createRemoveAuthorityInstruction,
@@ -15,7 +16,7 @@ import {
 } from '@unloc-dev/unloc-sdk-voting'
 import { getNftMetadataKey } from './common'
 import { BPF_LOADER_UPGRADEABLE_PROGRAM_ID, DATA_ACCOUNT, TOKEN_ACCOUNT, UNLOC, UNLOC_MINT } from './unloc-constants'
-import { getCollectionPoolRewardsInfoKey, LIQ_MINING_PID } from './unloc-liq-mining'
+import { getCollectionLoanLiqMinEmissionsInfoKey, getCollectionLoanLiqMinEmissionsVaultKey, LIQ_MINING_PID } from './unloc-liq-mining'
 import { STAKING_PID } from './unloc-staking'
 
 ///////////////
@@ -35,10 +36,13 @@ export const SESSION_TOTAL_EMISSIONS_VAULT = Buffer.from("sessionTotalEmissionsV
 export const getVotingSessionKey = (programId: PublicKey = VOTING_PID) => {
   return PublicKey.findProgramAddressSync([UNLOC, VOTING_PROGRAM, VOTE_SESSION_INFO, DATA_ACCOUNT], programId)[0]
 }
+export const getSessionTotalEmissionsVault = (programId: PublicKey = VOTING_PID) => {
+  return PublicKey.findProgramAddressSync([UNLOC, VOTING_PROGRAM, SESSION_TOTAL_EMISSIONS_VAULT, TOKEN_ACCOUNT], programId)[0]
+}
 export const getVotingProgramDataKey = (programId: PublicKey = VOTING_PID) => {
   return PublicKey.findProgramAddressSync([programId.toBytes()], BPF_LOADER_UPGRADEABLE_PROGRAM_ID)[0]
 }
-export const getNextEmissionsRewardsVaultKey = (programId: PublicKey = VOTING_PID) => {
+export const getSessionTotalEmissionsVaultKey = (programId: PublicKey = VOTING_PID) => {
   return PublicKey.findProgramAddressSync([UNLOC, VOTING_PROGRAM, SESSION_TOTAL_EMISSIONS_VAULT, TOKEN_ACCOUNT], programId)[0]
 }
 
@@ -53,7 +57,7 @@ export const initializeVotingSession = async (
   programId: PublicKey = VOTING_PID
 ) => {
   const voteSessionInfo = getVotingSessionKey(programId)
-  const nextEmissionsRewardsVault = getNextEmissionsRewardsVaultKey(programId)
+  const sessionTotalEmissionsVault = getSessionTotalEmissionsVaultKey(programId)
   const programData = getVotingProgramDataKey(programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
@@ -62,7 +66,7 @@ export const initializeVotingSession = async (
         initialiserWallet: userWallet,
         voteSessionInfo,
         unlocTokenMint,
-        nextEmissionsRewardsVault,
+        sessionTotalEmissionsVault,
         program: programId,
         programData
       },
@@ -129,18 +133,20 @@ export const removeAuthority = async (userWallet: PublicKey, authorityWalletToRe
 
 export const addCollection = async (userWallet: PublicKey, collectionNft: PublicKey, programId = VOTING_PID, liqMinProgram = LIQ_MINING_PID) => {
   const voteSessionInfo = getVotingSessionKey(programId)
-  const collectionPoolRewardsInfo = getCollectionPoolRewardsInfoKey(collectionNft, programId)
-  const collectionNftMetadata = getNftMetadataKey(collectionNft)
+  const collectionLoanLiqMinEmissionsInfo = getCollectionLoanLiqMinEmissionsInfoKey(collectionNft, liqMinProgram)
+  const collectionLoanLiqMinEmissionsVault = getCollectionLoanLiqMinEmissionsVaultKey(collectionNft, liqMinProgram)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createAddCollectionInstruction(
       {
         authority: userWallet,
         voteSessionInfo,
-        collectionPoolRewardsInfo,
+        collectionLoanLiqMinEmissionsInfo,
+        collectionLoanLiqMinEmissionsVault,
+        unlocTokenMint: UNLOC_MINT,
         collectionNft,
-        collectionNftMetadata,
-        liqMinProgram
+        liqMinProgram,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY
       },
       programId
     )
@@ -157,17 +163,15 @@ export const removeCollection = async (
   liqMinProgram = LIQ_MINING_PID
 ) => {
   const voteSessionInfo = getVotingSessionKey(programId)
-  const collectionPoolRewardsInfo = getCollectionPoolRewardsInfoKey(collectionNft, liqMinProgram)
-  const collectionNftMetadata = getNftMetadataKey(collectionNft)
+  const collectionLoanLiqMinEmissionsInfo = getCollectionLoanLiqMinEmissionsInfoKey(collectionNft, liqMinProgram)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createRemoveCollectionInstruction(
       {
         authority: userWallet,
         voteSessionInfo,
-        collectionPoolRewardsInfo,
+        collectionLoanLiqMinEmissionsInfo,
         collectionNft,
-        collectionNftMetadata
       },
       {
         projectId
@@ -208,8 +212,8 @@ export const setEmissions = async (
   connection: Connection,
   userWallet: PublicKey,
   rewardsAmount: bignum,
-  startTimestamp: bignum,
-  endTimestamp: bignum,
+  rewardDistributionStartTimestamp: bignum,
+  rewardDistributionEndTimestamp: bignum,
   lenderShareBp: number,
   borrowerShareBp: number,
   programId = VOTING_PID
@@ -218,25 +222,60 @@ export const setEmissions = async (
   const voteSessionData = await VoteSessionInfo.fromAccountAddress(connection, voteSessionInfo)
   const rewardsMint = voteSessionData.unlocTokenMint
   const authorityUnlocAtaToDebit = getAssociatedTokenAddressSync(rewardsMint, userWallet)
-  const nextEmissionsRewardsVault = getNextEmissionsRewardsVaultKey(programId)
+  const sessionTotalEmissionsVault = getSessionTotalEmissionsVaultKey(programId)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createSetEmissionsInstruction(
       {
         authority: userWallet,
         voteSessionInfo,
-        nextEmissionsRewardsVault,
+        sessionTotalEmissionsVault,
         authorityUnlocAtaToDebit,
         rewardsMint
       },
       {
         args: {
           rewardsAmount,
-          startTimestamp,
-          endTimestamp,
+          rewardDistributionStartTimestamp,
+          rewardDistributionEndTimestamp,
           lenderShareBp,
           borrowerShareBp
         }
+      },
+      programId
+    )
+  )
+
+  return new Transaction().add(...instructions)
+}
+
+
+export const allocateLiqMinRwds = async (
+  payer: PublicKey,
+  projectId: number,
+  collectionNft: PublicKey,
+  liqMinProgram = LIQ_MINING_PID,
+  programId = VOTING_PID,
+) => {
+  const voteSessionInfo = getVotingSessionKey(programId);
+  const sessionTotalEmissionsVault = getSessionTotalEmissionsVault(programId);
+  const collectionLoanLiqMinEmissionsInfo = getCollectionLoanLiqMinEmissionsInfoKey(collectionNft, liqMinProgram);
+  const collectionLoanLiqMinEmissionsVault = getCollectionLoanLiqMinEmissionsVaultKey(collectionNft, liqMinProgram);
+  const instructions: TransactionInstruction[] = []
+  instructions.push(
+    createAllocateLiqMinRwdsInstruction(
+      {
+        payer,
+        voteSessionInfo,
+        collectionNft,
+        sessionTotalEmissionsVault,
+        collectionLoanLiqMinEmissionsInfo,
+        collectionLoanLiqMinEmissionsVault,
+        liqMinProgram,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY
+      },
+      {
+        projectId,
       },
       programId
     )
