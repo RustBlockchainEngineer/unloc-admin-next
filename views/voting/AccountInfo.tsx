@@ -8,7 +8,7 @@ import Image from 'next/image'
 import UnlocToken from '../../public/unloc_token.png'
 
 export const AccountInfo = ({ info }: { info: VoteSessionInfo }) => {
-  const { loading, info: vaultInfo } = useTokenAccount(info?.nextEmissionsRewardsVault)
+  const { loading, info: vaultInfo } = useTokenAccount(info?.sessionTotalEmissionsVault)
 
   return (
     <>

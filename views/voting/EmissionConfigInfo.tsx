@@ -46,13 +46,13 @@ export const EmissionConfigInfo = ({ info }: { info: VoteSessionInfo }) => {
             <div className='rounded-md border border-gray-500 px-4 py-3'>
               <dd className='text-xs text-gray-300'>Start time</dd>
               <dt className='mt-2 font-mono text-xl font-semibold'>
-                {dayjs.unix(numVal(info.emissions.startTimestamp)).format('YYYY-MM-DD HH:mm:ssZ[Z]')}
+                {dayjs.unix(numVal(info.emissions.rewardDistributionStartTimestamp)).format('YYYY-MM-DD HH:mm:ssZ[Z]')}
               </dt>
             </div>
             <div className='rounded-md border border-gray-500 px-4 py-3'>
               <dd className='text-xs text-gray-300'>End time</dd>
               <dt className='mt-2 font-mono text-xl font-semibold'>
-                {dayjs.unix(numVal(info.emissions.endTimestamp)).format('YYYY-MM-DD HH:mm:ssZ[Z]')}
+                {dayjs.unix(numVal(info.emissions.rewardDistributionEndTimestamp)).format('YYYY-MM-DD HH:mm:ssZ[Z]')}
               </dt>
             </div>
             <div className='max-w-fit rounded-md border border-gray-500 px-4 py-3'>
