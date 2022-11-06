@@ -13,20 +13,11 @@ import { BN } from 'bn.js'
 import { observer } from 'mobx-react-lite'
 import toast from 'react-hot-toast'
 
-const initializeInfo = [
-  'This instruction is ran to initialize the pool to its initial state.',
-  'We set the compounding frequency, interest rates, score multipliers for all staking account types, the profile level requirements and the fee reduction percentages (per-level).',
-  'The initialized account will also control the token accounts that issue rewards and receive fees.'
-]
-
 export const LoanClaimExpiredCollateral = observer(() => {
   const { programs } = useStore()
   const { publicKey: wallet } = useWallet()
-  const {connection} = useConnection()
-  const stakePool = getStakingPoolKey(programs.stakePubkey)
+  const { connection } = useConnection()
   const sendAndConfirm = useSendTransaction()
-  const { info: poolInfo } = useAccount<StakingPoolInfo>(stakePool, stakePoolParser, true)
-  console.log(stakePool.toBase58())
 
   const onSubmit = async () => {
     if (!wallet) {
@@ -38,13 +29,7 @@ export const LoanClaimExpiredCollateral = observer(() => {
     const subOffer: PublicKey = PublicKey.default
 
     const signers: Keypair[] = []
-    let tx = await claimExpiredCollateral(
-      connection,
-      wallet,
-      subOffer,
-      signers,
-      programs.loanPubkey
-    )
+    let tx = await claimExpiredCollateral(connection, wallet, subOffer, signers, programs.loanPubkey)
 
     tx.sign(...signers)
     toast.promise(sendAndConfirm(tx, { skipPreflight: true }), {
@@ -61,24 +46,21 @@ export const LoanClaimExpiredCollateral = observer(() => {
 
   return (
     <main className='flex w-full flex-col gap-x-12 gap-y-4 text-white lg:flex-row'>
-      {!poolInfo && (
-        <div className='max-w-xl rounded-lg bg-slate-700  shadow-sm lg:min-w-[450px]'>
-          <div className='flex flex-wrap items-center justify-between border-b border-gray-500 p-8'>
-            <p className='flex items-center text-2xl font-semibold text-gray-100'>
-              <DocumentPlusIcon className='mr-2 h-6 w-6' />
-              Claim Expired Collateral
-              <InformationIcon info={initializeInfo} />
-            </p>
-          </div>
-          <Button
-            onClick={() => onSubmit()}
-            color='light-slate'
-            className={`text-sm font-normal !rounded-3xl w-44 bg-slate-400 hover:!bg-slate-400`}
-          >
+      <div className='max-w-xl rounded-lg bg-slate-700  shadow-sm lg:min-w-[450px]'>
+        <div className='flex flex-wrap items-center justify-between border-b border-gray-500 p-8'>
+          <p className='flex items-center text-2xl font-semibold text-gray-100'>
+            <DocumentPlusIcon className='mr-2 h-6 w-6' />
             Claim Expired Collateral
-          </Button>
+          </p>
         </div>
-      )}
+        <Button
+          onClick={() => onSubmit()}
+          color='light-slate'
+          className={`w-44 !rounded-3xl bg-slate-400 text-sm font-normal hover:!bg-slate-400`}
+        >
+          Claim Expired Collateral
+        </Button>
+      </div>
     </main>
   )
 })

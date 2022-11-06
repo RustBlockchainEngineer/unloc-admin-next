@@ -22,10 +22,7 @@ const initializeInfo = [
 export const LoanUpdate = observer(() => {
   const { programs } = useStore()
   const { publicKey: wallet } = useWallet()
-  const stakePool = getStakingPoolKey(programs.stakePubkey)
   const sendAndConfirm = useSendTransaction()
-  const { info: poolInfo } = useAccount<StakingPoolInfo>(stakePool, stakePoolParser, true)
-  console.log(stakePool.toBase58())
 
   const onSubmit = async () => {
     if (!wallet) {
@@ -34,7 +31,7 @@ export const LoanUpdate = observer(() => {
     }
 
     // these params need to be combined with frontend ui
-    const accruedInterestNumerator = new BN(100);
+    const accruedInterestNumerator = new BN(100)
     const denominator = new BN(10000)
     const minRepaidNumerator = new BN(100)
     const aprNumerator = new BN(100)
@@ -68,24 +65,22 @@ export const LoanUpdate = observer(() => {
 
   return (
     <main className='flex w-full flex-col gap-x-12 gap-y-4 text-white lg:flex-row'>
-      {!poolInfo && (
-        <div className='max-w-xl rounded-lg bg-slate-700  shadow-sm lg:min-w-[450px]'>
-          <div className='flex flex-wrap items-center justify-between border-b border-gray-500 p-8'>
-            <p className='flex items-center text-2xl font-semibold text-gray-100'>
-              <DocumentPlusIcon className='mr-2 h-6 w-6' />
-              Update Loan Settings
-              <InformationIcon info={initializeInfo} />
-            </p>
-          </div>
-          <Button
-            onClick={() => onSubmit()}
-            color='light-slate'
-            className={`text-sm font-normal !rounded-3xl w-44 bg-slate-400 hover:!bg-slate-400`}
-          >
-            Update Global State
-          </Button>
+      <div className='max-w-xl rounded-lg bg-slate-700  shadow-sm lg:min-w-[450px]'>
+        <div className='flex flex-wrap items-center justify-between border-b border-gray-500 p-8'>
+          <p className='flex items-center text-2xl font-semibold text-gray-100'>
+            <DocumentPlusIcon className='mr-2 h-6 w-6' />
+            Update Loan Settings
+            <InformationIcon info={initializeInfo} />
+          </p>
         </div>
-      )}
+        <Button
+          onClick={() => onSubmit()}
+          color='light-slate'
+          className={`w-44 !rounded-3xl bg-slate-400 text-sm font-normal hover:!bg-slate-400`}
+        >
+          Update Global State
+        </Button>
+      </div>
     </main>
   )
 })
