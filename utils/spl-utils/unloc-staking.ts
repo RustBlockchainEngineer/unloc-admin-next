@@ -30,7 +30,7 @@ export const POOL_UPDATE_CONFIGS_INFO = Buffer.from("poolUpdateConfigsInfo");
 
 export const STAKING_REWARDS_VAULT = Buffer.from("stakingRewardsVault");
 export const STAKING_DEPOSITS_VAULT = Buffer.from("stakingDepositsVault");
-export const PENALITY_DEPOSIT_VAULT = Buffer.from("penalityDepositVault");
+export const PENALITY_DEPOSIT_VAULT = Buffer.from("penalityDepositsVault");
 /////////////////
 // PDA helpers //
 /////////////////
