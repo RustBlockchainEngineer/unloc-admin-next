@@ -17,6 +17,7 @@ import {
 import { getNftMetadataKey } from './common'
 import { BPF_LOADER_UPGRADEABLE_PROGRAM_ID, DATA_ACCOUNT, TOKEN_ACCOUNT, UNLOC, UNLOC_MINT } from './unloc-constants'
 import { getCollectionLoanLiqMinEmissionsInfoKey, getCollectionLoanLiqMinEmissionsVaultKey, LIQ_MINING_PID } from './unloc-liq-mining'
+import { LOAN_PID } from './unloc-loan'
 import { STAKING_PID } from './unloc-staking'
 
 ///////////////
@@ -131,7 +132,7 @@ export const removeAuthority = async (userWallet: PublicKey, authorityWalletToRe
   return new Transaction().add(...instructions)
 }
 
-export const addCollection = async (userWallet: PublicKey, collectionNft: PublicKey, programId = VOTING_PID, liqMinProgram = LIQ_MINING_PID) => {
+export const addCollection = async (userWallet: PublicKey, collectionNft: PublicKey, programId = VOTING_PID, liqMinProgram = LIQ_MINING_PID, loanProgram = LOAN_PID) => {
   const voteSessionInfo = getVotingSessionKey(programId)
   const collectionLoanLiqMinEmissionsInfo = getCollectionLoanLiqMinEmissionsInfoKey(collectionNft, liqMinProgram)
   const collectionLoanLiqMinEmissionsVault = getCollectionLoanLiqMinEmissionsVaultKey(collectionNft, liqMinProgram)
@@ -146,6 +147,7 @@ export const addCollection = async (userWallet: PublicKey, collectionNft: Public
         unlocTokenMint: UNLOC_MINT,
         collectionNft,
         liqMinProgram,
+        loanProgram,
         instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY
       },
       programId
@@ -164,6 +166,7 @@ export const removeCollection = async (
 ) => {
   const voteSessionInfo = getVotingSessionKey(programId)
   const collectionLoanLiqMinEmissionsInfo = getCollectionLoanLiqMinEmissionsInfoKey(collectionNft, liqMinProgram)
+  const collectionLoanLiqMinEmissionsVault = getCollectionLoanLiqMinEmissionsVaultKey(collectionNft, liqMinProgram)
   const instructions: TransactionInstruction[] = []
   instructions.push(
     createRemoveCollectionInstruction(
@@ -171,7 +174,10 @@ export const removeCollection = async (
         authority: userWallet,
         voteSessionInfo,
         collectionLoanLiqMinEmissionsInfo,
+        collectionLoanLiqMinEmissionsVault,
         collectionNft,
+        liqMinProgram,
+        instructionSysvarAccount: SYSVAR_INSTRUCTIONS_PUBKEY
       },
       {
         projectId
