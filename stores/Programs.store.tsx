@@ -5,9 +5,9 @@ import { RootStore } from '.'
 import { GlobalState } from '@unloc-dev/unloc-loan-solita'
 
 export const initialValues = {
-  loan: '6oVXrGCdtnTUR6xCvn2Z3f2CYaiboAGar1DKxzeX8QYh',
-  stake: '65SDRmYzcAwHiSRyuij6f8LmHAwJ98fwfUnxkog17rbP',
-  vote: 'c1hkB5vKgt98WWzEd1xEEYQMZ9evCy2n6gLzj6PFgQk',
+  loan: 'Lon8EEkzGASmotFtJBanbTkzhsUc5fvCb4wtDxqrhhq',
+  stake: 'Stkmjz1k2Ak9sj57reGuei8jY28r2eRFRmB49mTN7u8',
+  vote: 'Voti8b8TVbqgS5TQ5oiDU3eHNqAjsZQuuMUKe4JwufU',
   liqMin: 'LiqQwAR3c2Hze5eXEcvTC25cgpUuKGJrmpWpE952Nx3'
 }
 
