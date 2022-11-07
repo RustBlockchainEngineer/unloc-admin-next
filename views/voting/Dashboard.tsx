@@ -1,11 +1,13 @@
 import { Copyable } from '@/components/common'
 import { Jdenticon } from '@/components/common/JdentIcon'
+import { notify } from '@/components/Notification'
 import { useAccount, useSendTransaction } from '@/hooks'
 import { useStore } from '@/stores'
 import { compressAddress } from '@/utils'
 import { numVal, val } from '@/utils/spl-utils'
 import {
   addAuthority,
+  allocateLiqMinRwds,
   getVotingSessionKey,
   reallocSessionAccount,
   removeAuthority
@@ -112,46 +114,46 @@ export const VotingDashboard = () => {
     })
   }
 
-  // const onAllocateRewards = async () => {
-  //   if (!wallet) {
-  //     toast.error('Connect your wallet')
-  //     return
-  //   }
+  const onAllocateRewards = async () => {
+    if (!wallet) {
+      toast.error('Connect your wallet')
+      return
+    }
 
-  //   setRunningAllocate(true)
-  //   try {
-  //     const emissions = info.emissions
+    setRunningAllocate(true)
+    try {
+      const emissions = info.emissions
 
-  //     if (emissions.allocationsUpdatedCount === info.projects.totalProjects) {
-  //       console.log('All is already allocated.')
-  //     }
+      if (emissions.allocationsUpdatedCount === info.projects.totalProjects) {
+        console.log('All is already allocated.')
+      }
 
-  //     let allocatedCount = 0
-  //     for (const project of info.projects.projects) {
-  //       if (project.active && project.allocationUpdatedAt < emissions.udpatedAt) {
-  //         try {
-  //           const tx = await allocateLiqMinRwds(wallet, project.id, project.collectionNft, programs.votePubkey)
+      let allocatedCount = 0
+      for (const project of info.projects.projects) {
+        if (project.active && project.allocationUpdatedAt < emissions.udpatedAt) {
+          try {
+            const tx = await allocateLiqMinRwds(wallet, project.id, project.collectionNft, programs.votePubkey)
 
-  //           const result = await sendAndConfirm(tx, 'finalized', false)
-  //           if (!result.result.value.err) {
-  //             allocatedCount++
-  //             toast.success(`Transaction confirmed, count: ${allocatedCount}.`)
-  //           } else {
-  //             toast.error(`Failed for this collectionNft: ${project.collectionNft.toString()}`)
-  //             console.log('Failed for this collectionNft: ', project.collectionNft.toString(), result.result.value.err)
-  //           }
-  //         } catch (err) {
-  //           toast.error(`Failed for this collectionNft: ${project.collectionNft.toString()}`)
-  //           console.log('Failed for this collectionNft: ', project.collectionNft.toString(), err)
-  //         }
-  //       }
-  //     }
-  //   } catch (err) {
-  //     console.log('allocateLiqMinRwds error: ', err)
-  //   } finally {
-  //     setRunningAllocate(false)
-  //   }
-  // }
+            const result = await sendAndConfirm(tx, { commitment: 'finalized', skipPreflight: true })
+            if (!result.result.value.err) {
+              allocatedCount++
+              notify({ type: 'success', description: `Transaction confirmed, count: ${allocatedCount}.` })
+            } else {
+              notify({ type: 'error', description: `Failed for collectionNft: ${project.collectionNft.toBase58()}` })
+              console.log('Failed for this collectionNft: ', project.collectionNft.toString(), result.result.value.err)
+            }
+          } catch (err) {
+            notify({ type: 'error', description: `Failed for collectionNft: ${project.collectionNft.toBase58()}` })
+            console.log('Failed for this collectionNft: ', project.collectionNft.toString(), err)
+          }
+        }
+      }
+    } catch (err) {
+      console.log('allocateLiqMinRwds error: ', err)
+    } finally {
+      setRunningAllocate(false)
+    }
+  }
 
   const reallocPercent = ((info?.projects.projects.length / info?.projects.currentMaxProjectsPossible) * 100).toFixed(0)
   const lastFiveAddedCollections = info.projects.projects.slice(-5).reverse()
@@ -473,7 +475,7 @@ export const VotingDashboard = () => {
                 <button
                   className='inline-flex items-center rounded-md bg-pink-600 px-5 py-2 hover:bg-pink-700'
                   type='button'
-                  // onClick={onAllocateRewards}
+                  onClick={onAllocateRewards}
                 >
                   {runningAllocate && <ArrowPathIcon className='-ml-1 mr-2 h-5 w-5 animate-spin' />}
                   {runningAllocate ? 'Running' : 'Start'}
