@@ -26,8 +26,7 @@ export const STAKING_PROGRAM = Buffer.from("stakingProgram");
 export const STAKING_POOL_INFO = Buffer.from("stakingPoolInfo");
 export const USER_STAKINGS_INFO = Buffer.from("userStakingsInfo");
 export const USER_UNLOC_SCORE_INFO = Buffer.from("unlocScoreInfo");
-export const POOL_UPDATE_CONFIGS_INFO = Buffer.from("poolUpdateConfigsInfo");
-
+export const STAKING_POOL_UPDATE_CONFIGS_INFO = Buffer.from("stakingPoolUpdateConfigsInfo");
 export const STAKING_REWARDS_VAULT = Buffer.from("stakingRewardsVault");
 export const STAKING_DEPOSITS_VAULT = Buffer.from("stakingDepositsVault");
 export const PENALITY_DEPOSIT_VAULT = Buffer.from("penalityDepositsVault");
@@ -69,7 +68,7 @@ export const getUpdatePoolConfigsKey = (
   programId: PublicKey = STAKING_PID
   ) => {
   return PublicKey.findProgramAddressSync(
-    [UNLOC, STAKING_PROGRAM, POOL_UPDATE_CONFIGS_INFO, proposalAuthorityWallet.toBuffer(), stakingPoolInfo.toBuffer(), DATA_ACCOUNT],
+    [UNLOC, STAKING_PROGRAM, STAKING_POOL_UPDATE_CONFIGS_INFO, proposalAuthorityWallet.toBuffer(), stakingPoolInfo.toBuffer(), DATA_ACCOUNT],
     programId,
   )[0];
 };
