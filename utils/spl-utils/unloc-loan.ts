@@ -10,7 +10,7 @@ import {
 } from '@unloc-dev/unloc-sdk-loan'
 import { createCreateGlobalStateInstruction } from '@unloc-dev/unloc-sdk-loan';
 import BN from 'bn.js';
-import { addTokenAccountInstruction, getEditionKey, getWalletTokenAccount } from './common';
+import { addTokenAccountInstruction, getEditionKey, getNftMetadataKey, getWalletTokenAccount } from './common';
 import { BPF_LOADER_UPGRADEABLE_PROGRAM_ID } from './unloc-constants';
 import { getCollectionLoanLiqMinEmissionsInfoKey, getCollectionLoanLiqMinEmissionsVaultKey, getLoanSubofferRewardsInfoKey, LIQ_MINING_PID } from './unloc-liq-mining';
 
@@ -156,7 +156,8 @@ export const claimExpiredCollateral = async (
   const metadataProgram = TOKEN_META_PID;
   
   const lender = subOfferData.lender;
-  const metadata = await Metadata.fromAccountAddress(connection, nftMint);
+  const nftMetadata = getNftMetadataKey(nftMint);
+  const metadata = await Metadata.fromAccountAddress(connection, nftMetadata);
   const collectionNft = metadata.collection!.key;
   const collectionLoanLiqMinEmissionsInfo = getCollectionLoanLiqMinEmissionsInfoKey(collectionNft, liqMinProgram)
   const collectionLoanLiqMinEmissionsVault = getCollectionLoanLiqMinEmissionsVaultKey(collectionNft, liqMinProgram)
